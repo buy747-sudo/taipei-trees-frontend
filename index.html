@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="台北市行道樹與受保護樹木查詢平台，支援掃碼、即時定位與統計資訊">
+  <title>台北市樹木查詢 | taipei-trees.org</title>
+
+  <!-- Leaflet 1.9 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── 頂部搜尋列（sticky）──────────────────────────── -->
+  <header id="top-bar">
+    <div id="site-title">🌳 台北市樹木查詢</div>
+    <div id="search-row">
+      <input id="search-input" type="search"
+        placeholder="輸入樹籍編號（如 SY0030551077）或貼上 QR 網址…"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+      <button id="scan-btn" aria-label="掃碼查詢">📷 掃碼</button>
+    </div>
+    <div id="filter-row">
+      <select id="filter-district">
+        <option value="">全部行政區</option>
+        <option>信義區</option><option>大安區</option><option>中正區</option>
+        <option>萬華區</option><option>中山區</option><option>松山區</option>
+        <option>大同區</option><option>內湖區</option><option>南港區</option>
+        <option>文山區</option><option>士林區</option><option>北投區</option>
+      </select>
+      <input id="filter-species" type="search" placeholder="樹種（如：榕樹）" autocomplete="off">
+      <div id="category-chips">
+        <button class="chip active" data-cat="all">全部</button>
+        <button class="chip" data-cat="street">行道樹</button>
+        <button class="chip" data-cat="protected">受保護</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── 地圖 ──────────────────────────────────────────── -->
+  <div id="map-container"></div>
+
+  <!-- ── 統計列 ─────────────────────────────────────────── -->
+  <div id="stats-bar">
+    <span id="count-label">載入中…</span>
+    <button id="stats-toggle">統計總覽 ▾</button>
+  </div>
+  <div id="stats-panel" hidden>
+    <table id="stats-table">
+      <thead><tr><th>行政區</th><th>合計</th><th>行道樹</th><th>受保護</th></tr></thead>
+      <tbody id="stats-tbody"></tbody>
+    </table>
+    <div id="top-species-wrap">
+      <strong>常見樹種：</strong>
+      <span id="top-species"></span>
+    </div>
+  </div>
+
+  <!-- ── 樹木列表 ─────────────────────────────────────────── -->
+  <ul id="tree-list" aria-label="樹木列表"></ul>
+
+  <!-- ── 底部 Sheet（樹木詳情）───────────────────────────── -->
+  <div id="sheet-overlay" hidden></div>
+  <div id="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+    <div id="sheet-grab"></div>
+    <div id="sheet-content">
+      <div id="sheet-header">
+        <span id="sheet-code"></span>
+        <span id="sheet-badge"></span>
+      </div>
+      <h2 id="sheet-title"></h2>
+      <table id="sheet-table"></table>
+      <div id="sheet-carbon"></div>
+      <div id="sheet-actions">
+        <button id="sheet-close">← 關閉</button>
+        <button id="sheet-share">分享此樹 🔗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── QR 掃碼覆蓋層 ──────────────────────────────────── -->
+  <div id="qr-overlay" hidden>
+    <div id="qr-header">
+      <button id="qr-close">✕ 關閉</button>
+      <span>對準樹木 QR Code</span>
+    </div>
+    <video id="qr-video" playsinline autoplay muted></video>
+    <canvas id="qr-canvas" hidden></canvas>
+    <div id="qr-aim"></div>
+  </div>
+
+  <!-- ── Toast 通知 ─────────────────────────────────────── -->
+  <div id="toast" role="alert" aria-live="polite" hidden></div>
+
+  <!-- ── 頁底授權聲明 ───────────────────────────────────── -->
+  <footer id="license-footer">
+    <p>行道樹資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市行道樹分布圖」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。</p>
+    <p>受保護樹木資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市受保護樹木」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。</p>
+  </footer>
+
+  <!-- ── Scripts（順序依賴：config → api → map → markers → sheet → filters → qr → stats → app）── -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/markers.js"></script>
+  <script src="js/sheet.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/qr.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
