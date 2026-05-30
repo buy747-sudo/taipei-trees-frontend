@@ -1,1 +1,83 @@
-// app.js — placeholder (Task 4+)
+// js/app.js — 主進入點
+
+function showToast(msg, duration = 2800) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.hidden = false;
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.hidden = true; }, duration);
+}
+
+function renderTreeList(trees) {
+  const ul = document.getElementById('tree-list');
+  if (!trees.length) {
+    ul.innerHTML = '<li style="padding:16px;color:#888;text-align:center;">此範圍內無樹木資料</li>';
+    return;
+  }
+  ul.innerHTML = trees.slice(0, 100).map((t, i) => {
+    const badgeClass = t.tree_category === 'protected' ? 'badge-protected' : 'badge-street';
+    const label = CATEGORY_LABEL[t.tree_category] || '';
+    const sub = [t.district, t.height_m ? `${t.height_m}m` : null, t.dbh_cm ? `DBH ${t.dbh_cm}cm` : null]
+      .filter(Boolean).join(' · ');
+    return `<li tabindex="0" data-idx="${i}">
+      <div class="tree-main">
+        <div class="tree-code">${t.registry_code || ''}</div>
+        <div class="tree-name">${t.species_name || '未知樹種'}</div>
+        <div class="tree-sub">${sub}</div>
+      </div>
+      <span class="tree-badge ${badgeClass}">${label}</span>
+    </li>`;
+  }).join('');
+
+  let _cachedTrees = trees.slice(0, 100);
+  ul.querySelectorAll('li').forEach(li => {
+    const idx = parseInt(li.dataset.idx, 10);
+    li.addEventListener('click', () => openSheet(_cachedTrees[idx]));
+    li.addEventListener('keydown', (e) => { if (e.key === 'Enter') openSheet(_cachedTrees[idx]); });
+  });
+}
+
+let _lastBboxKey = '';
+let _isLoading = false;
+
+async function loadTrees() {
+  if (_isLoading) return;
+  const bounds = getMapBounds();
+  const params = { ...bounds, ...getFilterParams() };
+  const bboxKey = JSON.stringify(params);
+  if (bboxKey === _lastBboxKey) return;
+  _lastBboxKey = bboxKey;
+  _isLoading = true;
+
+  document.getElementById('count-label').textContent = '載入中…';
+  clearMarkers();
+
+  try {
+    const data = await apiFetchTrees(params);
+    const trees = data.trees || [];
+    addTreeMarkers(trees);
+    renderTreeList(trees);
+    document.getElementById('count-label').textContent =
+      `共 ${(data.total || trees.length).toLocaleString()} 棵 | 顯示 ${trees.length} 棵`;
+  } catch (e) {
+    document.getElementById('count-label').textContent = '載入失敗，請稍後再試';
+    showToast('無法載入樹木資料');
+    console.error(e);
+  } finally {
+    _isLoading = false;
+  }
+}
+
+function onMapMoved() {
+  loadTrees();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  initSheet();
+  initFilters();
+  initSearch();
+  initQr();
+  initStats();
+  loadTrees();
+});
