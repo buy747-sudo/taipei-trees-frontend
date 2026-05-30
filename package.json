@@ -1,0 +1,11 @@
+{
+  "name": "taipei-trees-frontend",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.44.0"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "serve": "python3 -m http.server 8080"
+  }
+}
