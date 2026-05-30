@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>使用說明｜台北市樹木查詢 taipei-trees.org</title>
+  <meta name="description" content="台北市樹木查詢網站使用說明，提供一般版、長輩版與小朋友版教學，讓所有人都能輕鬆查詢行道樹與受保護樹木。">
+  <link rel="canonical" href="https://taipei-trees.org/guide.html">
+  <meta property="og:title" content="使用說明｜台北市樹木查詢">
+  <meta property="og:description" content="圖文並茂的操作教學，特別提供長輩版與小朋友版，讓全家人都能一起認識台北的樹。">
+  <meta property="og:url" content="https://taipei-trees.org/guide.html">
+  <meta property="og:locale" content="zh_TW">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Guide Page ────────────────────────────────────── */
+    body { background: #f5f5f5; }
+
+    #guide-header {
+      background: #1a5c2a; color: #fff;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #back-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4);
+      color: #fff; padding: 6px 14px; border-radius: 8px;
+      text-decoration: none; font-size: 0.9rem; white-space: nowrap;
+    }
+    #guide-header h1 { font-size: 1rem; font-weight: 700; margin: 0; }
+
+    /* ── Tabs ───────────────────────────────────────────── */
+    #tab-bar {
+      display: flex; background: #fff;
+      border-bottom: 2px solid #e0e0e0;
+      position: sticky; top: 52px; z-index: 99;
+    }
+    .tab-btn {
+      flex: 1; padding: 12px 8px; border: none; background: none;
+      font-size: 0.9rem; color: #666; cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      transition: color 0.15s;
+    }
+    .tab-btn.active { color: #1a5c2a; border-bottom-color: #1a5c2a; font-weight: 700; }
+
+    /* ── Tab Content ────────────────────────────────────── */
+    .tab-content { display: none; padding: 20px 16px 40px; max-width: 680px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    /* ── Section Cards ──────────────────────────────────── */
+    .guide-section {
+      background: #fff; border-radius: 12px; padding: 18px 20px;
+      margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .guide-section h2 {
+      font-size: 1.05rem; color: #1a5c2a; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .guide-section p, .guide-section li {
+      font-size: 0.92rem; color: #444; line-height: 1.7;
+    }
+    .guide-section ol, .guide-section ul { padding-left: 20px; }
+    .guide-section li { margin-bottom: 6px; }
+
+    /* ── Step Boxes ─────────────────────────────────────── */
+    .step { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+    .step-num {
+      min-width: 32px; height: 32px; border-radius: 50%;
+      background: #1a5c2a; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+    }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; font-size: 0.95rem; color: #1a1a1a; margin-bottom: 3px; }
+    .step-body span { font-size: 0.85rem; color: #666; line-height: 1.6; }
+
+    /* ── Icon Badge ─────────────────────────────────────── */
+    .icon-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+    .icon-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      background: #f5f5f5; border-radius: 10px; padding: 10px 14px;
+      font-size: 0.78rem; color: #555; text-align: center; min-width: 70px;
+    }
+    .icon-item span { font-size: 1.6rem; }
+
+    /* ── Map Icon Legend (in guide) ─────────────────────── */
+    .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+    .legend-guide-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #444; }
+    .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .star-icon { width: 16px; height: 16px; background: #f59e0b; flex-shrink: 0;
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+
+    /* ── 長輩版 ─────────────────────────────────────────── */
+    #tab-elder .guide-section h2 { font-size: 1.3rem; }
+    #tab-elder .guide-section p,
+    #tab-elder .guide-section li { font-size: 1.1rem; line-height: 1.9; }
+    #tab-elder .step-num { min-width: 40px; height: 40px; font-size: 1.1rem; }
+    #tab-elder .step-body strong { font-size: 1.15rem; }
+    #tab-elder .step-body span { font-size: 1.05rem; }
+    #tab-elder .tip-box {
+      background: #fff8e1; border-left: 4px solid #f59e0b;
+      border-radius: 8px; padding: 12px 16px; margin-top: 10px;
+      font-size: 1.05rem; color: #555; line-height: 1.8;
+    }
+    #tab-elder .big-btn-demo {
+      display: inline-block; background: #1a5c2a; color: #fff;
+      border-radius: 10px; padding: 10px 20px; font-size: 1.1rem;
+      margin: 8px 0; font-weight: 600;
+    }
+
+    /* ── 小朋友版 ───────────────────────────────────────── */
+    #tab-kids { background: #fffbf0; }
+    #tab-kids .guide-section { background: #fff; border: 2px solid #fde68a; }
+    #tab-kids .guide-section h2 { font-size: 1.15rem; color: #d97706; }
+    #tab-kids .guide-section p,
+    #tab-kids .guide-section li { font-size: 0.95rem; line-height: 1.8; }
+    #tab-kids .mission {
+      background: #f0fdf4; border: 2px dashed #86efac;
+      border-radius: 12px; padding: 14px 16px; margin: 10px 0;
+    }
+    #tab-kids .mission h3 { color: #16a34a; font-size: 1rem; margin-bottom: 6px; }
+    #tab-kids .fact-box {
+      background: #fef3c7; border-radius: 10px; padding: 12px 16px;
+      margin: 8px 0; font-size: 0.9rem; color: #92400e; line-height: 1.7;
+    }
+    #tab-kids .teacher-box {
+      background: #eff6ff; border: 2px solid #bfdbfe;
+      border-radius: 12px; padding: 16px 18px; margin-top: 8px;
+    }
+    #tab-kids .teacher-box h3 { color: #1d4ed8; font-size: 1rem; margin-bottom: 10px; }
+    #tab-kids .teacher-box li { font-size: 0.88rem; color: #1e40af; line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+  <header id="guide-header">
+    <a href="index.html" id="back-btn">← 回地圖</a>
+    <h1>🌳 台北市樹木查詢 — 使用說明</h1>
+  </header>
+
+  <div id="tab-bar">
+    <button class="tab-btn active" data-tab="general">📖 一般版</button>
+    <button class="tab-btn" data-tab="elder">👴 長輩版</button>
+    <button class="tab-btn" data-tab="kids">🌱 小朋友版</button>
+  </div>
+
+  <!-- ────────── 一般版 ────────── -->
+  <div id="tab-general" class="tab-content active">
+
+    <div class="guide-section">
+      <h2>🗺️ 認識地圖上的圖示</h2>
+      <div class="legend-row">
+        <div class="legend-guide-item"><div class="dot" style="background:#1a5c2a"></div>行道樹</div>
+        <div class="legend-guide-item"><div class="star-icon"></div>受保護樹木</div>
+        <div class="legend-guide-item"><div style="width:22px;height:22px;border-radius:50%;background:#f0c040;border:3px solid #e8a800;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700">8</div>聚合群組（點擊展開）</div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🔍 搜尋特定樹木</h2>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>輸入樹籍編號</strong>
+          <span>在頂部搜尋列輸入樹籍編號（例如：SY0030551077），按 Enter 查詢。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>貼上 QR 網址</strong>
+          <span>直接把樹木 QR Code 的網址貼進搜尋列，系統會自動解析樹籍編號。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>📷 掃描樹木 QR Code</h2>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>點「掃碼」按鈕</strong>
+          <span>按下頂部的「📷 掃碼」按鈕，允許瀏覽器使用相機。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>對準 QR Code</strong>
+          <span>將手機鏡頭對準樹牌上的方框圖案，系統自動辨識，不需按快門。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>查看樹木資料</strong>
+          <span>辨識成功後，樹木詳情會從畫面底部滑出，包含樹種、高度、固碳量等資訊。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🎛️ 篩選條件</h2>
+      <div class="icon-row">
+        <div class="icon-item"><span>🏙️</span>行政區</div>
+        <div class="icon-item"><span>🌿</span>樹種</div>
+        <div class="icon-item"><span>🟢</span>行道樹</div>
+        <div class="icon-item"><span>⭐</span>受保護</div>
+      </div>
+      <p style="margin-top:12px">選擇行政區後，地圖會自動飛到該區域；輸入樹種關鍵字（如「榕樹」）可快速篩選。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>📍 找附近的樹</h2>
+      <p>點地圖右上角的 <strong>📍 定位按鈕</strong>，允許取得位置後，地圖自動飛到你所在地，顯示周圍的樹木。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>🔗 分享一棵樹</h2>
+      <p>點開任意樹木詳情後，按底部的 <strong>「分享此樹 🔗」</strong> 按鈕，可複製連結或直接分享給朋友。對方開啟連結就會自動顯示同一棵樹的資料。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>📊 統計總覽</h2>
+      <p>點「統計總覽 ▾」按鈕，展開各行政區的樹木數量統計表。點擊行政區列，地圖自動飛到該區並篩選顯示。</p>
+    </div>
+
+  </div>
+
+  <!-- ────────── 長輩版 ────────── -->
+  <div id="tab-elder" class="tab-content">
+
+    <div class="guide-section">
+      <h2>👋 歡迎使用台北市樹木查詢</h2>
+      <p>這個網站幫助您認識台北市的樹木。不需要下載任何東西，用手機或電腦打開就可以用。</p>
+      <div class="tip-box">💡 如果字太小，請用兩隻手指在螢幕上撐開，就可以放大畫面。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>第一步：看地圖上的樹</h2>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>打開網頁，地圖會自動出現</strong>
+          <span>您會看到一張台北市地圖，上面有很多小圓點，每一個圓點就代表一棵樹。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>點一個圓點，看這棵樹的資料</strong>
+          <span>用手指點任何一個綠色圓點或金色星星，畫面下方會出現這棵樹的名稱、高度等資料。</span>
+        </div>
+      </div>
+      <div class="tip-box">🟢 綠色圓點 = 路邊的行道樹<br>⭐ 金色星星 = 珍貴的受保護樹木</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>第二步：找您附近的樹</h2>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>按「自動找位置」的按鈕</strong>
+          <span>地圖上有一個 📍 的按鈕，按下去，手機會問您「要允許取得位置嗎？」，請按「允許」。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>地圖自動移到您的位置</strong>
+          <span>地圖會自動移動，顯示您附近的樹木。您可以看到家附近有哪些樹！</span>
+        </div>
+      </div>
+      <div class="tip-box">💡 如果按了「📍」沒有反應，請確認手機的「定位服務」有開啟。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>第三步：掃描樹上的方框圖案</h2>
+      <p>如果您在路邊看到樹上貼有一個黑白方框圖案（QR Code），可以用這個網站掃描查詢！</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>按頂部的「📷 掃碼」按鈕</strong>
+          <span>畫面會打開相機，問您「要使用相機嗎？」請按「允許」。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>把相機對準樹上的方框</strong>
+          <span>不需要按快門，對準後等一下，系統會自動辨識。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>樹木的資料就出現了</strong>
+          <span>畫面下方會顯示這棵樹的名稱、樹齡、高度等詳細資料。</span>
+        </div>
+      </div>
+      <div class="tip-box">💡 如果掃描失敗，請確保光線夠亮，或離方框近一點再試。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>遇到問題怎麼辦？</h2>
+      <ul>
+        <li>畫面太小 → 用兩指撐開放大</li>
+        <li>找不到按鈕 → 往上滑，按鈕在頁面最頂端</li>
+        <li>地圖沒有顯示 → 確認網路有連線，然後重新整理頁面</li>
+        <li>掃碼沒反應 → 確認已允許相機權限</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ────────── 小朋友版 ────────── -->
+  <div id="tab-kids" class="tab-content">
+
+    <div class="guide-section">
+      <h2>🕵️ 歡迎加入樹木小偵探！</h2>
+      <p>台北市有超過 <strong>9 萬棵</strong> 行道樹，還有 <strong>3,800 多棵</strong> 珍貴的受保護樹木！</p>
+      <p>你可以用這個網站，查到每一棵樹的名字、年齡、還有它每年幫地球吸收多少的二氧化碳喔！</p>
+      <div class="fact-box">
+        🌍 你知道嗎？一棵榕樹每年可以吸收大約 <strong>12 公斤</strong> 的二氧化碳，<br>
+        相當於一台汽車少開了 <strong>60 公里</strong> 的排放量！
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🗺️ 任務一：找一棵你家附近的樹</h2>
+      <div class="mission">
+        <h3>🎯 怎麼做？</h3>
+        <ol>
+          <li>打開地圖，按右上角的 <strong>📍 按鈕</strong></li>
+          <li>地圖會飛到你的位置</li>
+          <li>點一個 <strong>綠色圓點</strong>，看這棵樹叫什麼名字！</li>
+        </ol>
+      </div>
+      <div class="fact-box">
+        🏆 完成任務後，你會知道：這棵樹叫什麼名字、有幾公尺高、每年幫地球吸收多少二氧化碳！
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>📷 任務二：掃描樹上的神秘圖案</h2>
+      <div class="mission">
+        <h3>🎯 去找一棵路邊的樹，看看有沒有這種圖案！</h3>
+        <p>很多台北市的路樹都貼有一個黑白方塊圖案（叫做 QR Code），就像餐廳的菜單一樣！</p>
+        <ol>
+          <li>按頂部的 <strong>📷 掃碼</strong> 按鈕</li>
+          <li>把手機對準樹牌上的黑白圖案</li>
+          <li>等一秒，這棵樹的資料就出現啦！</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🌟 任務三：找台北最老的樹</h2>
+      <div class="mission">
+        <h3>🎯 挑戰：能找到超過 100 年的老樹嗎？</h3>
+        <ol>
+          <li>按「受保護」分類篩選按鈕</li>
+          <li>點開金色星星 ⭐ 的標記</li>
+          <li>看看「樹齡」欄位，找找最老的樹！</li>
+        </ol>
+      </div>
+      <div class="fact-box">
+        🌳 台北市有些受保護的老樹，樹齡超過 <strong>200 年</strong>！<br>
+        它們從清朝時代就已經在那裡了，比台灣建國還久！
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🤔 樹木問答</h2>
+      <ul>
+        <li>🌿 台北市最多的樹種是什麼？→ 打開「統計總覽」找「常見樹種」！</li>
+        <li>🏙️ 哪個行政區的樹最多？→ 統計表裡找「合計」最大的那個！</li>
+        <li>📏 胸徑是什麼意思？→ 就是在距離地面 1.3 公尺高的地方量樹幹的寬度！</li>
+      </ul>
+    </div>
+
+    <div class="guide-section">
+      <h2>👨‍🏫 老師使用指南</h2>
+      <div class="teacher-box">
+        <h3>📚 課程連結建議</h3>
+        <ul>
+          <li><strong>自然科學</strong>：認識樹木種類、生態系統、固碳原理</li>
+          <li><strong>社會科</strong>：認識台北市各行政區、城市綠化政策</li>
+          <li><strong>數學</strong>：用統計數據計算各區樹木密度、碳匯總量</li>
+          <li><strong>環境教育</strong>：了解受保護樹木的意義、都市樹木的重要性</li>
+        </ul>
+        <h3 style="margin-top:14px">🎒 戶外教學建議流程</h3>
+        <ul>
+          <li>課前：讓學生用網站查詢目的地附近的樹種</li>
+          <li>現場：掃描樹牌 QR Code，對照網站資料</li>
+          <li>課後：統計全班找到的樹種，計算總碳匯量</li>
+          <li>延伸：讓學生選一棵「認養樹」，定期回來觀察</li>
+        </ul>
+        <h3 style="margin-top:14px">📋 學習單建議問題</h3>
+        <ul>
+          <li>這棵樹叫什麼名字？它的學名是什麼？</li>
+          <li>這棵樹有幾公尺高？胸徑是多少公分？</li>
+          <li>它每年吸收多少二氧化碳？等於少開車幾公里？</li>
+          <li>這棵樹是行道樹還是受保護樹木？有什麼不同？</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <footer id="license-footer">
+    <p>行道樹資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市行道樹分布圖」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。</p>
+    <p>受保護樹木資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市受保護樹木」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
