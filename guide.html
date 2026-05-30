@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>使用說明｜台北市樹木查詢 taipei-trees.org</title>
-  <meta name="description" content="台北市樹木查詢網站使用說明，提供一般版、長輩版與小朋友版教學，讓所有人都能輕鬆查詢行道樹與受保護樹木。">
+  <title>台北市行道樹 QR Code 掃碼查詢教學｜受保護樹木查詢使用說明</title>
+  <meta name="description" content="台北市行道樹 QR Code 掃碼查詢教學，提供一般版、長輩版與小朋友版完整說明。查詢台北市行道樹種類、樹齡、固碳量，以及受保護老樹資料。支援 GPS 即時定位、行政區篩選。">
+  <meta name="keywords" content="台北市行道樹QR Code,行道樹掃碼查詢,台北市行道樹種類,台北市受保護樹木,台北市老樹,台北市行道樹地圖,行道樹查詢,台北市行道樹資料,樹木QR碼,台北市行道樹分布,台北市珍貴樹木,行道樹學名,台北市行道樹固碳">
   <link rel="canonical" href="https://taipei-trees.org/guide.html">
-  <meta property="og:title" content="使用說明｜台北市樹木查詢">
-  <meta property="og:description" content="圖文並茂的操作教學，特別提供長輩版與小朋友版，讓全家人都能一起認識台北的樹。">
+  <meta property="og:title" content="台北市行道樹 QR Code 掃碼教學｜台北市樹木查詢使用說明">
+  <meta property="og:description" content="一分鐘學會掃描台北市行道樹 QR Code！提供長輩版、小朋友版教學，老師帶學生認識台北市行道樹與受保護樹木的最佳工具。">
   <meta property="og:url" content="https://taipei-trees.org/guide.html">
   <meta property="og:locale" content="zh_TW">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* ── Guide Page ────────────────────────────────────── */
     body { background: #f5f5f5; }
 
     #guide-header {
@@ -29,7 +29,6 @@
     }
     #guide-header h1 { font-size: 1rem; font-weight: 700; margin: 0; }
 
-    /* ── Tabs ───────────────────────────────────────────── */
     #tab-bar {
       display: flex; background: #fff;
       border-bottom: 2px solid #e0e0e0;
@@ -43,11 +42,9 @@
     }
     .tab-btn.active { color: #1a5c2a; border-bottom-color: #1a5c2a; font-weight: 700; }
 
-    /* ── Tab Content ────────────────────────────────────── */
     .tab-content { display: none; padding: 20px 16px 40px; max-width: 680px; margin: 0 auto; }
     .tab-content.active { display: block; }
 
-    /* ── Section Cards ──────────────────────────────────── */
     .guide-section {
       background: #fff; border-radius: 12px; padding: 18px 20px;
       margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
@@ -62,7 +59,13 @@
     .guide-section ol, .guide-section ul { padding-left: 20px; }
     .guide-section li { margin-bottom: 6px; }
 
-    /* ── Step Boxes ─────────────────────────────────────── */
+    /* 最推薦標籤 */
+    .recommended-badge {
+      display: inline-block; background: #d97706; color: #fff;
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px;
+      border-radius: 10px; margin-left: 6px; vertical-align: middle;
+    }
+
     .step { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
     .step-num {
       min-width: 32px; height: 32px; border-radius: 50%;
@@ -74,7 +77,6 @@
     .step-body strong { display: block; font-size: 0.95rem; color: #1a1a1a; margin-bottom: 3px; }
     .step-body span { font-size: 0.85rem; color: #666; line-height: 1.6; }
 
-    /* ── Icon Badge ─────────────────────────────────────── */
     .icon-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
     .icon-item {
       display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -83,14 +85,13 @@
     }
     .icon-item span { font-size: 1.6rem; }
 
-    /* ── Map Icon Legend (in guide) ─────────────────────── */
     .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
     .legend-guide-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #444; }
     .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
     .star-icon { width: 16px; height: 16px; background: #f59e0b; flex-shrink: 0;
       clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
 
-    /* ── 長輩版 ─────────────────────────────────────────── */
+    /* 長輩版 */
     #tab-elder .guide-section h2 { font-size: 1.3rem; }
     #tab-elder .guide-section p,
     #tab-elder .guide-section li { font-size: 1.1rem; line-height: 1.9; }
@@ -102,13 +103,8 @@
       border-radius: 8px; padding: 12px 16px; margin-top: 10px;
       font-size: 1.05rem; color: #555; line-height: 1.8;
     }
-    #tab-elder .big-btn-demo {
-      display: inline-block; background: #1a5c2a; color: #fff;
-      border-radius: 10px; padding: 10px 20px; font-size: 1.1rem;
-      margin: 8px 0; font-weight: 600;
-    }
 
-    /* ── 小朋友版 ───────────────────────────────────────── */
+    /* 小朋友版 */
     #tab-kids { background: #fffbf0; }
     #tab-kids .guide-section { background: #fff; border: 2px solid #fde68a; }
     #tab-kids .guide-section h2 { font-size: 1.15rem; color: #d97706; }
@@ -135,7 +131,7 @@
 
   <header id="guide-header">
     <a href="index.html" id="back-btn">← 回地圖</a>
-    <h1>🌳 台北市樹木查詢 — 使用說明</h1>
+    <h1>🌳 使用說明｜台北市樹木查詢</h1>
   </header>
 
   <div id="tab-bar">
@@ -144,123 +140,133 @@
     <button class="tab-btn" data-tab="kids">🌱 小朋友版</button>
   </div>
 
-  <!-- ────────── 一般版 ────────── -->
+  <!-- ══════════ 一般版 ══════════ -->
   <div id="tab-general" class="tab-content active">
 
     <div class="guide-section">
-      <h2>🗺️ 認識地圖上的圖示</h2>
-      <div class="legend-row">
-        <div class="legend-guide-item"><div class="dot" style="background:#1a5c2a"></div>行道樹</div>
-        <div class="legend-guide-item"><div class="star-icon"></div>受保護樹木</div>
-        <div class="legend-guide-item"><div style="width:22px;height:22px;border-radius:50%;background:#f0c040;border:3px solid #e8a800;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700">8</div>聚合群組（點擊展開）</div>
-      </div>
-    </div>
-
-    <div class="guide-section">
-      <h2>🔍 搜尋特定樹木</h2>
+      <h2>📷 掃描台北市行道樹 QR Code<span class="recommended-badge">最快最方便</span></h2>
+      <p>台北市政府在大多數行道樹和受保護樹木的樹牌上，都貼有一個黑白方框圖案（QR Code）。只要用本站掃描，就能立刻查到這棵樹的學名、樹齡、樹高、胸徑、每年固碳量等完整資料，不需要另外下載任何 App。</p>
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <strong>輸入樹籍編號</strong>
-          <span>在頂部搜尋列輸入樹籍編號（例如：SY0030551077），按 Enter 查詢。</span>
+          <strong>按頂部「📷 掃碼」按鈕</strong>
+          <span>瀏覽器會詢問是否允許使用相機，請點「允許」。支援 iOS Safari、Android Chrome 等主流瀏覽器。</span>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <strong>貼上 QR 網址</strong>
-          <span>直接把樹木 QR Code 的網址貼進搜尋列，系統會自動解析樹籍編號。</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="guide-section">
-      <h2>📷 掃描樹木 QR Code</h2>
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <strong>點「掃碼」按鈕</strong>
-          <span>按下頂部的「📷 掃碼」按鈕，允許瀏覽器使用相機。</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <strong>對準 QR Code</strong>
-          <span>將手機鏡頭對準樹牌上的方框圖案，系統自動辨識，不需按快門。</span>
+          <strong>將鏡頭對準樹牌上的 QR Code</strong>
+          <span>無需按快門，系統自動辨識台北市行道樹 QR Code。光線充足時約 1 秒內完成辨識。</span>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <strong>查看樹木資料</strong>
-          <span>辨識成功後，樹木詳情會從畫面底部滑出，包含樹種、高度、固碳量等資訊。</span>
+          <strong>查看樹木完整資料</strong>
+          <span>樹木詳情從畫面底部滑出，顯示樹種（含學名）、行政區、樹高、胸徑、樹齡、年固碳量等，並可複製連結分享給朋友。</span>
         </div>
       </div>
     </div>
 
     <div class="guide-section">
-      <h2>🎛️ 篩選條件</h2>
-      <div class="icon-row">
-        <div class="icon-item"><span>🏙️</span>行政區</div>
-        <div class="icon-item"><span>🌿</span>樹種</div>
-        <div class="icon-item"><span>🟢</span>行道樹</div>
-        <div class="icon-item"><span>⭐</span>受保護</div>
-      </div>
-      <p style="margin-top:12px">選擇行政區後，地圖會自動飛到該區域；輸入樹種關鍵字（如「榕樹」）可快速篩選。</p>
-    </div>
-
-    <div class="guide-section">
-      <h2>📍 找附近的樹</h2>
-      <p>點地圖右上角的 <strong>📍 定位按鈕</strong>，允許取得位置後，地圖自動飛到你所在地，顯示周圍的樹木。</p>
-    </div>
-
-    <div class="guide-section">
-      <h2>🔗 分享一棵樹</h2>
-      <p>點開任意樹木詳情後，按底部的 <strong>「分享此樹 🔗」</strong> 按鈕，可複製連結或直接分享給朋友。對方開啟連結就會自動顯示同一棵樹的資料。</p>
-    </div>
-
-    <div class="guide-section">
-      <h2>📊 統計總覽</h2>
-      <p>點「統計總覽 ▾」按鈕，展開各行政區的樹木數量統計表。點擊行政區列，地圖自動飛到該區並篩選顯示。</p>
-    </div>
-
-  </div>
-
-  <!-- ────────── 長輩版 ────────── -->
-  <div id="tab-elder" class="tab-content">
-
-    <div class="guide-section">
-      <h2>👋 歡迎使用台北市樹木查詢</h2>
-      <p>這個網站幫助您認識台北市的樹木。不需要下載任何東西，用手機或電腦打開就可以用。</p>
-      <div class="tip-box">💡 如果字太小，請用兩隻手指在螢幕上撐開，就可以放大畫面。</div>
-    </div>
-
-    <div class="guide-section">
-      <h2>第一步：看地圖上的樹</h2>
+      <h2>🔍 搜尋台北市行道樹樹籍資料</h2>
+      <p>每一棵台北市行道樹都有唯一的<strong>樹籍編號</strong>（例如：SY0030551077），可直接輸入查詢，或貼上含 treeid 參數的網址由系統自動解析。</p>
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <strong>打開網頁，地圖會自動出現</strong>
-          <span>您會看到一張台北市地圖，上面有很多小圓點，每一個圓點就代表一棵樹。</span>
+          <strong>輸入樹籍編號後按 Enter</strong>
+          <span>在頂部搜尋列輸入台北市行道樹或受保護樹木的樹籍編號，按 Enter 查詢。</span>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <strong>點一個圓點，看這棵樹的資料</strong>
-          <span>用手指點任何一個綠色圓點或金色星星，畫面下方會出現這棵樹的名稱、高度等資料。</span>
+          <strong>貼上 QR Code 網址自動解析</strong>
+          <span>直接貼上台北市行道樹管理系統的 QR 網址，本站自動擷取樹籍編號查詢。</span>
         </div>
       </div>
-      <div class="tip-box">🟢 綠色圓點 = 路邊的行道樹<br>⭐ 金色星星 = 珍貴的受保護樹木</div>
     </div>
 
     <div class="guide-section">
-      <h2>第二步：找您附近的樹</h2>
+      <h2>🗺️ 認識地圖圖示</h2>
+      <div class="legend-row">
+        <div class="legend-guide-item"><div class="dot" style="background:#1a5c2a"></div>行道樹（全市 9 萬餘棵）</div>
+        <div class="legend-guide-item"><div class="star-icon"></div>受保護樹木（珍貴老樹，約 3,800 棵）</div>
+        <div class="legend-guide-item"><div style="width:22px;height:22px;border-radius:50%;background:#f0c040;border:3px solid #e8a800;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700">8</div>聚合群組（縮放後展開）</div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🎛️ 篩選台北市行道樹種類與分布</h2>
+      <div class="icon-row">
+        <div class="icon-item"><span>🏙️</span>行政區</div>
+        <div class="icon-item"><span>🌿</span>樹種篩選</div>
+        <div class="icon-item"><span>🟢</span>行道樹</div>
+        <div class="icon-item"><span>⭐</span>受保護樹</div>
+      </div>
+      <p style="margin-top:12px">選擇行政區（信義區、大安區、中山區等 12 區）後地圖自動飛至該區；輸入樹種關鍵字（如「榕樹」、「樟樹」、「印度橡膠樹」）可快速篩選台北市行道樹種類分布。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>📍 查詢附近行道樹（GPS 即時定位）</h2>
+      <p>點地圖右上角 <strong>📍 定位按鈕</strong>，允許瀏覽器取得 GPS 位置後，地圖自動飛到您所在地並顯示周圍的台北市行道樹與受保護樹木分布。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>📊 台北市行道樹統計資料</h2>
+      <p>按「統計總覽 ▾」可展開各行政區行道樹數量統計表，以及全市最常見的台北市行道樹種類排行。點擊行政區列，地圖自動飛到該區並篩選顯示。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>🔗 分享樹木資料</h2>
+      <p>開啟任意台北市行道樹或受保護樹木的詳情後，按「分享此樹 🔗」複製連結，對方點開連結即可直接查看同一棵樹的樹籍資料。連結包含唯一樹籍編號，永久有效。</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════ 長輩版 ══════════ -->
+  <div id="tab-elder" class="tab-content">
+
+    <div class="guide-section">
+      <h2>👋 歡迎使用台北市樹木查詢</h2>
+      <p>這個網站收錄了台北市超過 <strong>9 萬棵行道樹</strong>，還有 <strong>3,800 多棵珍貴的受保護老樹</strong>。不需要下載任何東西，用手機或平板打開就可以馬上使用。</p>
+      <div class="tip-box">💡 如果字太小，請用兩隻手指在螢幕上撐開，就可以放大畫面。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>📷 最方便的方法：掃描樹上的方框圖案</h2>
+      <p>台北市路邊的很多樹，樹牌上都有一個黑白方框圖案。您可以直接用這個網站掃描，馬上知道這棵台北市行道樹叫什麼名字、幾歲、多高！</p>
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <strong>按「自動找位置」的按鈕</strong>
+          <strong>按「📷 掃碼」按鈕</strong>
+          <span>按鈕在網頁最頂端右邊，按下去之後手機會問您「要使用相機嗎？」，請按「允許」。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>把相機對準樹牌上的方框</strong>
+          <span>不需要按快門。把手機鏡頭對著黑白方框，停一下，系統會自動辨識台北市行道樹的資料。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>樹木的詳細資料出現了</strong>
+          <span>畫面下方會出現這棵行道樹的名稱（中文和學名）、樹齡、高度，還有它每年幫地球吸收多少二氧化碳！</span>
+        </div>
+      </div>
+      <div class="tip-box">💡 如果掃描失敗，請站近一點、或找光線比較亮的地方再試一次。</div>
+    </div>
+
+    <div class="guide-section">
+      <h2>第二步：找您附近的行道樹</h2>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>按「📍 自動找位置」的按鈕</strong>
           <span>地圖上有一個 📍 的按鈕，按下去，手機會問您「要允許取得位置嗎？」，請按「允許」。</span>
         </div>
       </div>
@@ -268,140 +274,138 @@
         <div class="step-num">2</div>
         <div class="step-body">
           <strong>地圖自動移到您的位置</strong>
-          <span>地圖會自動移動，顯示您附近的樹木。您可以看到家附近有哪些樹！</span>
+          <span>地圖會自動移動，顯示您附近的台北市行道樹與受保護老樹分布。綠色圓點是行道樹，金色星星是珍貴的受保護樹木。</span>
         </div>
       </div>
-      <div class="tip-box">💡 如果按了「📍」沒有反應，請確認手機的「定位服務」有開啟。</div>
+      <div class="tip-box">🟢 綠色圓點 = 路邊的行道樹<br>⭐ 金色星星 = 珍貴受保護老樹（台北市有 3,800 多棵！）</div>
     </div>
 
     <div class="guide-section">
-      <h2>第三步：掃描樹上的方框圖案</h2>
-      <p>如果您在路邊看到樹上貼有一個黑白方框圖案（QR Code），可以用這個網站掃描查詢！</p>
+      <h2>第三步：點開樹木看詳細資料</h2>
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <strong>按頂部的「📷 掃碼」按鈕</strong>
-          <span>畫面會打開相機，問您「要使用相機嗎？」請按「允許」。</span>
+          <strong>用手指點任何一個圓點或星星</strong>
+          <span>地圖上的每一個圖示都代表一棵台北市的樹木，點下去就可以看到詳細資料。</span>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <strong>把相機對準樹上的方框</strong>
-          <span>不需要按快門，對準後等一下，系統會自動辨識。</span>
+          <strong>從畫面下方滑出的卡片看資料</strong>
+          <span>您可以看到這棵樹的中文名稱、學名、種在哪個行政區、樹高、胸徑（樹幹寬度）等資料。</span>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <strong>樹木的資料就出現了</strong>
-          <span>畫面下方會顯示這棵樹的名稱、樹齡、高度等詳細資料。</span>
-        </div>
-      </div>
-      <div class="tip-box">💡 如果掃描失敗，請確保光線夠亮，或離方框近一點再試。</div>
+      <div class="tip-box">💡 如果圓點太密集，用兩指撐開地圖放大，圓點就會分開，更容易點選。</div>
     </div>
 
     <div class="guide-section">
       <h2>遇到問題怎麼辦？</h2>
       <ul>
         <li>畫面太小 → 用兩指撐開放大</li>
-        <li>找不到按鈕 → 往上滑，按鈕在頁面最頂端</li>
-        <li>地圖沒有顯示 → 確認網路有連線，然後重新整理頁面</li>
-        <li>掃碼沒反應 → 確認已允許相機權限</li>
+        <li>地圖沒有顯示 → 確認手機網路有連線，重新整理頁面</li>
+        <li>掃碼沒反應 → 確認已按「允許」開啟相機權限</li>
+        <li>找不到按鈕 → 往上滑，所有按鈕都在頁面最頂端</li>
       </ul>
     </div>
 
   </div>
 
-  <!-- ────────── 小朋友版 ────────── -->
+  <!-- ══════════ 小朋友版 ══════════ -->
   <div id="tab-kids" class="tab-content">
 
     <div class="guide-section">
-      <h2>🕵️ 歡迎加入樹木小偵探！</h2>
-      <p>台北市有超過 <strong>9 萬棵</strong> 行道樹，還有 <strong>3,800 多棵</strong> 珍貴的受保護樹木！</p>
-      <p>你可以用這個網站，查到每一棵樹的名字、年齡、還有它每年幫地球吸收多少的二氧化碳喔！</p>
+      <h2>🕵️ 歡迎加入台北市樹木小偵探！</h2>
+      <p>你知道嗎？台北市有超過 <strong>9 萬棵行道樹</strong>，還有 <strong>3,800 多棵</strong> 非常珍貴的受保護老樹！</p>
+      <p>這些台北市的行道樹每天都在幫我們做一件很重要的事——吸收空氣中的二氧化碳，讓我們呼吸的空氣更乾淨！你可以用這個網站，查到每一棵台北市行道樹的名字、年齡、還有它每年幫地球吸收多少二氧化碳喔！</p>
       <div class="fact-box">
         🌍 你知道嗎？一棵榕樹每年可以吸收大約 <strong>12 公斤</strong> 的二氧化碳，<br>
-        相當於一台汽車少開了 <strong>60 公里</strong> 的排放量！
+        相當於一台汽車少開了 <strong>60 公里</strong>！台北市 9 萬棵行道樹加起來，每年固碳量超級驚人！
       </div>
     </div>
 
     <div class="guide-section">
-      <h2>🗺️ 任務一：找一棵你家附近的樹</h2>
+      <h2>📷 任務一：掃描台北市行道樹 QR Code！<span class="recommended-badge" style="background:#16a34a">最酷的方法</span></h2>
+      <p>台北市很多行道樹的樹牌上都有一個神秘的黑白方塊圖案（叫做 QR Code），就像在餐廳掃菜單一樣！</p>
       <div class="mission">
         <h3>🎯 怎麼做？</h3>
         <ol>
+          <li>出門找一棵路邊的台北市行道樹，看看樹牌上有沒有黑白方塊</li>
+          <li>打開這個網站，按頂部的 <strong>📷 掃碼</strong> 按鈕</li>
+          <li>把手機鏡頭對準黑白方塊，等一秒，不用按快門！</li>
+          <li>這棵台北市行道樹的所有秘密立刻出現！</li>
+        </ol>
+      </div>
+      <div class="fact-box">
+        🏆 掃描成功後你會知道：這棵台北市行道樹的中文名、學名、有幾歲、有幾公尺高、每年幫地球吸收多少二氧化碳！
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🗺️ 任務二：找一棵你家附近的台北市行道樹</h2>
+      <div class="mission">
+        <h3>🎯 用 GPS 定位找樹！</h3>
+        <ol>
           <li>打開地圖，按右上角的 <strong>📍 按鈕</strong></li>
-          <li>地圖會飛到你的位置</li>
-          <li>點一個 <strong>綠色圓點</strong>，看這棵樹叫什麼名字！</li>
+          <li>地圖會飛到你的位置，顯示你家附近的台北市行道樹分布</li>
+          <li>點一個 <strong>綠色圓點</strong>，看這棵台北市行道樹叫什麼名字！</li>
+          <li>再試試看點一個 <strong>金色星星 ⭐</strong>，那是台北市受保護的珍貴老樹！</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>🌟 任務三：找台北市最老的受保護樹木</h2>
+      <div class="mission">
+        <h3>🎯 挑戰：能找到超過 100 年的台北市老樹嗎？</h3>
+        <ol>
+          <li>按「受保護」分類篩選按鈕，地圖上只顯示台北市受保護老樹</li>
+          <li>點開一個金色星星 ⭐</li>
+          <li>看詳情裡的「樹齡」欄位，找找哪棵最老！</li>
         </ol>
       </div>
       <div class="fact-box">
-        🏆 完成任務後，你會知道：這棵樹叫什麼名字、有幾公尺高、每年幫地球吸收多少二氧化碳！
+        🌳 台北市有些受保護老樹的樹齡超過 <strong>200 年</strong>！<br>
+        它們從清朝時代就已經站在那裡了，比你的曾曾曾祖父還老！<br>
+        台北市政府特別把這些珍貴老樹列為「受保護樹木」，不能隨便砍掉。
       </div>
     </div>
 
     <div class="guide-section">
-      <h2>📷 任務二：掃描樹上的神秘圖案</h2>
-      <div class="mission">
-        <h3>🎯 去找一棵路邊的樹，看看有沒有這種圖案！</h3>
-        <p>很多台北市的路樹都貼有一個黑白方塊圖案（叫做 QR Code），就像餐廳的菜單一樣！</p>
-        <ol>
-          <li>按頂部的 <strong>📷 掃碼</strong> 按鈕</li>
-          <li>把手機對準樹牌上的黑白圖案</li>
-          <li>等一秒，這棵樹的資料就出現啦！</li>
-        </ol>
-      </div>
-    </div>
-
-    <div class="guide-section">
-      <h2>🌟 任務三：找台北最老的樹</h2>
-      <div class="mission">
-        <h3>🎯 挑戰：能找到超過 100 年的老樹嗎？</h3>
-        <ol>
-          <li>按「受保護」分類篩選按鈕</li>
-          <li>點開金色星星 ⭐ 的標記</li>
-          <li>看看「樹齡」欄位，找找最老的樹！</li>
-        </ol>
-      </div>
-      <div class="fact-box">
-        🌳 台北市有些受保護的老樹，樹齡超過 <strong>200 年</strong>！<br>
-        它們從清朝時代就已經在那裡了，比台灣建國還久！
-      </div>
-    </div>
-
-    <div class="guide-section">
-      <h2>🤔 樹木問答</h2>
+      <h2>🤔 台北市行道樹大考驗！</h2>
       <ul>
-        <li>🌿 台北市最多的樹種是什麼？→ 打開「統計總覽」找「常見樹種」！</li>
-        <li>🏙️ 哪個行政區的樹最多？→ 統計表裡找「合計」最大的那個！</li>
-        <li>📏 胸徑是什麼意思？→ 就是在距離地面 1.3 公尺高的地方量樹幹的寬度！</li>
+        <li>🌿 台北市最多的行道樹種是什麼？→ 打開「統計總覽」找「常見樹種」！</li>
+        <li>🏙️ 台北市哪個行政區的行道樹最多？→ 統計表裡找「合計」最大的那個！</li>
+        <li>📏 「胸徑」是什麼意思？→ 在距離地面 1.3 公尺高的地方量樹幹的寬度，樹越老通常越粗！</li>
+        <li>🌱 「固碳」是什麼？→ 樹木用陽光和空氣製造養分時，會把二氧化碳鎖在木頭裡，這就叫固碳！</li>
       </ul>
     </div>
 
     <div class="guide-section">
       <h2>👨‍🏫 老師使用指南</h2>
       <div class="teacher-box">
-        <h3>📚 課程連結建議</h3>
+        <h3>📚 台北市行道樹課程連結建議</h3>
         <ul>
-          <li><strong>自然科學</strong>：認識樹木種類、生態系統、固碳原理</li>
-          <li><strong>社會科</strong>：認識台北市各行政區、城市綠化政策</li>
-          <li><strong>數學</strong>：用統計數據計算各區樹木密度、碳匯總量</li>
-          <li><strong>環境教育</strong>：了解受保護樹木的意義、都市樹木的重要性</li>
+          <li><strong>自然科學</strong>：認識台北市行道樹種類、樹木生長、固碳原理與氣候變遷</li>
+          <li><strong>社會科</strong>：認識台北市 12 行政區、台北市行道樹分布政策、城市綠化</li>
+          <li><strong>數學</strong>：用台北市行道樹統計資料計算各區樹木密度、全市碳匯總量</li>
+          <li><strong>環境教育</strong>：了解台北市受保護樹木制度、都市行道樹的生態功能</li>
+          <li><strong>資訊科技</strong>：認識 QR Code 原理、開放資料（Open Data）概念</li>
         </ul>
-        <h3 style="margin-top:14px">🎒 戶外教學建議流程</h3>
+        <h3 style="margin-top:14px">🎒 帶學生認識台北市行道樹的戶外教學流程</h3>
         <ul>
-          <li>課前：讓學生用網站查詢目的地附近的樹種</li>
-          <li>現場：掃描樹牌 QR Code，對照網站資料</li>
-          <li>課後：統計全班找到的樹種，計算總碳匯量</li>
-          <li>延伸：讓學生選一棵「認養樹」，定期回來觀察</li>
+          <li><strong>課前</strong>：用統計面板查詢目的地行政區的台北市行道樹種類與數量</li>
+          <li><strong>現場</strong>：每位同學掃描 1 棵台北市行道樹 QR Code，記錄樹種與固碳量</li>
+          <li><strong>課後</strong>：統計全班掃到的台北市行道樹種類，計算總固碳量</li>
+          <li><strong>延伸</strong>：讓學生選一棵「認養的台北市行道樹」，定期回來觀察成長</li>
         </ul>
-        <h3 style="margin-top:14px">📋 學習單建議問題</h3>
+        <h3 style="margin-top:14px">📋 台北市行道樹學習單建議問題</h3>
         <ul>
-          <li>這棵樹叫什麼名字？它的學名是什麼？</li>
-          <li>這棵樹有幾公尺高？胸徑是多少公分？</li>
-          <li>它每年吸收多少二氧化碳？等於少開車幾公里？</li>
-          <li>這棵樹是行道樹還是受保護樹木？有什麼不同？</li>
+          <li>這棵台北市行道樹叫什麼名字？它的學名（拉丁文名）是什麼？</li>
+          <li>這棵行道樹有幾公尺高？胸徑是多少公分？</li>
+          <li>它每年吸收多少二氧化碳？換算成少開車多少公里？</li>
+          <li>這棵樹是行道樹還是台北市受保護樹木？兩者有什麼不同？</li>
+          <li>這棵行道樹在台北市哪個行政區？附近還有哪些樹種？</li>
         </ul>
       </div>
     </div>
