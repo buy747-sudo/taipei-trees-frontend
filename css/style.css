@@ -1,13 +1,177 @@
-/* style.css — placeholder; full styles in Task 4 */
+/* ── Reset & Base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif; background: #f5f5f5; color: #1a1a1a; }
 
+/* ── Screen Reader Only ───────────────────────────────── */
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border-width: 0;
+}
+
+/* ── Top Bar ──────────────────────────────────────────── */
+#top-bar {
+  position: sticky; top: 0; z-index: 1000;
+  background: #1a5c2a; color: #fff;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+#site-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+
+#search-row { display: flex; gap: 8px; margin-bottom: 6px; }
+#search-input {
+  flex: 1; padding: 8px 12px; font-size: 1rem;
+  border: 2px solid transparent; border-radius: 8px;
+  background: rgba(255,255,255,0.15); color: #fff;
+  outline: none;
+}
+#search-input::placeholder { color: rgba(255,255,255,0.7); }
+#search-input:focus { border-color: #7ecb94; background: rgba(255,255,255,0.2); }
+
+#scan-btn {
+  padding: 8px 14px; border: 2px solid #7ecb94; border-radius: 8px;
+  background: transparent; color: #fff; font-size: 0.95rem;
+  cursor: pointer; white-space: nowrap;
+}
+#scan-btn:active { background: rgba(126,203,148,0.25); }
+
+/* ── Filter Row ───────────────────────────────────────── */
+#filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#filter-district, #filter-species {
+  padding: 6px 10px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.12); color: #fff; font-size: 0.85rem;
+}
+#filter-district option { background: #1a5c2a; }
+#filter-species::placeholder { color: rgba(255,255,255,0.6); }
+#category-chips { display: flex; gap: 6px; }
+.chip {
+  padding: 5px 12px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.4);
+  background: transparent; color: rgba(255,255,255,0.8); font-size: 0.85rem;
+  cursor: pointer; transition: background 0.15s;
+}
+.chip.active { background: #7ecb94; color: #1a1a1a; border-color: #7ecb94; font-weight: 600; }
+
+/* ── Map ──────────────────────────────────────────────── */
+#map-container { height: 50vh; min-height: 280px; width: 100%; z-index: 0; }
+
+/* ── Stats Bar ────────────────────────────────────────── */
+#stats-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px; background: #fff; border-bottom: 1px solid #e0e0e0;
+}
+#count-label { font-size: 0.9rem; color: #555; }
+#stats-toggle {
+  font-size: 0.85rem; color: #1a5c2a; background: none;
+  border: 1px solid #1a5c2a; border-radius: 16px;
+  padding: 4px 12px; cursor: pointer;
+}
+
+/* ── Stats Panel ──────────────────────────────────────── */
+#stats-panel { background: #fff; padding: 12px 14px; border-bottom: 1px solid #e0e0e0; overflow-x: auto; }
+#stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+#stats-table caption { display: none; }
+#stats-table th, #stats-table td { padding: 6px 10px; text-align: right; border-bottom: 1px solid #f0f0f0; }
+#stats-table th:first-child, #stats-table td:first-child { text-align: left; }
+#stats-table thead th { background: #f5f5f5; font-weight: 600; color: #333; }
+#stats-table tbody tr:hover { background: #f0f7f1; cursor: pointer; }
+#top-species-wrap { margin-top: 10px; font-size: 0.85rem; color: #555; }
+#top-species .sp-chip {
+  display: inline-block; margin: 2px 3px; padding: 2px 8px;
+  background: #e8f5e9; border-radius: 12px; font-size: 0.8rem; color: #2e7d32;
+}
+
+/* ── Tree List ────────────────────────────────────────── */
+#tree-list { list-style: none; background: #fff; overflow-y: auto; max-height: 35vh; }
+#tree-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid #f0f0f0;
+  cursor: pointer; transition: background 0.15s;
+}
+#tree-list li:hover, #tree-list li:focus { background: #f0f7f1; outline: none; }
+.tree-main { flex: 1; }
+.tree-code { font-size: 0.75rem; color: #888; font-family: monospace; }
+.tree-name { font-size: 1rem; font-weight: 600; color: #1a1a1a; }
+.tree-sub { font-size: 0.8rem; color: #666; }
+.tree-badge {
+  font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;
+  white-space: nowrap; margin-left: 8px;
+}
+.badge-street { background: #e3f2fd; color: #1565c0; }
+.badge-protected { background: #fce4ec; color: #b71c1c; }
+
+/* ── Bottom Sheet ─────────────────────────────────────── */
+#sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
+}
+#detail-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 2001;
+  background: #fff; border-radius: 16px 16px 0 0;
+  max-height: 80vh; overflow-y: auto;
+  transform: translateY(0); transition: transform 0.25s ease;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+#sheet-grab {
+  width: 40px; height: 4px; background: #d0d0d0; border-radius: 2px;
+  margin: 12px auto 0;
+}
+#sheet-content { padding: 16px 20px 24px; }
+#sheet-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+#sheet-code { font-family: monospace; font-size: 0.85rem; color: #888; }
+#sheet-badge { font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+#sheet-title { font-size: 1.4rem; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; }
+#sheet-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-bottom: 14px; }
+#sheet-table td { padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
+#sheet-table td:first-child { color: #888; width: 90px; }
+#sheet-carbon {
+  background: #f0f7f1; border-radius: 10px; padding: 12px 14px;
+  font-size: 0.9rem; color: #2e7d32; margin-bottom: 16px; line-height: 1.6;
+}
+#sheet-actions { display: flex; justify-content: space-between; }
+#sheet-close, #sheet-share {
+  padding: 10px 20px; border-radius: 8px; font-size: 0.95rem; cursor: pointer;
+}
+#sheet-close { background: #f5f5f5; border: none; color: #333; }
+#sheet-share { background: #1a5c2a; border: none; color: #fff; }
+
+/* ── QR Overlay ───────────────────────────────────────── */
+#qr-overlay {
+  position: fixed; inset: 0; z-index: 3000; background: #000;
+  display: flex; flex-direction: column; align-items: center;
+}
+#qr-header {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; color: #fff;
+}
+#qr-close { background: none; border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+#qr-video { width: 100%; max-width: 480px; flex: 1; object-fit: cover; }
+#qr-aim {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 220px; height: 220px;
+  border: 3px solid rgba(126,203,148,0.9);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+/* ── Toast ────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.8); color: #fff;
+  padding: 10px 20px; border-radius: 24px; font-size: 0.9rem;
+  z-index: 4000; white-space: nowrap;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ── Footer ───────────────────────────────────────────── */
+#license-footer {
+  background: #f9f9f9; border-top: 1px solid #e0e0e0;
+  padding: 16px 14px; font-size: 0.75rem; color: #888; line-height: 1.6;
+}
+#license-footer p + p { margin-top: 6px; }
+
+/* ── RWD（桌機）──────────────────────────────────────── */
+@media (min-width: 768px) {
+  #map-container { height: 60vh; }
+  #detail-sheet { max-width: 480px; right: 20px; left: auto; border-radius: 16px; bottom: 20px; }
+  #tree-list { max-height: none; }
 }
