@@ -17,14 +17,16 @@
 
   <!-- ── 頂部搜尋列（sticky）──────────────────────────── -->
   <header id="top-bar">
-    <div id="site-title">🌳 台北市樹木查詢</div>
+    <div id="site-title"><span aria-hidden="true">🌳</span> 台北市樹木查詢</div>
     <div id="search-row">
+      <label for="search-input" class="sr-only">樹籍編號或 QR 網址</label>
       <input id="search-input" type="search"
         placeholder="輸入樹籍編號（如 SY0030551077）或貼上 QR 網址…"
         autocomplete="off" autocorrect="off" spellcheck="false">
-      <button id="scan-btn" aria-label="掃碼查詢">📷 掃碼</button>
+      <button id="scan-btn" aria-label="掃碼查詢"><span aria-hidden="true">📷</span> 掃碼</button>
     </div>
     <div id="filter-row">
+      <label for="filter-district" class="sr-only">行政區篩選</label>
       <select id="filter-district">
         <option value="">全部行政區</option>
         <option>信義區</option><option>大安區</option><option>中正區</option>
@@ -32,6 +34,7 @@
         <option>大同區</option><option>內湖區</option><option>南港區</option>
         <option>文山區</option><option>士林區</option><option>北投區</option>
       </select>
+      <label for="filter-species" class="sr-only">樹種篩選</label>
       <input id="filter-species" type="search" placeholder="樹種（如：榕樹）" autocomplete="off">
       <div id="category-chips">
         <button class="chip active" data-cat="all">全部</button>
@@ -40,6 +43,8 @@
       </div>
     </div>
   </header>
+
+  <main id="main-content">
 
   <!-- ── 地圖 ──────────────────────────────────────────── -->
   <div id="map-container"></div>
@@ -51,6 +56,7 @@
   </div>
   <div id="stats-panel" hidden>
     <table id="stats-table">
+      <caption class="sr-only">台北市各行政區樹木統計</caption>
       <thead><tr><th>行政區</th><th>合計</th><th>行道樹</th><th>受保護</th></tr></thead>
       <tbody id="stats-tbody"></tbody>
     </table>
@@ -62,6 +68,8 @@
 
   <!-- ── 樹木列表 ─────────────────────────────────────────── -->
   <ul id="tree-list" aria-label="樹木列表"></ul>
+
+  </main>
 
   <!-- ── 底部 Sheet（樹木詳情）───────────────────────────── -->
   <div id="sheet-overlay" hidden></div>
