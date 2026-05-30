@@ -20,6 +20,24 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 #site-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
 #version-badge { font-size: 0.65rem; font-weight: 400; opacity: 0.55; letter-spacing: 0.02em; vertical-align: middle; }
+
+/* ── Auth area（右上角登入/登出）───────────────────────── */
+#auth-login-btn {
+  padding: 4px 10px; border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,0.55); color: rgba(255,255,255,0.9);
+  font-size: 0.8rem; text-decoration: none; white-space: nowrap;
+}
+#auth-login-btn:hover { background: rgba(255,255,255,0.15); }
+#auth-user {
+  font-size: 0.78rem; color: rgba(255,255,255,0.75);
+  margin-right: 6px; white-space: nowrap;
+}
+#auth-logout-btn {
+  padding: 4px 10px; border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,0.4); color: rgba(255,255,255,0.75);
+  background: transparent; font-size: 0.78rem; cursor: pointer; white-space: nowrap;
+}
+#auth-logout-btn:hover { background: rgba(255,255,255,0.12); }
 .legend-label { font-size: 0.72rem; color: #333; margin-right: 8px; }
 
 #search-row { display: flex; gap: 8px; margin-bottom: 6px; }

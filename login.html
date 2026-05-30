@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>登入｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; background: #f0f4f1; }
+
+    .login-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .login-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .login-header a:hover { color: #fff; }
+    .login-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+
+    .login-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .login-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+      padding: 32px 28px; width: 100%; max-width: 380px;
+    }
+
+    .login-logo {
+      text-align: center; margin-bottom: 24px;
+    }
+    .login-logo .tree-icon { font-size: 2.4rem; }
+    .login-logo h2 { font-size: 1.1rem; color: #1a5c2a; font-weight: 700; margin-top: 6px; }
+    .login-logo p { font-size: 0.82rem; color: #666; margin-top: 2px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 0.85rem; font-weight: 600;
+      color: #333; margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%; padding: 11px 14px; font-size: 1rem;
+      border: 1.5px solid #d0d0d0; border-radius: 10px;
+      outline: none; transition: border-color 0.15s;
+      background: #fafafa;
+    }
+    .form-group input:focus { border-color: #1a5c2a; background: #fff; }
+
+    .login-btn {
+      width: 100%; padding: 13px; font-size: 1rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; margin-top: 8px; transition: background 0.15s;
+    }
+    .login-btn:hover { background: #14491f; }
+    .login-btn:disabled { background: #888; cursor: not-allowed; }
+
+    .error-msg {
+      background: #fff0f0; color: #c0392b; border: 1px solid #f5c6c6;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.88rem;
+      margin-bottom: 16px; display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .info-msg {
+      background: #e8f5e9; color: #1a5c2a; border: 1px solid #c8e6c9;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.88rem;
+      margin-bottom: 16px; display: none;
+    }
+    .info-msg.show { display: block; }
+
+    .login-footer { text-align: center; margin-top: 16px; font-size: 0.78rem; color: #999; }
+  </style>
+</head>
+<body>
+
+  <header class="login-header">
+    <a href="/">← 回地圖</a>
+    <h1>台北市樹木查詢</h1>
+  </header>
+
+  <div class="login-wrap">
+    <div class="login-card">
+
+      <div class="login-logo">
+        <div class="tree-icon">🌳</div>
+        <h2>作業人員登入</h2>
+        <p>普查、風險評估及管理人員專用</p>
+      </div>
+
+      <div id="info-msg" class="info-msg"></div>
+      <div id="error-msg" class="error-msg"></div>
+
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label for="username">帳號</label>
+          <input id="username" type="text" autocomplete="username"
+                 placeholder="請輸入帳號" autocorrect="off" autocapitalize="none">
+        </div>
+        <div class="form-group">
+          <label for="password">密碼</label>
+          <input id="password" type="password" autocomplete="current-password"
+                 placeholder="請輸入密碼">
+        </div>
+        <button type="submit" id="login-btn" class="login-btn">登入</button>
+      </form>
+
+      <p class="login-footer">忘記密碼請聯絡系統管理員</p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // token 過期提示
+    const params = new URLSearchParams(location.search);
+    if (params.get('expired') === '1') {
+      const info = document.getElementById('info-msg');
+      info.textContent = '登入已過期，請重新登入。';
+      info.classList.add('show');
+    }
+
+    // 已登入者導回首頁
+    if (Auth.isLoggedIn()) {
+      window.location.href = '/';
+    }
+
+    const form     = document.getElementById('login-form');
+    const errorMsg = document.getElementById('error-msg');
+    const btn      = document.getElementById('login-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      errorMsg.classList.remove('show');
+
+      if (!username || !password) {
+        errorMsg.textContent = '請輸入帳號和密碼';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '登入中…';
+
+      try {
+        await Auth.login(username, password);
+        // 導回原本要去的頁面，或首頁
+        const next = params.get('next') || '/';
+        window.location.href = next;
+      } catch (err) {
+        errorMsg.textContent = err.message || '登入失敗，請稍後再試';
+        errorMsg.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = '登入';
+      }
+    });
+  </script>
+</body>
+</html>
