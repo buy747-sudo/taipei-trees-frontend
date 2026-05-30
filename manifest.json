@@ -1,0 +1,33 @@
+{
+  "name": "台北市樹木查詢",
+  "short_name": "台北樹木",
+  "description": "台北市行道樹與受保護樹木查詢地圖，收錄逾 9 萬棵樹木，支援 QR 掃碼即時查詢。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f9f0",
+  "theme_color": "#1a5c2a",
+  "lang": "zh-TW",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "掃碼查樹",
+      "short_name": "掃碼",
+      "description": "開啟 QR Code 掃碼器查詢樹籍",
+      "url": "/?qr=1"
+    }
+  ]
+}
