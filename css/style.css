@@ -20,6 +20,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 #site-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
 #version-badge { font-size: 0.65rem; font-weight: 400; opacity: 0.55; letter-spacing: 0.02em; vertical-align: middle; }
+.legend-label { font-size: 0.72rem; color: #333; margin-right: 8px; }
 
 #search-row { display: flex; gap: 8px; margin-bottom: 6px; }
 #search-input {
