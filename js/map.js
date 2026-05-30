@@ -47,11 +47,7 @@ function initMap() {
   });
   new LocControl({ position: 'topright' }).addTo(_map);
 
-  _clusterGroup = L.markerClusterGroup({
-    chunkedLoading: true,
-    maxClusterRadius: 60,
-    showCoverageOnHover: false,
-  });
+  _clusterGroup = L.layerGroup();
   _map.addLayer(_clusterGroup);
 
   _map.on('moveend', () => {

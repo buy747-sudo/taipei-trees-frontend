@@ -1,4 +1,4 @@
-// js/markers.js — tree markers + markercluster
+// js/markers.js — tree markers
 
 const ICON_STREET = L.divIcon({
   className: '',
@@ -30,7 +30,7 @@ function addTreeMarkers(trees) {
     m.on('click', () => openSheet(tree));
     return m;
   });
-  _clusterGroup.addLayers(markers);
+  markers.forEach(m => _clusterGroup.addLayer(m));
 }
 
 function clearMarkers() {
