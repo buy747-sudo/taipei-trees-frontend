@@ -164,6 +164,7 @@
         const user = Auth.getUser();
         const label = user.display_name || user.username;
         area.innerHTML =
+          `<a href="/risk.html" id="auth-risk-btn" title="風險評估">📋</a>` +
           `<span id="auth-user">${label}</span>` +
           `<button id="auth-logout-btn">登出</button>`;
         document.getElementById('auth-logout-btn').addEventListener('click', () => {

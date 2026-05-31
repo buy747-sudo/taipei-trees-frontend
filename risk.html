@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>風險評估｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── 版面 ───────────────────────────────────── */
+    body { background: #f0f4f1; min-height: 100vh; }
+
+    .risk-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .risk-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size:0.9rem; }
+    .risk-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+    .risk-header .huser { font-size: 0.8rem; color: rgba(255,255,255,0.75); }
+
+    .risk-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+    /* ── 步驟指示 ────────────────────────────────── */
+    .step-bar {
+      display: flex; gap: 0; margin-bottom: 20px;
+      border-radius: 8px; overflow: hidden; background: #ddd;
+    }
+    .step-bar span {
+      flex: 1; text-align: center; padding: 8px 4px; font-size: 0.75rem;
+      font-weight: 600; color: #888; transition: all 0.2s;
+    }
+    .step-bar span.active { background: #1a5c2a; color: #fff; }
+    .step-bar span.done   { background: #4caf50; color: #fff; }
+
+    /* ── 卡片 ────────────────────────────────────── */
+    .card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      padding: 20px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 1rem; font-weight: 700; color: #1a5c2a;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 2px solid #e8f5e9;
+    }
+
+    /* ── 查詢 step ───────────────────────────────── */
+    .qr-btn {
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; margin-bottom: 12px; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .qr-btn:hover { background: #14491f; }
+
+    .divider { text-align: center; color: #aaa; font-size: 0.85rem; margin: 10px 0; }
+
+    .input-row { display: flex; gap: 8px; }
+    .input-row input {
+      flex: 1; padding: 11px 14px; font-size: 1rem;
+      border: 1.5px solid #d0d0d0; border-radius: 10px; outline: none;
+      background: #fafafa;
+    }
+    .input-row input:focus { border-color: #1a5c2a; background: #fff; }
+    .input-row button {
+      padding: 11px 18px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; white-space: nowrap;
+    }
+    .input-row button:hover { background: #14491f; }
+
+    /* ── QR 掃描器 ───────────────────────────────── */
+    #qr-scanner-wrap {
+      margin-top: 12px; border-radius: 12px; overflow: hidden;
+      background: #000; position: relative; display: none;
+    }
+    #qr-scanner-wrap video { width: 100%; display: block; max-height: 260px; object-fit: cover; }
+    #qr-cancel { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6);
+      color: #fff; border: none; border-radius: 6px; padding: 6px 12px;
+      cursor: pointer; font-size: 0.85rem; }
+
+    /* ── 樹木資訊卡 ──────────────────────────────── */
+    .tree-info-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .tree-info-table td { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; }
+    .tree-info-table td:first-child { color: #666; width: 80px; }
+    .tree-info-table td:last-child { font-weight: 600; }
+
+    .start-btn {
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; margin-top: 14px;
+    }
+    .start-btn:hover { background: #14491f; }
+
+    /* ── 評估表單 ────────────────────────────────── */
+    .section-header {
+      background: #e8f5e9; border-radius: 8px;
+      padding: 10px 14px; margin: 18px 0 12px;
+      font-weight: 700; color: #1a5c2a; font-size: 0.95rem;
+    }
+
+    .question-block {
+      margin-bottom: 16px; padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .question-block:last-child { border-bottom: none; }
+
+    .q-title {
+      font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: #222;
+    }
+    .q-note { font-size: 0.78rem; color: #888; margin-bottom: 8px; }
+
+    .option-list { display: flex; flex-direction: column; gap: 6px; }
+    .option-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      border: 1.5px solid #e0e0e0; transition: all 0.15s; background: #fafafa;
+    }
+    .option-item:hover { border-color: #1a5c2a; background: #f0faf2; }
+    .option-item.selected { border-color: #1a5c2a; background: #e8f5e9; }
+    .option-item.cf-selected { border-color: #c62828; background: #ffebee; }
+    .option-item input[type="radio"],
+    .option-item input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; }
+    .opt-text { flex: 1; }
+    .opt-label { font-size: 0.88rem; font-weight: 600; }
+    .opt-hint  { font-size: 0.76rem; color: #777; margin-top: 2px; }
+    .cf-badge  { font-size: 0.7rem; color: #c62828; font-weight: 700;
+      background: #ffebee; padding: 2px 6px; border-radius: 4px;
+      margin-left: auto; flex-shrink: 0; }
+
+    /* ── A 級重大危害 ─────────────────────────────── */
+    .grade-a-section {
+      background: #fff8e1; border: 2px solid #f59e0b;
+      border-radius: 12px; padding: 14px; margin-bottom: 16px;
+    }
+    .grade-a-title {
+      font-weight: 700; color: #b45309; font-size: 0.9rem; margin-bottom: 10px;
+    }
+    .grade-a-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid #fde68a;
+    }
+    .grade-a-item:last-child { border-bottom: none; }
+    .grade-a-item label { font-size: 0.85rem; cursor: pointer; flex: 1; }
+    .grade-a-item small { display: block; color: #92400e; font-size: 0.75rem; margin-top: 2px; }
+
+    /* ── 環境風險 ────────────────────────────────── */
+    .env-risk-list { display: flex; flex-direction: column; gap: 8px; }
+    .env-option {
+      padding: 12px 14px; border-radius: 8px; cursor: pointer;
+      border: 1.5px solid #e0e0e0; background: #fafafa; transition: all 0.15s;
+    }
+    .env-option:hover { border-color: #1a5c2a; background: #f0faf2; }
+    .env-option.selected { border-color: #1a5c2a; background: #e8f5e9; }
+    .env-option-label { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+    .env-option-desc  { font-size: 0.78rem; color: #666; margin-top: 3px; }
+    .env-option-ex    { font-size: 0.72rem; color: #999; margin-top: 2px; }
+
+    /* ── 照片上傳 ────────────────────────────────── */
+    .photo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    @media (max-width: 480px) {
+      .photo-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .photo-slot {
+      aspect-ratio: 1; border-radius: 8px; border: 2px dashed #ccc;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; cursor: pointer; overflow: hidden;
+      background: #fafafa; position: relative; transition: border-color 0.15s;
+    }
+    .photo-slot:hover { border-color: #1a5c2a; }
+    .photo-slot.has-photo { border-style: solid; border-color: #4caf50; }
+    .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-slot .slot-label {
+      font-size: 0.7rem; color: #888; text-align: center;
+      padding: 4px; line-height: 1.3;
+    }
+    .photo-del {
+      position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.55);
+      color: #fff; border: none; border-radius: 4px; padding: 2px 5px;
+      cursor: pointer; font-size: 0.7rem; display: none;
+    }
+    .photo-slot.has-photo .photo-del { display: block; }
+    .photo-uploading::after {
+      content: '上傳中…'; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.8); display: flex;
+      align-items: center; justify-content: center; font-size: 0.75rem;
+    }
+
+    /* ── 備注欄 ──────────────────────────────────── */
+    textarea.notes-input {
+      width: 100%; padding: 11px 14px; font-size: 0.9rem;
+      border: 1.5px solid #d0d0d0; border-radius: 10px; outline: none;
+      background: #fafafa; min-height: 80px; resize: vertical; font-family: inherit;
+    }
+    textarea.notes-input:focus { border-color: #1a5c2a; background: #fff; }
+
+    /* ── 操作按鈕 ────────────────────────────────── */
+    .action-bar { display: flex; gap: 10px; margin-top: 8px; }
+    .btn-secondary {
+      flex: 1; padding: 13px; font-size: 0.95rem; font-weight: 700;
+      background: #fff; color: #1a5c2a; border: 2px solid #1a5c2a;
+      border-radius: 10px; cursor: pointer;
+    }
+    .btn-primary {
+      flex: 2; padding: 13px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none;
+      border-radius: 10px; cursor: pointer;
+    }
+    .btn-primary:hover { background: #14491f; }
+    .btn-primary:disabled { background: #888; cursor: not-allowed; }
+
+    /* ── 結果頁 ──────────────────────────────────── */
+    .grade-badge {
+      text-align: center; padding: 28px 20px 20px;
+    }
+    .grade-circle {
+      width: 90px; height: 90px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 900; color: #fff; margin-bottom: 10px;
+    }
+    .grade-label { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .grade-desc  { font-size: 0.85rem; color: #666; }
+
+    .treatment-list { list-style: none; padding: 0; }
+    .treatment-list li {
+      padding: 8px 12px 8px 32px; position: relative;
+      border-bottom: 1px solid #f0f0f0; font-size: 0.88rem;
+    }
+    .treatment-list li::before {
+      content: '▶'; position: absolute; left: 10px;
+      color: #1a5c2a; font-size: 0.7rem; top: 11px;
+    }
+
+    .submit-confirm { margin-top: 16px; }
+    .submit-confirm input {
+      width: 100%; padding: 11px 14px; font-size: 1rem;
+      border: 1.5px solid #d0d0d0; border-radius: 10px; outline: none;
+      background: #fafafa; margin-bottom: 10px;
+    }
+    .submit-confirm input:focus { border-color: #1a5c2a; background: #fff; }
+
+    .result-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .result-actions a, .result-actions button {
+      display: block; width: 100%; padding: 13px; text-align: center;
+      font-size: 0.95rem; font-weight: 700; border-radius: 10px;
+      cursor: pointer; text-decoration: none;
+    }
+    .result-actions .btn-new {
+      background: #1a5c2a; color: #fff; border: none;
+    }
+    .result-actions .btn-back {
+      background: #fff; color: #1a5c2a; border: 2px solid #1a5c2a;
+    }
+
+    /* ── 錯誤/資訊訊息 ───────────────────────────── */
+    .msg-error {
+      background: #fff0f0; color: #c0392b; border: 1px solid #f5c6c6;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.88rem;
+      margin-bottom: 12px; display: none;
+    }
+    .msg-error.show { display: block; }
+    .msg-info {
+      background: #e8f5e9; color: #1a5c2a; border: 1px solid #c8e6c9;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.88rem;
+      margin-bottom: 12px; display: none;
+    }
+    .msg-info.show { display: block; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header class="risk-header">
+    <a href="/">← 地圖</a>
+    <h1>🌳 樹木風險評估</h1>
+    <span class="huser" id="header-user"></span>
+  </header>
+
+  <div class="risk-body">
+
+    <!-- 步驟指示 -->
+    <div class="step-bar" id="step-bar">
+      <span id="sbar-1" class="active">① 找樹</span>
+      <span id="sbar-2">② 填表</span>
+      <span id="sbar-3">③ 結果</span>
+    </div>
+
+    <!-- ── Step 1：找樹 ──────────────────────────────── -->
+    <div id="step-lookup">
+      <div class="card">
+        <div class="card-title">📷 掃描樹牌 QR Code</div>
+        <button class="qr-btn" id="qr-open-btn">
+          <span>📷</span> 開啟相機掃描
+        </button>
+        <div id="qr-scanner-wrap">
+          <video id="qr-video" autoplay playsinline muted></video>
+          <button id="qr-cancel">✕ 關閉</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⌨️ 手動輸入樹籍編號</div>
+        <div id="lookup-error" class="msg-error"></div>
+        <div class="input-row">
+          <input id="tree-code-input" type="text" placeholder="例：JS0750021125"
+                 autocorrect="off" autocapitalize="characters">
+          <button id="lookup-btn">查詢</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Step 2：樹木資訊確認 ──────────────────────── -->
+    <div id="step-tree-info" hidden>
+      <div class="card">
+        <div class="card-title" id="tree-species-title">—</div>
+        <table class="tree-info-table" id="tree-info-table"></table>
+        <button class="start-btn" id="start-assessment-btn">開始風險評估 →</button>
+      </div>
+    </div>
+
+    <!-- ── Step 3：評估表單 ──────────────────────────── -->
+    <div id="step-form" hidden>
+
+      <!-- A 級重大危害 -->
+      <div class="grade-a-section" id="grade-a-section">
+        <div class="grade-a-title">⚠️ A 級重大危害（任一項符合即為 A 級，立即處置）</div>
+        <div id="grade-a-items"></div>
+      </div>
+
+      <!-- 主評估題目（動態產生） -->
+      <div id="assessment-questions"></div>
+
+      <!-- 環境風險 -->
+      <div class="card">
+        <div class="card-title">五、環境風險等級</div>
+        <div class="env-risk-list" id="env-risk-list"></div>
+      </div>
+
+      <!-- 照片上傳 -->
+      <div class="card">
+        <div class="card-title">六、現場照片</div>
+        <div class="photo-grid" id="photo-grid"></div>
+        <input type="file" id="photo-file-input" accept="image/*" capture="environment" hidden>
+      </div>
+
+      <!-- 備注 -->
+      <div class="card">
+        <div class="card-title">七、備注說明</div>
+        <textarea class="notes-input" id="notes-input" placeholder="現場觀察補充說明（選填）"></textarea>
+      </div>
+
+      <div id="form-error" class="msg-error"></div>
+      <div class="action-bar">
+        <button class="btn-secondary" id="save-draft-btn">儲存草稿</button>
+        <button class="btn-primary" id="preview-result-btn">查看評級結果 →</button>
+      </div>
+    </div>
+
+    <!-- ── Step 4：結果 ───────────────────────────────── -->
+    <div id="step-result" hidden>
+
+      <!-- 評級 -->
+      <div class="card">
+        <div class="grade-badge">
+          <div class="grade-circle" id="result-circle">?</div>
+          <div class="grade-label" id="result-label">—</div>
+          <div class="grade-desc" id="result-desc">—</div>
+        </div>
+
+        <div id="grade-a-warning" hidden style="background:#fff8e1;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.85rem;color:#92400e;">
+          <strong>⚠️ A 級重大危害因子：</strong>
+          <div id="grade-a-hit-list" style="margin-top:6px;"></div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-weight:700;font-size:0.88rem;margin-bottom:6px;color:#444;">建議處置措施：</div>
+          <ul class="treatment-list" id="treatment-list"></ul>
+        </div>
+
+        <div style="font-size:0.78rem;color:#aaa;text-align:right;" id="result-scores"></div>
+      </div>
+
+      <!-- 送出確認 -->
+      <div class="card" id="submit-card">
+        <div class="card-title">送出評估報告</div>
+        <p style="font-size:0.85rem;color:#555;margin-bottom:12px;">送出後無法修改，請確認評估資料無誤。</p>
+        <div id="submit-error" class="msg-error"></div>
+        <div id="submit-success" class="msg-info"></div>
+        <div class="submit-confirm" id="submit-form">
+          <input type="password" id="submit-password" placeholder="請輸入您的登入密碼確認送出">
+          <button class="btn-primary" id="submit-btn">確認送出</button>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-new" id="new-assessment-btn">評估下一棵樹</button>
+        <button class="btn-back btn-secondary" id="back-to-form-btn" style="width:100%;border-radius:10px;">← 返回修改</button>
+        <a href="/" class="btn-back">回到地圖</a>
+      </div>
+
+    </div>
+
+  </div><!-- .risk-body -->
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/risk.js"></script>
+</body>
+</html>
