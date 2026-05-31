@@ -60,11 +60,12 @@ const Auth = (() => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || '登入失敗');
+    const user = data.user || data; // 相容平層與巢狀兩種格式
     _save(data.token, {
-      username: data.username,
-      display_name: data.display_name,
-      role: data.role,
-      contractor_id: data.contractor_id,
+      username: user.username,
+      display_name: user.display_name,
+      role: user.role,
+      contractor_id: user.contractor_id,
     });
     return data;
   }
