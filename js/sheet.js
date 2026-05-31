@@ -9,6 +9,14 @@ function openSheet(tree) {
   badge.textContent = CATEGORY_LABEL[tree.tree_category] || '';
   badge.className = tree.tree_category === 'protected' ? 'badge-protected' : 'badge-street';
 
+  // 擬人化問候語
+  const greeting = document.getElementById('sheet-greeting');
+  if (greeting) {
+    const speciesName = tree.species_name || '這棵樹';
+    greeting.textContent = `您好，我是 ${speciesName} 🌳`;
+    greeting.hidden = false;
+  }
+
   const title = document.getElementById('sheet-title');
   title.textContent = tree.species_name || '未知樹種';
   if (tree.scientific_name) {
