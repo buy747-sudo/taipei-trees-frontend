@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>風險評估報告｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f0f4f1; min-height: 100vh; }
+    .rr-header {
+      background: #1a5c2a; color: #fff; padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .rr-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .rr-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+
+    .rr-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+    .card { background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 1rem; font-weight: 700; color: #1a5c2a;
+      margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #e8f5e9; }
+
+    .tree-info-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .tree-info-table td { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; }
+    .tree-info-table td:first-child { color: #666; width: 80px; }
+    .tree-info-table td:last-child { font-weight: 600; }
+
+    .grade-badge { text-align: center; padding: 24px 20px 16px; }
+    .grade-circle {
+      width: 90px; height: 90px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 900; color: #fff; margin-bottom: 10px;
+    }
+    .grade-label { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .grade-desc  { font-size: 0.85rem; color: #666; }
+
+    .treatment-list { list-style: none; padding: 0; }
+    .treatment-list li { padding: 8px 12px 8px 32px; position: relative;
+      border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+    .treatment-list li::before { content: '▶'; position: absolute; left: 10px;
+      color: #1a5c2a; font-size: 0.7rem; top: 11px; }
+
+    .action-bar { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .btn-pdf {
+      display: block; width: 100%; padding: 13px; text-align: center;
+      font-size: 0.95rem; font-weight: 700; border-radius: 10px;
+      cursor: pointer; border: none; background: #1565c0; color: #fff;
+    }
+    .btn-share {
+      display: block; width: 100%; padding: 13px; text-align: center;
+      font-size: 0.95rem; font-weight: 700; border-radius: 10px;
+      cursor: pointer; border: 2px solid #1a5c2a; background: #fff; color: #1a5c2a;
+    }
+    .btn-map {
+      display: block; width: 100%; padding: 13px; text-align: center;
+      font-size: 0.95rem; font-weight: 700; border-radius: 10px;
+      text-decoration: none; background: #1a5c2a; color: #fff;
+    }
+
+    .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 1rem; }
+    .error-msg { background: #fff0f0; color: #c0392b; border: 1px solid #f5c6c6;
+      border-radius: 8px; padding: 14px 16px; text-align: center; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header class="rr-header">
+  <a href="/">← 地圖</a>
+  <h1>🌳 樹木風險評估報告</h1>
+</header>
+
+<div class="rr-body">
+  <div id="loading" class="loading">載入中…</div>
+  <div id="error-wrap" hidden>
+    <div class="error-msg" id="error-msg"></div>
+    <div style="text-align:center;margin-top:16px;">
+      <a href="/" style="color:#1a5c2a;">← 回到地圖</a>
+    </div>
+  </div>
+
+  <div id="report-wrap" hidden>
+
+    <!-- 樹木基本資料 -->
+    <div class="card">
+      <div class="card-title" id="rr-species">—</div>
+      <table class="tree-info-table" id="rr-tree-table"></table>
+    </div>
+
+    <!-- 評級 -->
+    <div class="card">
+      <div class="grade-badge">
+        <div class="grade-circle" id="rr-circle">?</div>
+        <div class="grade-label" id="rr-label">—</div>
+        <div class="grade-desc"  id="rr-desc">—</div>
+      </div>
+
+      <div id="rr-grade-a-warning" hidden
+           style="background:#fff8e1;border:1px solid #f59e0b;border-radius:8px;
+                  padding:10px 14px;margin-bottom:12px;font-size:0.85rem;color:#92400e;">
+        <strong>⚠️ A 級重大危害因子：</strong>
+        <div id="rr-grade-a-hits" style="margin-top:6px;"></div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-weight:700;font-size:0.88rem;margin-bottom:6px;color:#444;">建議處置措施：</div>
+        <ul class="treatment-list" id="rr-treatments"></ul>
+      </div>
+
+      <div style="font-size:0.78rem;color:#aaa;text-align:right;" id="rr-scores"></div>
+    </div>
+
+    <!-- 備注 -->
+    <div class="card" id="rr-notes-card" hidden>
+      <div class="card-title">現場備注</div>
+      <p id="rr-notes" style="font-size:0.9rem;color:#444;margin:0;white-space:pre-wrap;"></p>
+    </div>
+
+    <!-- 操作 -->
+    <div class="action-bar">
+      <button class="btn-pdf" id="rr-pdf-btn" onclick="exportReportPDF()">📄 下載 PDF 報告</button>
+      <button class="btn-share" onclick="shareThis()">🔗 複製分享連結</button>
+      <a href="/" class="btn-map">回到地圖</a>
+    </div>
+
+    <p style="text-align:center;font-size:0.75rem;color:#bbb;margin-top:16px;">
+      台北市樹木查詢平台 taipei-trees.org
+    </p>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script>
+const GRADE_COLORS = { A:'#8B0000', B:'#D32F2F', C:'#E65100', D:'#388E3C' };
+let _reportData = null;
+
+(async function load() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if (!id) { showError('請提供評估 ID（?id=…）'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/assessment/${id}`);
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || '無法載入報告'); return; }
+    _reportData = data;
+    renderReport(data);
+  } catch (e) {
+    showError('網路錯誤，請稍後再試');
+  }
+})();
+
+function renderReport(data) {
+  const { assessment: a, tree, grade_info, treatments } = data;
+  const grade = a.final_grade || 'D';
+  const color = GRADE_COLORS[grade] || '#388E3C';
+
+  // 樹木資料
+  document.getElementById('rr-species').textContent =
+    `🌳 ${tree?.species_name || '未知樹種'}`;
+  const rows = [
+    ['樹籍編號', tree?.registry_code],
+    ['行政區',   tree?.district],
+    ['位置',     tree?.managing_unit],
+    ['樹高',     tree?.height_m != null ? `${tree.height_m} m` : null],
+    ['胸徑',     tree?.dbh_cm   != null ? `${tree.dbh_cm} cm` : null],
+    ['評估編號', `#${a.id}`],
+  ].filter(([,v]) => v);
+  document.getElementById('rr-tree-table').innerHTML =
+    rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+  // 評級
+  const circle = document.getElementById('rr-circle');
+  circle.textContent = grade; circle.style.background = color;
+  document.getElementById('rr-label').textContent = grade_info?.label || `${grade} 級`;
+  document.getElementById('rr-desc').style.color = color;
+  document.getElementById('rr-desc').textContent = grade_info?.desc || '';
+
+  // 處置措施
+  document.getElementById('rr-treatments').innerHTML =
+    (treatments || []).map(t => `<li>${t}</li>`).join('');
+
+  // A 級危害
+  const hits = a.grade_a_hits || [];
+  if (hits.length > 0) {
+    document.getElementById('rr-grade-a-warning').hidden = false;
+    document.getElementById('rr-grade-a-hits').innerHTML =
+      hits.map(h => `<div>• ${h}</div>`).join('');
+  }
+
+  // 分數
+  document.getElementById('rr-scores').textContent =
+    `健康分數：${a.health_score} ／ 關鍵因子：${a.critical_count} 項`;
+
+  // 備注
+  if (a.notes) {
+    document.getElementById('rr-notes-card').hidden = false;
+    document.getElementById('rr-notes').textContent = a.notes;
+  }
+
+  document.getElementById('loading').hidden = true;
+  document.getElementById('report-wrap').hidden = false;
+}
+
+function showError(msg) {
+  document.getElementById('loading').hidden = true;
+  document.getElementById('error-msg').textContent = msg;
+  document.getElementById('error-wrap').hidden = false;
+}
+
+// ── PDF ──
+async function exportReportPDF() {
+  if (!_reportData) return;
+  const btn = document.getElementById('rr-pdf-btn');
+  btn.disabled = true; btn.textContent = '產生中…';
+
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const { assessment: a, tree, grade_info, treatments } = _reportData;
+    const grade = a.final_grade || 'D';
+    const gradeColor = { A:[139,0,0], B:[211,47,47], C:[230,81,0], D:[56,142,60] }[grade] || [56,142,60];
+    const pageW = 210, margin = 14, contentW = pageW - margin * 2;
+    let y = 18;
+
+    doc.setFillColor(26, 92, 42);
+    doc.rect(0, 0, 210, 24, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(14); doc.setFont('helvetica','bold');
+    doc.text('Tree Risk Assessment Report', margin, 10);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('台北市樹木風險評估報告  taipei-trees.org', margin, 17);
+    doc.setTextColor(0,0,0); y = 32;
+
+    if (tree) {
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text('樹木基本資料', margin, y); y += 7;
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      [['樹籍編號', tree.registry_code],['樹種',tree.species_name],
+       ['行政區',tree.district],['位置',tree.managing_unit],
+       ['樹高',tree.height_m!=null?`${tree.height_m} m`:'—'],
+       ['胸徑',tree.dbh_cm!=null?`${tree.dbh_cm} cm`:'—']
+      ].forEach(([k,v]) => {
+        doc.setFont('helvetica','bold'); doc.text(k+'：', margin, y);
+        doc.setFont('helvetica','normal'); doc.text(v||'—', margin+22, y);
+        y += 5.5;
+      });
+      y += 4;
+    }
+
+    doc.setFillColor(...gradeColor);
+    doc.roundedRect(margin, y, contentW, 22, 3, 3, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(28); doc.setFont('helvetica','bold');
+    doc.text(grade, margin+8, y+16);
+    doc.setFontSize(13);
+    doc.text(grade_info?.label||`${grade} 級`, margin+22, y+10);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text(grade_info?.desc||'', margin+22, y+18);
+    doc.setTextColor(0,0,0); y += 28;
+
+    doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text(`健康分數：${a.health_score}  ／  關鍵因子：${a.critical_count} 項  ／  評估 #${a.id}`, margin, y);
+    doc.setTextColor(0,0,0); y += 7;
+
+    const hits = a.grade_a_hits||[];
+    if (hits.length > 0) {
+      doc.setFillColor(255,243,205);
+      doc.rect(margin, y, contentW, 6+hits.length*5.5, 'F');
+      doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.setTextColor(180,83,9);
+      doc.text('⚠ A 級重大危害因子', margin+3, y+5);
+      y += 8; doc.setFont('helvetica','normal');
+      hits.forEach(h => { doc.text(`• ${h}`, margin+5, y); y += 5.5; });
+      doc.setTextColor(0,0,0); y += 3;
+    }
+
+    if (treatments?.length > 0) {
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text('建議處置措施', margin, y); y += 7;
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      treatments.forEach(t => { doc.text(`▶  ${t}`, margin+3, y); y += 5.5; });
+      y += 4;
+    }
+
+    if (a.notes) {
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text('現場備注', margin, y); y += 7;
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      const lines = doc.splitTextToSize(a.notes, contentW-4);
+      doc.text(lines, margin+3, y); y += lines.length * 5;
+    }
+
+    const now = new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+    doc.setFontSize(7.5); doc.setTextColor(150,150,150);
+    doc.text(`評估日期：${now}   ／   台北市樹木查詢平台  taipei-trees.org`, margin, 290);
+
+    const treeCode = tree?.registry_code || 'unknown';
+    doc.save(`樹木風險評估_${treeCode}_${now.replace(/\//g,'-')}.pdf`);
+  } catch(e) {
+    alert('PDF 產生失敗，請重試');
+  } finally {
+    btn.disabled = false; btn.textContent = '📄 下載 PDF 報告';
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function shareThis() {
+  const url = location.href;
+  if (navigator.share) {
+    navigator.share({ title: '樹木風險評估報告', url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.querySelector('.btn-share');
+      if (btn) { btn.textContent = '✅ 已複製！'; setTimeout(() => btn.textContent = '🔗 複製分享連結', 2000); }
+    });
+  }
+}
+</script>
+</body>
+</html>

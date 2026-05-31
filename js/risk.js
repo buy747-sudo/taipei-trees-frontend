@@ -209,15 +209,24 @@ function buildAssessmentForm() {
   document.getElementById('preview-result-btn').addEventListener('click', () => saveAndPreview(true));
 }
 
+const HINT_IMG_BASE = '/images/hints/';
+
+function optionImgHTML(img_hint) {
+  if (!img_hint) return '';
+  return `<img src="${HINT_IMG_BASE}${img_hint}" alt="參考圖" class="opt-img"
+               loading="lazy" onerror="this.style.display='none'">`;
+}
+
 function buildQuestionHTML(item) {
   let optionsHTML = '';
 
   if (item.type === 'radio') {
     optionsHTML = `<div class="option-list">` +
       item.options.map(opt => `
-        <div class="option-item" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf})">
+        <div class="option-item" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf || false})">
           <input type="radio" name="${item.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
+            ${optionImgHTML(opt.img_hint)}
             <div class="opt-label">${opt.label}</div>
             ${opt.hint ? `<div class="opt-hint">${opt.hint}</div>` : ''}
           </div>
@@ -231,6 +240,7 @@ function buildQuestionHTML(item) {
         <div class="option-item" onclick="toggleCheckbox(this,'${opt.key}')">
           <input type="checkbox" name="${opt.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
+            ${optionImgHTML(opt.img_hint)}
             <div class="opt-label">${opt.label}</div>
             ${opt.hint ? `<div class="opt-hint">${opt.hint}</div>` : ''}
           </div>
@@ -242,9 +252,10 @@ function buildQuestionHTML(item) {
     const ec = item.extra_checkbox;
     optionsHTML = `<div class="option-list">` +
       item.radio_options.map(opt => `
-        <div class="option-item" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf})">
+        <div class="option-item" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf || false})">
           <input type="radio" name="${item.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
+            ${optionImgHTML(opt.img_hint)}
             <div class="opt-label">${opt.label}</div>
             ${opt.hint ? `<div class="opt-hint">${opt.hint}</div>` : ''}
           </div>
@@ -254,6 +265,7 @@ function buildQuestionHTML(item) {
       `<div class="option-item" onclick="toggleCheckbox(this,'${ec.key}')">
         <input type="checkbox" name="${ec.key}" value="${ec.value}" data-cf="${ec.cf ? 1 : 0}">
         <div class="opt-text">
+          ${optionImgHTML(ec.img_hint)}
           <div class="opt-label">${ec.label}</div>
           ${ec.hint ? `<div class="opt-hint">${ec.hint}</div>` : ''}
         </div>
@@ -648,6 +660,148 @@ function resetToLookup() {
   _tree = null; _assessId = null; _lastResult = null; _photoSlots = {};
   document.getElementById('tree-code-input').value = '';
   showStep('lookup');
+}
+
+// ── PDF 匯出 ─────────────────────────────────────────────────────────────────
+async function exportPDF() {
+  if (!_assessId || !_lastResult) return;
+  const btn = document.getElementById('pdf-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '產生中…'; }
+
+  try {
+    // 動態載入 jsPDF + html2canvas
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = 210, margin = 14, contentW = pageW - margin * 2;
+    let y = 18;
+
+    // ── 標題 ──
+    const grade = _lastResult.final_grade || 'D';
+    const gradeInfo = _lastResult.grade_info || {};
+    const gradeColor = { A:[139,0,0], B:[211,47,47], C:[230,81,0], D:[56,142,60] }[grade] || [56,142,60];
+
+    doc.setFillColor(26, 92, 42);
+    doc.rect(0, 0, 210, 24, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+    doc.text('Tree Risk Assessment Report', margin, 10);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.text('台北市樹木風險評估報告  taipei-trees.org', margin, 17);
+    doc.setTextColor(0, 0, 0);
+    y = 32;
+
+    // ── 樹木基本資料 ──
+    if (_tree) {
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('樹木基本資料', margin, y); y += 7;
+      doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+      const treeRows = [
+        ['樹籍編號', _tree.registry_code || '—'],
+        ['樹種',     _tree.species_name || '—'],
+        ['行政區',   _tree.district || '—'],
+        ['位置',     _tree.managing_unit || '—'],
+        ['樹高',     _tree.height_m != null ? `${_tree.height_m} m` : '—'],
+        ['胸徑',     _tree.dbh_cm   != null ? `${_tree.dbh_cm} cm` : '—'],
+      ];
+      treeRows.forEach(([k, v]) => {
+        doc.setFont('helvetica', 'bold'); doc.text(k + '：', margin, y);
+        doc.setFont('helvetica', 'normal'); doc.text(v, margin + 22, y);
+        y += 5.5;
+      });
+      y += 4;
+    }
+
+    // ── 評級結果 ──
+    doc.setFillColor(...gradeColor);
+    doc.roundedRect(margin, y, contentW, 22, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28); doc.setFont('helvetica', 'bold');
+    doc.text(grade, margin + 8, y + 16);
+    doc.setFontSize(13);
+    doc.text(gradeInfo.label || `${grade} 級`, margin + 22, y + 10);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.text(gradeInfo.desc || '', margin + 22, y + 18);
+    doc.setTextColor(0, 0, 0);
+    y += 28;
+
+    // 分數
+    doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+    doc.text(
+      `健康分數：${_lastResult.health_score}  ／  關鍵因子：${_lastResult.critical_count} 項  ／  評估 ID：${_assessId}`,
+      margin, y
+    );
+    doc.setTextColor(0, 0, 0);
+    y += 7;
+
+    // ── A 級危害 ──
+    const hits = _lastResult.grade_a_hits || [];
+    if (hits.length > 0) {
+      doc.setFillColor(255, 243, 205);
+      doc.rect(margin, y, contentW, 6 + hits.length * 5.5, 'F');
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(180, 83, 9);
+      doc.text('⚠ A 級重大危害因子', margin + 3, y + 5);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      hits.forEach(h => {
+        doc.text(`• ${h}`, margin + 5, y); y += 5.5;
+      });
+      doc.setTextColor(0, 0, 0);
+      y += 3;
+    }
+
+    // ── 建議處置 ──
+    const treatments = _lastResult.treatments || [];
+    if (treatments.length > 0) {
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('建議處置措施', margin, y); y += 7;
+      doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+      treatments.forEach(t => {
+        doc.text(`▶  ${t}`, margin + 3, y); y += 5.5;
+      });
+      y += 4;
+    }
+
+    // ── 頁尾 ──
+    const now = new Date().toLocaleDateString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit' });
+    doc.setFontSize(7.5); doc.setTextColor(150, 150, 150);
+    doc.text(`評估日期：${now}   ／   台北市樹木查詢平台  taipei-trees.org`, margin, 290);
+
+    // ── 儲存 ──
+    const treeCode = _tree?.registry_code || 'unknown';
+    doc.save(`樹木風險評估_${treeCode}_${now.replace(/\//g,'-')}.pdf`);
+
+  } catch (e) {
+    console.error('PDF 產生失敗', e);
+    alert('PDF 產生失敗，請重試');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📄 下載 PDF 報告'; }
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ── 分享連結 ─────────────────────────────────────────────────────────────────
+function shareReport() {
+  const url = `${location.origin}/risk-report.html?id=${_assessId}`;
+  if (navigator.share) {
+    navigator.share({ title: '樹木風險評估報告', url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('share-btn');
+      if (btn) { const orig = btn.textContent; btn.textContent = '✅ 已複製！'; setTimeout(() => btn.textContent = orig, 2000); }
+    });
+  }
 }
 
 // ── 工具 ─────────────────────────────────────────────────────────────────────

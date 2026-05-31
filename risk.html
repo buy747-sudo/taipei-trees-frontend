@@ -248,6 +248,13 @@
       font-size: 0.95rem; font-weight: 700; border-radius: 10px;
       cursor: pointer; text-decoration: none;
     }
+
+    /* ── 選項參考圖 ──────────────────────────────── */
+    .opt-img {
+      display: block; width: 100%; max-width: 200px;
+      border-radius: 6px; margin-bottom: 6px;
+      border: 1px solid #e0e0e0;
+    }
     .result-actions .btn-new {
       background: #1a5c2a; color: #fff; border: none;
     }
@@ -397,6 +404,8 @@
       </div>
 
       <div class="result-actions">
+        <button class="btn-primary" id="pdf-btn" onclick="exportPDF()" style="background:#1565c0;">📄 下載 PDF 報告</button>
+        <button class="btn-secondary" id="share-btn" onclick="shareReport()">🔗 複製分享連結</button>
         <button class="btn-new" id="new-assessment-btn">評估下一棵樹</button>
         <button class="btn-back btn-secondary" id="back-to-form-btn" style="width:100%;border-radius:10px;">← 返回修改</button>
         <a href="/" class="btn-back">回到地圖</a>
