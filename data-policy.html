@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── Favicon & PWA ─────────────────────────────────── -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a5c2a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="台北樹木">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <title>資料來源與開放授權聲明｜台北市樹木查詢平台</title>
+  <meta name="description" content="台北市樹木查詢平台所使用之樹木資料，均來自台北市政府開放資料平台，依政府資料開放授權條款（OGDL）合法使用。本頁說明資料來源、授權範圍與使用規範。">
+  <link rel="canonical" href="https://taipei-trees.org/data-policy.html">
+  <meta property="og:title" content="資料來源與開放授權聲明｜台北市樹木查詢平台">
+  <meta property="og:url" content="https://taipei-trees.org/data-policy.html">
+  <meta property="og:locale" content="zh_TW">
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body { background: #f5f5f5; }
+
+    #page-header {
+      background: #1a5c2a; color: #fff;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #page-header a {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4);
+      color: #fff; padding: 6px 14px; border-radius: 8px;
+      text-decoration: none; font-size: 0.9rem; white-space: nowrap;
+    }
+    #page-header h1 { font-size: 1rem; font-weight: 700; margin: 0; }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 28px 16px 72px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a5c2a 0%, #2d7a3a 60%, #3a8f48 100%);
+      border-radius: 16px; padding: 28px 24px; color: #fff;
+      margin-bottom: 28px; text-align: center;
+    }
+    .hero h2 { font-size: 1.3rem; margin: 0 0 8px; font-weight: 800; }
+    .hero p  { font-size: 0.93rem; margin: 0; opacity: 0.9; line-height: 1.6; }
+
+    .card {
+      background: #fff; border-radius: 14px;
+      padding: 22px 20px; margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h3 {
+      font-size: 1rem; font-weight: 800; color: #1a5c2a;
+      margin: 0 0 14px; padding-bottom: 10px;
+      border-bottom: 2px solid #e8f5e9;
+    }
+    .card p, .card li {
+      font-size: 0.9rem; color: #444; line-height: 1.7; margin: 0 0 8px;
+    }
+    .card ul { padding-left: 18px; margin: 0; }
+    .card li { margin-bottom: 6px; }
+
+    .dataset-table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px;
+    }
+    .dataset-table th {
+      background: #f0f7f1; color: #1a5c2a; font-weight: 700;
+      padding: 10px 12px; text-align: left; border-bottom: 2px solid #c8e6c9;
+    }
+    .dataset-table td {
+      padding: 10px 12px; border-bottom: 1px solid #f0f0f0; color: #444;
+      vertical-align: top;
+    }
+    .dataset-table tr:last-child td { border-bottom: none; }
+    .badge-ogdl {
+      display: inline-block; background: #e8f5e9; color: #2e7d32;
+      border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 700;
+    }
+
+    .notice-box {
+      background: #fff8e1; border-left: 4px solid #f59e0b;
+      border-radius: 0 10px 10px 0; padding: 14px 16px; margin-top: 14px;
+    }
+    .notice-box p { font-size: 0.88rem; color: #5a4a1a; margin: 0; line-height: 1.6; }
+
+    .contact-block {
+      background: #f0f7f1; border-radius: 10px; padding: 16px 18px; margin-top: 14px;
+    }
+    .contact-block p { font-size: 0.88rem; color: #2e7d32; margin: 0 0 4px; }
+    .contact-block a { color: #1a5c2a; font-weight: 700; }
+
+    footer {
+      margin-top: 32px; padding-top: 20px; border-top: 1px solid #e0e0e0;
+      font-size: 0.8rem; color: #999; line-height: 1.7;
+    }
+    footer a { color: #1a5c2a; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header id="page-header">
+    <a href="/">← 返回地圖</a>
+    <h1>資料來源與授權聲明</h1>
+  </header>
+
+  <main class="wrap">
+
+    <div class="hero">
+      <h2>📋 開放資料使用聲明</h2>
+      <p>本平台所有樹木資料均來自政府開放資料平台，<br>依法合規使用，資料主權屬於台北市政府。</p>
+    </div>
+
+    <!-- 資料來源 -->
+    <div class="card">
+      <h3>📂 資料集來源</h3>
+      <p>本平台使用以下兩個公開資料集，均取自<strong>臺北市政府開放資料平台（data.taipei）</strong>：</p>
+      <table class="dataset-table">
+        <thead>
+          <tr>
+            <th>資料集名稱</th>
+            <th>主管機關</th>
+            <th>授權</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong>臺北市行道樹</strong><br>
+              <span style="color:#888;font-size:0.8rem;">含樹種、位置、胸徑、樹高、固碳量等</span>
+            </td>
+            <td>工務局公園路燈工程管理處</td>
+            <td><span class="badge-ogdl">OGDL</span></td>
+          </tr>
+          <tr>
+            <td>
+              <strong>臺北市受保護樹木</strong><br>
+              <span style="color:#888;font-size:0.8rem;">含受保護原因、樹齡、位置等</span>
+            </td>
+            <td>工務局公園路燈工程管理處</td>
+            <td><span class="badge-ogdl">OGDL</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notice-box">
+        <p>資料版權屬臺北市政府工務局公園路燈工程管理處所有。本平台僅提供查詢介面，未對原始資料進行實質性修改。</p>
+      </div>
+    </div>
+
+    <!-- 授權條款說明 -->
+    <div class="card">
+      <h3>⚖️ 政府資料開放授權條款（OGDL）</h3>
+      <p>上述資料集依據<strong>政府資料開放授權條款（Open Government Data License，OGDL）1.0 版</strong>釋出，使用者可自由：</p>
+      <ul>
+        <li>複製、散布、傳輸資料</li>
+        <li>以任何媒介或格式重製資料</li>
+        <li>重混、轉換資料，並以此資料為基礎進行創作</li>
+        <li>為任何目的（包含商業目的）使用資料</li>
+      </ul>
+      <p>使用時須遵守以下條件：</p>
+      <ul>
+        <li>需標示資料來源（本平台已於各頁面底部標示）</li>
+        <li>不得暗示政府機關為衍生著作之背書者</li>
+      </ul>
+      <p style="margin-top:10px;">
+        完整條款請見：
+        <a href="https://data.gov.tw/license" target="_blank" rel="noopener" style="color:#1a5c2a;font-weight:700;">
+          政府資料開放授權條款全文 →
+        </a>
+      </p>
+    </div>
+
+    <!-- 資料更新與準確性 -->
+    <div class="card">
+      <h3>🔄 資料更新與準確性</h3>
+      <ul>
+        <li>本平台資料定期與 data.taipei 同步更新，同步頻率視政府原始資料集更新而定。</li>
+        <li>樹木位置、數量可能因養護作業、颱風災害等因素與現場實際狀況有所差異。</li>
+        <li>固碳量數值依政府資料集所提供之估算值顯示，僅供參考。</li>
+        <li>受保護樹木狀態若有異動，請以公園處公告為準。</li>
+      </ul>
+    </div>
+
+    <!-- 隱私與追蹤 -->
+    <div class="card">
+      <h3>🔒 隱私與資料收集</h3>
+      <ul>
+        <li>本平台使用 <strong>Cloudflare Web Analytics</strong> 收集匿名網站流量數據（頁面瀏覽次數、訪客來源區域、裝置類型）。</li>
+        <li>Cloudflare Web Analytics <strong>不使用 Cookie</strong>，不追蹤個人身分。</li>
+        <li>本平台<strong>不收集、不儲存</strong>任何使用者個人資料。</li>
+        <li>定位功能（GPS）僅於使用者主動允許後啟用，定位資料不會上傳至任何伺服器。</li>
+        <li>QR Code 掃描功能在本地裝置執行，不上傳掃描圖像。</li>
+      </ul>
+    </div>
+
+    <!-- 聯絡資訊 -->
+    <div class="card">
+      <h3>✉️ 聯絡我們</h3>
+      <p>若發現資料有誤、對授權使用有疑問，或希望洽談資料合作，歡迎聯絡：</p>
+      <div class="contact-block">
+        <p>🌿 <strong>怡仁生態景觀有限公司</strong></p>
+        <p>台北市南區行道樹養護承包廠商（大安、信義、文山區）</p>
+        <p>Email：<a href="mailto:buy747@gmail.com">buy747@gmail.com</a></p>
+      </div>
+      <p style="margin-top:14px;font-size:0.85rem;color:#888;">
+        本平台為公益性質樹木查詢服務，資料引用及網站架設費用由怡仁生態景觀有限公司自行承擔。
+      </p>
+    </div>
+
+    <footer>
+      <p>行道樹資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市行道樹」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。</p>
+      <p>受保護樹木資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市受保護樹木」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。</p>
+      <p style="margin-top:8px;">
+        <a href="/">返回地圖</a>　｜
+        <a href="/about.html">關於本站</a>　｜
+        <a href="https://data.taipei" target="_blank" rel="noopener">data.taipei</a>
+      </p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
