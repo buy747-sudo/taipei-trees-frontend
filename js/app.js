@@ -80,14 +80,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initQr();
   initStats();
 
-  // setTimeout(0) 確保瀏覽器完成所有 CSS layout 後才初始化地圖視角
-  // requestAnimationFrame 在 Chrome 有時仍在 layout 前執行，導致標記偏底部
-  setTimeout(() => {
-    const map = typeof getMap === 'function' ? getMap() : null;
-    if (map) {
-      map.invalidateSize({ animate: false });
-      map.setView(TAIPEI_CENTER, DEFAULT_ZOOM, { animate: false });
-    }
-    loadTrees();
-  }, 0);
+  loadTrees();
 });
