@@ -29,10 +29,10 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 #auth-login-btn:hover { background: rgba(255,255,255,0.15); }
 #auth-survey-btn, #auth-risk-btn {
-  padding: 4px 9px; border-radius: 14px; font-size: 0.85rem;
-  text-decoration: none; color: rgba(255,255,255,0.85);
-  border: 1.5px solid rgba(255,255,255,0.35);
-  white-space: nowrap;
+  padding: 4px 10px; border-radius: 14px; font-size: 0.78rem; font-weight: 600;
+  text-decoration: none; color: rgba(255,255,255,0.9);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  white-space: nowrap; letter-spacing: 0.01em;
 }
 #auth-survey-btn:hover, #auth-risk-btn:hover { background: rgba(255,255,255,0.15); }
 #auth-user {
@@ -263,3 +263,15 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   padding: 3px 10px; text-decoration: none; white-space: nowrap;
 }
 #guide-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* ── benefit chips（底部 sheet 效益摘要）── */
+.benefit-chips {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 2px;
+}
+.bchip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 16px;
+  background: #e8f5e9; color: #1a5c2a;
+  font-size: 0.78rem; border: 1px solid #c8e6c9;
+}
+.bchip strong { font-weight: 700; }

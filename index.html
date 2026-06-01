@@ -125,6 +125,8 @@
       <h2 id="sheet-title"></h2>
       <table id="sheet-table"></table>
       <div id="sheet-carbon"></div>
+      <div id="sheet-benefits" hidden></div>
+      <div id="sheet-detail-link" hidden style="text-align:right;margin-top:4px;"><a id="sheet-detail-btn" href="#" style="font-size:0.82rem;color:#1a5c2a;font-weight:600;text-decoration:none;">完整效益說明 →</a></div>
       <div id="sheet-eco" hidden></div>
       <div id="sheet-actions">
         <button id="sheet-close">← 關閉</button>
@@ -168,8 +170,8 @@
         const user = Auth.getUser();
         const label = user.display_name || user.username;
         area.innerHTML =
-          `<a href="/survey.html" id="auth-survey-btn" title="普查">📝</a>` +
-          `<a href="/risk.html" id="auth-risk-btn" title="風險評估">📋</a>` +
+          `<a href="/survey.html" id="auth-survey-btn">📝 普查</a>` +
+          `<a href="/risk.html" id="auth-risk-btn">📋 評估</a>` +
           `<span id="auth-user">${label}</span>` +
           `<button id="auth-logout-btn">登出</button>`;
         document.getElementById('auth-logout-btn').addEventListener('click', () => {
@@ -185,6 +187,7 @@
   <script src="js/species.js"></script>
   <script src="js/map.js"></script>
   <script src="js/markers.js"></script>
+  <script src="js/benefits.js"></script>
   <script src="js/sheet.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/qr.js"></script>

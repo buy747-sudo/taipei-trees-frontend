@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>樹木詳情｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f0f4f1; min-height: 100vh; }
+    .tr-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .tr-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .tr-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+    .tr-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+    .card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      padding: 20px; margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 1rem; font-weight: 700; color: #1a5c2a;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 2px solid #e8f5e9;
+    }
+    /* 樹木 hero */
+    .tree-hero { text-align: center; padding: 20px 16px 12px; }
+    .tree-hero .icon { font-size: 3rem; }
+    .tree-hero .name { font-size: 1.5rem; font-weight: 800; color: #1a5c2a; margin-top: 6px; }
+    .tree-hero .sci  { font-size: 0.82rem; color: #888; font-style: italic; }
+    .tree-hero .code-badge {
+      display: inline-block; margin-top: 8px;
+      background: #e8f5e9; color: #1a5c2a; border-radius: 12px;
+      padding: 3px 12px; font-size: 0.78rem; font-weight: 600;
+    }
+    .cat-badge {
+      display: inline-block; margin-left: 6px;
+      padding: 3px 10px; border-radius: 10px; font-size: 0.72rem; font-weight: 700;
+    }
+    .badge-street    { background: #e8f5e9; color: #1a5c2a; }
+    .badge-protected { background: #fff8e1; color: #92400e; }
+
+    /* 效益卡片 */
+    .benefit-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    @media (max-width: 420px) { .benefit-cards { grid-template-columns: 1fr; } }
+    .benefit-card {
+      background: #f0f9f1; border: 1.5px solid #c8e6c9;
+      border-radius: 12px; padding: 14px 10px; text-align: center;
+    }
+    .benefit-card .bc-icon { font-size: 1.5rem; }
+    .benefit-card .bc-label { font-size: 0.72rem; color: #555; margin: 4px 0 2px; }
+    .benefit-card .bc-value { font-size: 1.2rem; font-weight: 800; color: #1a5c2a; }
+    .benefit-card .bc-unit  { font-size: 0.68rem; color: #777; }
+
+    /* 計算說明（折疊） */
+    details { margin-top: 12px; }
+    details summary {
+      font-size: 0.82rem; color: #1a5c2a; font-weight: 600;
+      cursor: pointer; padding: 6px 0; list-style: none;
+    }
+    details summary::before { content: "▶ "; font-size: 0.7rem; }
+    details[open] summary::before { content: "▼ "; }
+    .method-block {
+      background: #f8fdf9; border-radius: 10px; padding: 12px 14px;
+      margin-top: 8px; font-size: 0.78rem; color: #444; line-height: 1.7;
+    }
+    .method-block .formula {
+      font-family: monospace; background: #e8f5e9;
+      padding: 4px 8px; border-radius: 6px; display: block; margin: 6px 0;
+      font-size: 0.75rem; color: #1a5c2a;
+    }
+    .method-block .cite {
+      font-size: 0.7rem; color: #888; margin-top: 6px;
+    }
+
+    /* 資料表 */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table td { padding: 7px 6px; border-bottom: 1px solid #f0f0f0; }
+    .data-table td:first-child { color: #777; width: 38%; }
+    .data-table td:last-child { font-weight: 600; color: #222; }
+
+    /* 生態說明 */
+    .eco-traits { font-size: 0.85rem; color: #444; line-height: 1.75; }
+    .eco-aliases { font-size: 0.78rem; color: #888; margin-top: 8px; }
+
+    /* 分享 */
+    .share-row { display: flex; gap: 10px; margin-top: 4px; }
+    .btn-share {
+      flex: 1; padding: 12px; font-size: 0.9rem; font-weight: 600;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px; cursor: pointer;
+    }
+    .btn-share:hover { background: #14491f; }
+    .btn-back {
+      flex: 1; padding: 12px; font-size: 0.9rem; font-weight: 600;
+      background: #fff; color: #1a5c2a; border: 1.5px solid #1a5c2a;
+      border-radius: 10px; cursor: pointer; text-align: center; text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-back:hover { background: #e8f5e9; }
+
+    .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 0.95rem; }
+    .error-msg { background: #fce8e8; color: #c00; border-radius: 10px; padding: 16px; text-align: center; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header class="tr-header">
+    <a href="/">&#8592; 地圖</a>
+    <h1 id="tr-page-title">樹木詳情</h1>
+  </header>
+
+  <div class="tr-body">
+
+    <div id="loading-msg" class="loading">載入樹木資料中…</div>
+    <div id="error-msg" class="error-msg" hidden>找不到此樹籍資料，請確認編碼後再試。</div>
+
+    <div id="tree-content" hidden>
+
+      <!-- hero -->
+      <div class="card tree-hero">
+        <div class="icon">&#127795;</div>
+        <div class="name" id="tr-name">—</div>
+        <div class="sci"  id="tr-sci"></div>
+        <div>
+          <span class="code-badge" id="tr-code"></span>
+          <span class="cat-badge"  id="tr-cat"></span>
+        </div>
+      </div>
+
+      <!-- 效益卡片 -->
+      <div class="card" id="benefit-section">
+        <div class="card-title">每年生態效益估算</div>
+        <div class="benefit-cards">
+          <div class="benefit-card">
+            <div class="bc-icon">&#127807;</div>
+            <div class="bc-label">碳儲存</div>
+            <div class="bc-value" id="bc-co2">—</div>
+            <div class="bc-unit">kg CO₂</div>
+          </div>
+          <div class="benefit-card">
+            <div class="bc-icon">&#128167;</div>
+            <div class="bc-label">雨水截留</div>
+            <div class="bc-value" id="bc-rain">—</div>
+            <div class="bc-unit" id="bc-rain-unit">公升/年</div>
+          </div>
+          <div class="benefit-card">
+            <div class="bc-icon">&#127787;&#65039;</div>
+            <div class="bc-label">空污效益</div>
+            <div class="bc-value" id="bc-air">—</div>
+            <div class="bc-unit">NT$/年</div>
+          </div>
+        </div>
+
+        <details>
+          <summary>計算方式說明</summary>
+          <div class="method-block">
+            <strong>&#127807; 碳儲存</strong><br>
+            以地上生物量公式估算樹木儲存的碳量，再換算為 CO₂ 當量：
+            <span class="formula">AGB = 0.0509 × 木材密度(g/cm³) × 胸徑(cm)² × 樹高(m)</span>
+            CO₂ = AGB × BEF(1.26) × 碳分率(0.47) × 44/12<br>
+            木材密度採樹種查表，其餘預設 0.50 g/cm³（IPCC 熱帶闊葉樹預設值）。
+            <div class="cite">引用：Brown (1997) FAO Forestry Paper 134；IPCC (2006) GPG LULUCF Ch.4</div>
+
+            <br><strong>&#128167; 雨水截留</strong><br>
+            依樹冠面積與台北年均降雨量（2,400 mm）估算年截留量：
+            <span class="formula">截留量 = 冠幅面積(m²) × 2,400 mm × 0.08</span>
+            截留係數 0.08 為城市闊葉樹研究均值。
+            <div class="cite">引用：Xiao, Q. et al. (2000) Urban Ecosystems 3: 65–86</div>
+
+            <br><strong>&#127787;&#65039; 空污效益</strong><br>
+            以葉面積估算 PM₂.₅ 等污染物年吸收量，乘以台灣健康成本：
+            <span class="formula">葉面積 = 冠幅面積 × LAI(4.0)</span>
+            <span class="formula">效益 = 葉面積 × 0.028 kg/m²/年 × NT$620/kg × 1.55</span>
+            1.55 為 O₃、NO₂、SO₂ 等其他污染物加成係數。
+            <div class="cite">引用：Nowak, D.J. et al. (2014) Environmental Pollution 193: 119–127；台灣環境部健康風險評估</div>
+
+            <br><em style="font-size:0.7rem;color:#aaa;">以上為基於樹木尺寸的估算值，實際效益受樹種、立地條件、氣候等因素影響。</em>
+          </div>
+        </details>
+      </div>
+
+      <!-- 基本資料 -->
+      <div class="card">
+        <div class="card-title">基本資料</div>
+        <table class="data-table" id="tr-data-table"></table>
+      </div>
+
+      <!-- 生態說明 -->
+      <div class="card" id="eco-card" hidden>
+        <div class="card-title">樹種生態</div>
+        <div class="eco-traits" id="tr-traits"></div>
+        <div class="eco-aliases" id="tr-aliases"></div>
+      </div>
+
+      <!-- 操作 -->
+      <div class="share-row">
+        <a href="/" class="btn-back">&#8592; 回地圖</a>
+        <button class="btn-share" id="tr-share">分享此樹 &#128279;</button>
+      </div>
+
+    </div><!-- #tree-content -->
+
+  </div><!-- .tr-body -->
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/species.js?v=20260601"></script>
+  <script src="js/benefits.js"></script>
+  <script src="js/tree.js"></script>
+</body>
+</html>

@@ -41,13 +41,42 @@ function openSheet(tree) {
     `<tr><td>${k}</td><td>${v}</td></tr>`
   ).join('');
 
+  // 生態效益（優先用 API 固碳值，否則用 benefits.js 計算）
+  const benefitData = typeof calcBenefits === 'function' ? calcBenefits(tree) : null;
+  const co2 = tree.annual_co2_kg || benefitData?.co2_kg;
   const carbon = document.getElementById('sheet-carbon');
-  if (tree.annual_co2_kg) {
-    const km = Math.round(tree.annual_co2_kg / 0.196);
-    carbon.innerHTML = `🌿 每年固碳約 <strong>${tree.annual_co2_kg} kg CO₂</strong><br>等同省去開車約 ${km} 公里`;
+  if (co2) {
+    const km = Math.round(co2 / 0.196);
+    carbon.innerHTML = `🌿 每年固碳約 <strong>${co2} kg CO₂</strong>（等同少開車 ${km} 公里）`;
     carbon.hidden = false;
   } else {
     carbon.hidden = true;
+  }
+
+  // 效益摘要小卡
+  const benefitEl = document.getElementById('sheet-benefits');
+  const detailLinkEl = document.getElementById('sheet-detail-link');
+  const detailBtn = document.getElementById('sheet-detail-btn');
+  if (benefitData) {
+    const rain = benefitData.rain_L >= 1000
+      ? (benefitData.rain_L / 1000).toFixed(1) + ' 噸'
+      : benefitData.rain_L + ' L';
+    const ntd = benefitData.airpoll_ntd >= 1000
+      ? 'NT$' + (benefitData.airpoll_ntd / 1000).toFixed(1) + 'k'
+      : 'NT$' + benefitData.airpoll_ntd;
+    benefitEl.innerHTML =
+      `<div class="benefit-chips">` +
+      `<span class="bchip">💧 截雨 <strong>${rain}</strong>/年</span>` +
+      `<span class="bchip">🌬️ 空污 <strong>${ntd}</strong>/年</span>` +
+      `</div>`;
+    benefitEl.hidden = false;
+    if (tree.registry_code) {
+      detailBtn.href = `/tree.html?code=${encodeURIComponent(tree.registry_code)}`;
+      detailLinkEl.hidden = false;
+    }
+  } else {
+    benefitEl.hidden = true;
+    detailLinkEl.hidden = true;
   }
 
   // 樹種生態說明
