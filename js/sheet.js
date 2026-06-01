@@ -55,7 +55,6 @@ function openSheet(tree) {
 
   // 效益摘要小卡
   const benefitEl = document.getElementById('sheet-benefits');
-  const detailLinkEl = document.getElementById('sheet-detail-link');
   const detailBtn = document.getElementById('sheet-detail-btn');
   if (benefitData) {
     const rain = benefitData.rain_L >= 1000
@@ -70,20 +69,21 @@ function openSheet(tree) {
       `<span class="bchip">🌬️ 空污 <strong>${ntd}</strong>/年</span>` +
       `</div>`;
     benefitEl.hidden = false;
-    if (tree.registry_code) {
-      detailBtn.href = `/tree.html?code=${encodeURIComponent(tree.registry_code)}`;
-      detailLinkEl.hidden = false;
-    }
   } else {
     benefitEl.hidden = true;
-    detailLinkEl.hidden = true;
+  }
+  if (detailBtn && tree.registry_code) {
+    detailBtn.href = `/tree.html?code=${encodeURIComponent(tree.registry_code)}`;
+    detailBtn.hidden = false;
+  } else if (detailBtn) {
+    detailBtn.hidden = true;
   }
 
   // 樹種生態說明
   const eco = document.getElementById('sheet-eco');
   const speciesInfo = typeof getSpeciesInfo === 'function' ? getSpeciesInfo(tree.species_name) : null;
-  if (speciesInfo) {
-    const aliasHtml = speciesInfo.aliases.length
+  if (speciesInfo?.traits) {
+    const aliasHtml = speciesInfo.aliases?.length
       ? `<div class="eco-aliases">別名：${speciesInfo.aliases.join('、')}</div>` : '';
     eco.innerHTML = `<div class="eco-traits">${speciesInfo.traits}</div>${aliasHtml}`;
     eco.hidden = false;
