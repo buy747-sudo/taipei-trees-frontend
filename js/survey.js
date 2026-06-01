@@ -50,6 +50,7 @@ let photoFiles = {};        // direction -> File
   }
 
   bindEvents();
+  populateSpeciesDatalist();
   goStep(0);
 })();
 
@@ -73,6 +74,9 @@ function bindEvents() {
   document.querySelectorAll('[data-go]').forEach(btn => {
     btn.addEventListener('click', () => goStep(parseInt(btn.dataset.go)));
   });
+
+  // species name -> auto-fill code + origin
+  document.getElementById('species-name').addEventListener('change', onSpeciesChange);
 
   // GPS
   document.getElementById('gps-refresh-btn').addEventListener('click', requestGPS);
@@ -261,6 +265,32 @@ function haversineM(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat/2)**2 +
             Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── species datalist ─────────────────────────────────────────────────────────────
+function populateSpeciesDatalist() {
+  const dl = document.getElementById('species-list');
+  if (!dl || typeof getSpeciesNames !== 'function') return;
+  getSpeciesNames().forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    const info = getSpeciesInfo(name);
+    if (info) opt.label = `${name}（${info.origin}，編碼 ${info.code}）`;
+    dl.appendChild(opt);
+  });
+}
+
+function onSpeciesChange() {
+  const name = document.getElementById('species-name').value.trim();
+  if (!name || typeof getSpeciesInfo !== 'function') return;
+  const info = getSpeciesInfo(name);
+  if (!info) return;
+  if (info.code) document.getElementById('species-code').value = info.code;
+  // auto-select origin radio
+  if (info.origin) {
+    const radio = document.querySelector(`[name=origin][value="${info.origin}"]`);
+    if (radio) radio.checked = true;
+  }
 }
 
 // ── DBH auto-calc ─────────────────────────────────────────────────────────────
