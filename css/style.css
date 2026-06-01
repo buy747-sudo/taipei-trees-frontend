@@ -284,3 +284,5 @@ a.btn-detail {
   flex: 1.5;
 }
 a.btn-detail:hover { background: #14491f; }
+
+.bchip-note { font-size: 0.68rem; color: #aaa; margin-top: 3px; }

@@ -63,11 +63,13 @@ function openSheet(tree) {
     const ntd = benefitData.airpoll_ntd >= 1000
       ? 'NT$' + (benefitData.airpoll_ntd / 1000).toFixed(1) + 'k'
       : 'NT$' + benefitData.airpoll_ntd;
+    const estNote = benefitData.height_estimated
+      ? `<div class="bchip-note">＊樹高依胸徑估算</div>` : '';
     benefitEl.innerHTML =
       `<div class="benefit-chips">` +
       `<span class="bchip">💧 截雨 <strong>${rain}</strong>/年</span>` +
       `<span class="bchip">🌬️ 空污 <strong>${ntd}</strong>/年</span>` +
-      `</div>`;
+      `</div>${estNote}`;
     benefitEl.hidden = false;
   } else {
     benefitEl.hidden = true;

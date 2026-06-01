@@ -61,6 +61,12 @@ function render(tree) {
       document.getElementById('bc-rain').textContent = b.rain_L.toLocaleString();
     }
     document.getElementById('bc-air').textContent = 'NT$' + b.airpoll_ntd.toLocaleString();
+    if (b.height_estimated) {
+      const note = document.createElement('p');
+      note.style.cssText = 'font-size:0.72rem;color:#aaa;margin-top:10px;text-align:center;';
+      note.textContent = '＊樹高資料未提供，依胸徑（DBH）以城市樹木異速生長公式估算';
+      document.getElementById('benefit-section').appendChild(note);
+    }
   } else {
     document.getElementById('benefit-section').hidden = true;
   }
