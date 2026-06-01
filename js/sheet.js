@@ -50,6 +50,18 @@ function openSheet(tree) {
     carbon.hidden = true;
   }
 
+  // 樹種生態說明
+  const eco = document.getElementById('sheet-eco');
+  const speciesInfo = typeof getSpeciesInfo === 'function' ? getSpeciesInfo(tree.species_name) : null;
+  if (speciesInfo) {
+    const aliasHtml = speciesInfo.aliases.length
+      ? `<div class="eco-aliases">別名：${speciesInfo.aliases.join('、')}</div>` : '';
+    eco.innerHTML = `<div class="eco-traits">${speciesInfo.traits}</div>${aliasHtml}`;
+    eco.hidden = false;
+  } else {
+    eco.hidden = true;
+  }
+
   sheet.hidden = false;
   overlay.hidden = false;
   document.body.style.overflow = 'hidden';
