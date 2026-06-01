@@ -28,6 +28,13 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   font-size: 0.8rem; text-decoration: none; white-space: nowrap;
 }
 #auth-login-btn:hover { background: rgba(255,255,255,0.15); }
+#auth-survey-btn, #auth-risk-btn {
+  padding: 4px 9px; border-radius: 14px; font-size: 0.85rem;
+  text-decoration: none; color: rgba(255,255,255,0.85);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  white-space: nowrap;
+}
+#auth-survey-btn:hover, #auth-risk-btn:hover { background: rgba(255,255,255,0.15); }
 #auth-user {
   font-size: 0.78rem; color: rgba(255,255,255,0.75);
   margin-right: 6px; white-space: nowrap;
