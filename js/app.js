@@ -79,5 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initQr();
   initStats();
-  loadTrees();
+
+  // 等瀏覽器完成排版再載入，確保 Leaflet 拿到正確的地圖容器尺寸
+  // 否則初始 bbox 可能基於錯誤高度計算，導致標記偏在地圖底部
+  requestAnimationFrame(() => {
+    const map = typeof getMap === 'function' ? getMap() : null;
+    if (map) map.invalidateSize();
+    loadTrees();
+  });
 });

@@ -57,6 +57,8 @@ function initMap() {
   return _map;
 }
 
+function getMap() { return _map; }
+
 function getMapBounds() {
   const b = _map.getBounds();
   return {
