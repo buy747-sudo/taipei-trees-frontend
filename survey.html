@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>行道樹普查｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f0f4f1; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
+
+    .sv-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .sv-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .sv-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+    .sv-header .huser { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+
+    .step-bar {
+      display: flex; gap: 0; background: #ddd;
+      border-radius: 8px; overflow: hidden; margin-bottom: 18px;
+    }
+    .step-bar span {
+      flex: 1; text-align: center; padding: 7px 2px; font-size: 0.68rem;
+      font-weight: 600; color: #888; transition: all 0.2s; cursor: default;
+    }
+    .step-bar span.active { background: #1a5c2a; color: #fff; }
+    .step-bar span.done   { background: #4caf50; color: #fff; }
+
+    .sv-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+    .card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      padding: 20px; margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 1rem; font-weight: 700; color: #1a5c2a;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 2px solid #e8f5e9;
+    }
+
+    .frow { margin-bottom: 14px; }
+    .frow label {
+      display: block; font-size: 0.82rem; font-weight: 600;
+      color: #444; margin-bottom: 5px;
+    }
+    .frow label .req { color: #c00; margin-left: 2px; }
+    .frow input[type=text], .frow input[type=number], .frow input[type=date],
+    .frow select, .frow textarea {
+      width: 100%; padding: 10px 12px; font-size: 0.95rem;
+      border: 1.5px solid #d0d0d0; border-radius: 10px; outline: none;
+      background: #fafafa; box-sizing: border-box; transition: border-color 0.15s;
+    }
+    .frow input:focus, .frow select:focus, .frow textarea:focus {
+      border-color: #1a5c2a; background: #fff;
+    }
+    .frow input[readonly] { background: #f0f4f1; color: #555; }
+    .frow textarea { resize: vertical; min-height: 70px; }
+    .frow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .seg-label {
+      font-size: 0.78rem; font-weight: 700; color: #888;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin: 18px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 4px;
+    }
+
+    .radio-group {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+    }
+    .radio-group label {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border-radius: 8px; cursor: pointer;
+      border: 1.5px solid #d0d0d0; font-size: 0.85rem; font-weight: 400;
+      background: #fafafa; transition: all 0.15s;
+    }
+    .radio-group input { accent-color: #1a5c2a; }
+    .radio-group label:has(input:checked) {
+      border-color: #1a5c2a; background: #e8f5e9; color: #1a5c2a; font-weight: 600;
+    }
+
+    .gps-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    }
+    .gps-ok  { background: #e8f5e9; color: #1a5c2a; }
+    .gps-warn{ background: #fff8e1; color: #92400e; }
+    .gps-err { background: #fce8e8; color: #c00; }
+
+    .dbh-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .dbh-row .frow { margin-bottom: 0; }
+
+    .photo-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    .photo-slot {
+      border: 2px dashed #c8e6c9; border-radius: 12px;
+      padding: 14px; text-align: center; cursor: pointer;
+      background: #f9fdf9; transition: all 0.15s; position: relative; min-height: 120px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .photo-slot:hover { border-color: #1a5c2a; background: #f0f8f1; }
+    .photo-slot.has-photo { border-style: solid; border-color: #4caf50; background: #f0fff1; }
+    .photo-slot .slot-dir { font-size: 0.78rem; font-weight: 700; color: #1a5c2a; margin-bottom: 4px; }
+    .photo-slot .slot-hint { font-size: 0.72rem; color: #888; }
+    .photo-slot img { width: 100%; border-radius: 8px; margin-top: 8px; display: none; max-height: 140px; object-fit: cover; }
+    .photo-slot.has-photo img { display: block; }
+    .photo-slot input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .photo-slot .del-btn {
+      position: absolute; top: 6px; right: 6px;
+      background: #c00; color: #fff; border: none; border-radius: 50%;
+      width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer;
+      display: none; align-items: center; justify-content: center; z-index: 2;
+    }
+    .photo-slot.has-photo .del-btn { display: flex; }
+
+    .compass-hint {
+      background: #fff8e1; border: 1px solid #f59e0b; border-radius: 10px;
+      padding: 10px 14px; font-size: 0.82rem; color: #92400e; margin-bottom: 12px;
+    }
+
+    .nav-row { display: flex; gap: 10px; margin-top: 8px; }
+    .btn-prev {
+      flex: 1; padding: 13px; font-size: 0.95rem; font-weight: 600;
+      background: #fff; color: #1a5c2a; border: 1.5px solid #1a5c2a;
+      border-radius: 10px; cursor: pointer;
+    }
+    .btn-prev:hover { background: #e8f5e9; }
+    .btn-next {
+      flex: 2; padding: 13px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none;
+      border-radius: 10px; cursor: pointer;
+    }
+    .btn-next:hover { background: #14491f; }
+    .btn-submit {
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none;
+      border-radius: 10px; cursor: pointer; margin-top: 8px;
+    }
+    .btn-submit:hover { background: #14491f; }
+    .btn-draft {
+      width: 100%; padding: 11px; font-size: 0.9rem; font-weight: 600;
+      background: #fff; color: #555; border: 1.5px solid #ccc;
+      border-radius: 10px; cursor: pointer; margin-top: 8px;
+    }
+    .btn-draft:hover { background: #f5f5f5; }
+
+    .qr-btn {
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; margin-bottom: 12px; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .qr-btn:hover { background: #14491f; }
+    #qr-scanner-wrap {
+      margin-top: 10px; border-radius: 12px; overflow: hidden;
+      background: #000; position: relative;
+    }
+    #qr-scanner-wrap video { width: 100%; display: block; max-height: 240px; object-fit: cover; }
+    #qr-crosshair {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px; height: 160px;
+      border: 3px solid #4caf50; border-radius: 8px;
+      pointer-events: none;
+    }
+
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #333; color: #fff; padding: 10px 20px; border-radius: 20px;
+      font-size: 0.88rem; z-index: 9999; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+    .msg-error { background: #fce8e8; color: #c00; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; margin-bottom: 10px; display: none; }
+    .msg-info  { background: #e8f5e9; color: #1a5c2a; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; margin-bottom: 10px; display: none; }
+
+    .tree-info-bar {
+      background: #e8f5e9; border-radius: 10px; padding: 10px 14px;
+      margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .tree-info-bar .ti-icon { font-size: 1.6rem; }
+    .tree-info-bar .ti-main { font-weight: 700; color: #1a5c2a; font-size: 0.95rem; }
+    .tree-info-bar .ti-sub  { font-size: 0.78rem; color: #555; margin-top: 2px; }
+
+    [data-step] { display: none; }
+    [data-step].active { display: block; }
+
+    .divider { text-align: center; color: #aaa; font-size: 0.82rem; margin: 10px 0; }
+    .input-row { display: flex; gap: 8px; }
+    .input-row input {
+      flex: 1; padding: 11px 14px; font-size: 1rem;
+      border: 1.5px solid #d0d0d0; border-radius: 10px; outline: none;
+      background: #fafafa;
+    }
+    .input-row input:focus { border-color: #1a5c2a; background: #fff; }
+    .input-row button {
+      padding: 11px 18px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; white-space: nowrap;
+    }
+    .input-row button:hover { background: #14491f; }
+  </style>
+</head>
+<body>
+
+  <header class="sv-header">
+    <a href="/">&#8592; 地圖</a>
+    <h1>&#127795; 行道樹普查</h1>
+    <span class="huser" id="huser"></span>
+  </header>
+
+  <div class="sv-body">
+
+    <div class="step-bar" id="step-bar">
+      <span data-s="0">A 選樹</span>
+      <span data-s="1">B 樹籍</span>
+      <span data-s="2">C GPS</span>
+      <span data-s="3">D 量測</span>
+      <span data-s="4">E 樹穴</span>
+      <span data-s="5">F 特殊</span>
+      <span data-s="6">G 照片</span>
+    </div>
+
+    <!-- A: select tree -->
+    <div data-step="0">
+      <div class="card">
+        <div class="card-title">A. 選取樹木</div>
+        <button class="qr-btn" id="qr-btn">&#128247; 掃描樹牌 QR Code</button>
+        <div id="qr-scanner-wrap" hidden>
+          <video id="qr-video" playsinline></video>
+          <div id="qr-crosshair"></div>
+        </div>
+        <div class="divider">— 或輸入樹籍編碼 —</div>
+        <div class="input-row">
+          <input type="text" id="code-input" placeholder="例：JS0750021125" autocomplete="off">
+          <button id="code-search-btn">查詢</button>
+        </div>
+        <div id="step-a-error" class="msg-error" style="margin-top:10px;"></div>
+      </div>
+
+      <div id="tree-found-card" class="card" hidden>
+        <div class="card-title">樹木資訊</div>
+        <div class="tree-info-bar">
+          <div class="ti-icon">&#127795;</div>
+          <div>
+            <div class="ti-main" id="ti-species">—</div>
+            <div class="ti-sub" id="ti-meta">—</div>
+          </div>
+        </div>
+        <div class="frow">
+          <label>普查日期 <span class="req">*</span></label>
+          <input type="date" id="survey-date">
+        </div>
+        <div class="nav-row" style="margin-top:0;">
+          <button class="btn-next" id="step-a-next">下一步：確認樹籍 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: tree record confirmation -->
+    <div data-step="1">
+      <div class="card">
+        <div class="card-title">B. 樹籍確認</div>
+        <div class="frow">
+          <label>編碼狀態 <span class="req">*</span></label>
+          <div class="radio-group" id="code-status-group">
+            <label><input type="radio" name="code_status" value="0"> 0 正常</label>
+            <label><input type="radio" name="code_status" value="1"> 1 失蹤</label>
+            <label><input type="radio" name="code_status" value="2"> 2 死亡</label>
+            <label><input type="radio" name="code_status" value="3"> 3 移植</label>
+            <label><input type="radio" name="code_status" value="4"> 4 新植</label>
+          </div>
+        </div>
+        <div class="frow">
+          <label>樹木狀況 <span class="req">*</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="tree_status" value="P"> P 現存</label>
+            <label><input type="radio" name="tree_status" value="I"> I 疑似問題</label>
+            <label><input type="radio" name="tree_status" value="U"> U 受損</label>
+          </div>
+        </div>
+        <div class="frow-grid">
+          <div class="frow" style="margin-bottom:0;">
+            <label>樹種名稱</label>
+            <input type="text" id="species-name" placeholder="例：樟樹" list="species-list">
+            <datalist id="species-list"></datalist>
+          </div>
+          <div class="frow" style="margin-bottom:0;">
+            <label>樹種編碼</label>
+            <input type="number" id="species-code" placeholder="附件五編碼" min="1">
+          </div>
+        </div>
+        <div class="frow">
+          <label>原生 / 外來</label>
+          <div class="radio-group">
+            <label><input type="radio" name="origin" value="原生"> 原生</label>
+            <label><input type="radio" name="origin" value="外來"> 外來</label>
+            <label><input type="radio" name="origin" value=""> 不確定</label>
+          </div>
+        </div>
+        <div class="frow">
+          <label>土地利用</label>
+          <div class="radio-group">
+            <label><input type="radio" name="land_use" value="P"> P 公園</label>
+            <label><input type="radio" name="land_use" value="I"> I 機關</label>
+            <label><input type="radio" name="land_use" value="T"> T 行道</label>
+            <label><input type="radio" name="land_use" value="O"> O 其他</label>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" data-go="0">← 返回</button>
+          <button class="btn-next" data-go="2">下一步：GPS →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- C: GPS -->
+    <div data-step="2">
+      <div class="card">
+        <div class="card-title">C. GPS 驗證</div>
+        <div class="seg-label">手機 GPS（自動擷取）</div>
+        <div class="frow">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span id="gps-badge" class="gps-badge">&#9203; 等待定位…</span>
+            <button id="gps-refresh-btn" style="padding:6px 12px;font-size:0.8rem;background:#1a5c2a;color:#fff;border:none;border-radius:8px;cursor:pointer;">重新定位</button>
+          </div>
+          <div class="frow-grid">
+            <div class="frow" style="margin-bottom:0;">
+              <label>緯度（手機）</label>
+              <input type="text" id="gps-phone-lat" readonly placeholder="—">
+            </div>
+            <div class="frow" style="margin-bottom:0;">
+              <label>經度（手機）</label>
+              <input type="text" id="gps-phone-lng" readonly placeholder="—">
+            </div>
+          </div>
+        </div>
+        <div id="gps-dist-hint" style="display:none;margin-bottom:8px;"></div>
+        <div class="seg-label">儀器 GPS（正式值，手動輸入）</div>
+        <div class="frow-grid">
+          <div class="frow" style="margin-bottom:0;">
+            <label>緯度（儀器）</label>
+            <input type="number" id="gps-instr-lat" placeholder="25.0478" step="0.000001">
+          </div>
+          <div class="frow" style="margin-bottom:0;">
+            <label>經度（儀器）</label>
+            <input type="number" id="gps-instr-lng" placeholder="121.5319" step="0.000001">
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:#888;margin-top:6px;">台北市規範：次米級（誤差 &lt;1m），手機 GPS 僅供核對</div>
+        <div class="frow-grid" style="margin-top:12px;">
+          <div class="frow" style="margin-bottom:0;">
+            <label>TWD97 X（選填）</label>
+            <input type="number" id="twd97-x" placeholder="302350" step="0.1">
+          </div>
+          <div class="frow" style="margin-bottom:0;">
+            <label>TWD97 Y（選填）</label>
+            <input type="number" id="twd97-y" placeholder="2774820" step="0.1">
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" data-go="1">← 返回</button>
+          <button class="btn-next" data-go="3">下一步：量測 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- D: measurements -->
+    <div data-step="3">
+      <div class="card">
+        <div class="card-title">D. 量測資料</div>
+        <div class="seg-label">胸徑 DBH（地面上 130cm，站樹木正南側面北量，至小數第一位）</div>
+        <div class="frow">
+          <label>量測高度（cm，預設 130）</label>
+          <input type="number" id="ht-dbh" value="130" min="50" max="200" step="1">
+        </div>
+        <div class="dbh-row">
+          <div class="frow"><label>DBH1（cm）<span class="req">*</span></label><input type="number" id="dbh1" placeholder="42.5" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH2（cm）</label><input type="number" id="dbh2" placeholder="分枝" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH3（cm）</label><input type="number" id="dbh3" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH4（cm）</label><input type="number" id="dbh4" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH5（cm）</label><input type="number" id="dbh5" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH6（cm）</label><input type="number" id="dbh6" step="0.1" min="0"></div>
+        </div>
+        <div class="frow-grid">
+          <div class="frow" style="margin-bottom:0;">
+            <label>樹胸圍（cm，自動）</label>
+            <input type="number" id="circumference" placeholder="自動計算" step="0.1" readonly>
+          </div>
+          <div class="frow" style="margin-bottom:0;">
+            <label>1m 高直徑（cm）</label>
+            <input type="number" id="dbh-1m" placeholder="" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="frow" style="margin-top:10px;">
+          <label>1m 高胸圍（cm，自動）</label>
+          <input type="number" id="circ-1m" placeholder="自動計算" step="0.1" readonly>
+        </div>
+        <div class="seg-label">樹體量測</div>
+        <div class="frow-grid">
+          <div class="frow" style="margin-bottom:0;"><label>樹高（m）</label><input type="number" id="height-m" placeholder="8.0" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>冠層高度（m）</label><input type="number" id="live-top" placeholder="7.5" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>枝下高（m）</label><input type="number" id="crown-base" placeholder="2.5" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>東西冠幅（m）</label><input type="number" id="crown-ew" placeholder="6.0" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>南北冠幅（m）</label><input type="number" id="crown-ns" placeholder="5.5" step="0.1" min="0"></div>
+        </div>
+        <div class="frow-grid" style="margin-top:10px;">
+          <div class="frow" style="margin-bottom:0;"><label>梢枯率（%）</label><input type="number" id="dieback" placeholder="5" step="1" min="0" max="100"></div>
+          <div class="frow" style="margin-bottom:0;"><label>冠層缺失率（%）</label><input type="number" id="canopy-missing" placeholder="10" step="1" min="0" max="100"></div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" data-go="2">← 返回</button>
+          <button class="btn-next" data-go="4">下一步：樹穴 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- E: tree pit -->
+    <div data-step="4">
+      <div class="card">
+        <div class="card-title">E. 樹穴資料</div>
+        <div class="frow">
+          <label>樹穴類型</label>
+          <div class="radio-group">
+            <label><input type="radio" name="pit_type" value="單一"> 單一</label>
+            <label><input type="radio" name="pit_type" value="帶狀"> 帶狀</label>
+            <label><input type="radio" name="pit_type" value="無"> 無</label>
+          </div>
+        </div>
+        <div class="frow">
+          <label>樹穴型態</label>
+          <div class="radio-group">
+            <label><input type="radio" name="pit_form" value="平面"> 平面</label>
+            <label><input type="radio" name="pit_form" value="花台"> 花台</label>
+          </div>
+        </div>
+        <div class="frow-grid">
+          <div class="frow" style="margin-bottom:0;"><label>樹穴長（m）</label><input type="number" id="pit-length" placeholder="1.2" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>樹穴寬（m）</label><input type="number" id="pit-width" placeholder="1.2" step="0.1" min="0"></div>
+        </div>
+        <div class="frow"><label>蓋板材料</label><input type="text" id="pit-cover" placeholder="例：透水磚、鐵格柵"></div>
+        <div class="frow"><label>設施物</label><input type="text" id="pit-facilities" placeholder="例：電箱、消防栓"></div>
+        <div class="frow">
+          <label>圍籬</label>
+          <div class="radio-group">
+            <label><input type="radio" name="pit_fence" value="1"> 有</label>
+            <label><input type="radio" name="pit_fence" value="0" checked> 無</label>
+          </div>
+        </div>
+        <div class="frow">
+          <label>保護柱</label>
+          <div class="radio-group">
+            <label><input type="radio" name="pit_pole" value="1"> 有</label>
+            <label><input type="radio" name="pit_pole" value="0" checked> 無</label>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" data-go="3">← 返回</button>
+          <button class="btn-next" data-go="5">下一步：特殊 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- F: special -->
+    <div data-step="5">
+      <div class="card">
+        <div class="card-title">F. 特殊資訊</div>
+        <div class="frow">
+          <label>是否行道樹</label>
+          <div class="radio-group">
+            <label><input type="radio" name="is_street_tree" value="S" checked> S 是</label>
+            <label><input type="radio" name="is_street_tree" value="N"> N 否</label>
+          </div>
+        </div>
+        <div class="frow" id="park-name-row" hidden>
+          <label>公園 / 綠地名稱</label>
+          <input type="text" id="park-name" placeholder="例：大安森林公園">
+        </div>
+        <div class="frow">
+          <label>受保護樹木</label>
+          <div class="radio-group">
+            <label><input type="radio" name="protected_tree" value="1"> 是</label>
+            <label><input type="radio" name="protected_tree" value="0" checked> 否</label>
+          </div>
+        </div>
+        <div class="frow">
+          <label>備註</label>
+          <textarea id="notes" placeholder="特殊情形、觀察記錄…"></textarea>
+        </div>
+        <div class="nav-row">
+          <button class="btn-prev" data-go="4">← 返回</button>
+          <button class="btn-next" data-go="6">下一步：照片 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- G: photos -->
+    <div data-step="6">
+      <div class="card">
+        <div class="card-title">G. 拍攝照片</div>
+        <div class="compass-hint" id="photo-direction-hint">
+          &#128205; 請先選擇道路方向，系統將自動決定拍攝角度
+        </div>
+        <div class="frow">
+          <label>道路方位</label>
+          <select id="road-direction">
+            <option value="">— 請選擇 —</option>
+            <option value="ns_east">南北向道路 東側</option>
+            <option value="ns_west">南北向道路 西側</option>
+            <option value="ns_island">南北向安全島</option>
+            <option value="ew_north">東西向道路 北側</option>
+            <option value="ew_south">東西向道路 南側</option>
+            <option value="ew_island">東西向安全島</option>
+            <option value="park">綠地 / 廣場</option>
+          </select>
+        </div>
+        <div id="photo-slots-wrap" class="photo-slots"></div>
+        <div id="step-g-error" class="msg-error" style="margin-top:8px;"></div>
+        <div id="step-g-info" class="msg-info" style="margin-top:8px;"></div>
+        <div class="nav-row">
+          <button class="btn-prev" data-go="5">← 返回</button>
+        </div>
+        <button class="btn-submit" id="submit-btn">&#9989; 送出普查</button>
+        <button class="btn-draft" id="draft-btn">&#128190; 儲存草稿</button>
+      </div>
+    </div>
+
+  </div><!-- .sv-body -->
+
+  <div id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/survey.js"></script>
+
+</body>
+</html>
