@@ -79,6 +79,20 @@
 
   <main id="main-content">
 
+  <!-- ── 民眾導覽 ─────────────────────────────────────── -->
+  <section id="public-intro" aria-label="台北樹木查詢導覽">
+    <div class="intro-copy">
+      <p class="intro-kicker">城市裡的樹木資料地圖</p>
+      <h2>找一棵你身邊的樹</h2>
+      <p>掃描樹牌 QR Code，或輸入樹籍編號，就能查看樹種、位置與生態效益。</p>
+    </div>
+    <div class="intro-steps" aria-label="使用方式">
+      <span>1 掃描樹牌</span>
+      <span>2 查看樹木名片</span>
+      <span>3 分享給朋友</span>
+    </div>
+  </section>
+
   <!-- ── 地圖 ──────────────────────────────────────────── -->
 
 
@@ -180,7 +194,7 @@
           window.location.reload();
         });
       } else {
-        area.innerHTML = `<a href="/login.html" id="auth-login-btn">登入</a>`;
+        area.innerHTML = `<a href="/login.html" id="auth-login-btn">工作登入</a>`;
       }
     })();
   </script>

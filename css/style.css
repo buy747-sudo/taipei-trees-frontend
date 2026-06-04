@@ -64,6 +64,34 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 #scan-btn:active { background: rgba(126,203,148,0.25); }
 
+/* ── Public Intro ─────────────────────────────────────── */
+#public-intro {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px;
+  align-items: center; background: #fff; border-bottom: 1px solid #dbe7dd;
+  padding: 14px 16px;
+}
+.intro-kicker {
+  color: #2f7d4a; font-size: 0.76rem; font-weight: 700;
+  margin-bottom: 3px;
+}
+#public-intro h2 {
+  color: #173f24; font-size: 1.3rem; line-height: 1.25;
+  margin-bottom: 4px;
+}
+#public-intro p:not(.intro-kicker) {
+  color: #4f6356; font-size: 0.88rem; line-height: 1.55;
+}
+.intro-steps {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+}
+.intro-steps span {
+  display: inline-flex; align-items: center; min-height: 32px;
+  padding: 6px 10px; border-radius: 18px;
+  background: #edf8ef; border: 1px solid #cfe8d4;
+  color: #1a5c2a; font-size: 0.78rem; font-weight: 700;
+  white-space: nowrap;
+}
+
 /* ── Filter Row ───────────────────────────────────────── */
 #filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 #filter-district, #filter-species {
@@ -81,7 +109,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 .chip.active { background: #7ecb94; color: #1a1a1a; border-color: #7ecb94; font-weight: 600; }
 
 /* ── Map ──────────────────────────────────────────────── */
-#map-container { height: calc(100vh - 148px); min-height: 300px; width: 100%; z-index: 0; position: relative; }
+#map-container { height: calc(100vh - 254px); min-height: 300px; width: 100%; z-index: 0; position: relative; }
 
 /* ── Stats Bar ────────────────────────────────────────── */
 #stats-bar {
@@ -221,9 +249,15 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── RWD（桌機）──────────────────────────────────────── */
 @media (min-width: 768px) {
-  #map-container { height: calc(100vh - 140px); }
+  #map-container { height: calc(100vh - 238px); }
   #detail-sheet { max-width: 480px; right: 20px; left: auto; border-radius: 16px; bottom: 20px; }
   #tree-list { max-height: none; }
+}
+
+@media (max-width: 640px) {
+  #public-intro { grid-template-columns: 1fr; gap: 10px; }
+  .intro-steps { justify-content: flex-start; }
+  #map-container { height: calc(100vh - 304px); }
 }
 
 /* ── Map Legend ───────────────────────────────────────── */

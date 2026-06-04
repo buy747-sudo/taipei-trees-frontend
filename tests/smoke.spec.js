@@ -52,6 +52,14 @@ test('頁面標題正確', async ({ page }) => {
   await expect(page).toHaveTitle(/台北市樹木查詢/);
 });
 
+test('首頁保留 SEO 標題並顯示民眾導覽', async ({ page }) => {
+  await page.goto(BASE);
+  await expect(page).toHaveTitle('台北市樹木查詢｜行道樹 & 受保護樹｜掃碼即時查詢');
+  await expect(page.locator('#public-intro')).toContainText('找一棵你身邊的樹');
+  await expect(page.locator('#public-intro')).toContainText('掃描樹牌');
+  await expect(page.locator('#auth-login-btn')).toContainText('工作登入');
+});
+
 test('地圖容器存在且 Leaflet 初始化', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.locator('#map-container')).toBeVisible();
@@ -113,6 +121,32 @@ test('tree.html 有效 code 顯示效益卡片', async ({ page }) => {
   await expect(page.locator('#tree-content')).toBeVisible({ timeout: 8000 });
   await expect(page.locator('#benefit-section')).toBeVisible();
   await expect(page.locator('#bc-co2')).not.toHaveText('—');
+});
+
+test('tree.html 樹木名片提供民眾摘要', async ({ page }) => {
+  await page.route('**/public/tree/TT0000000001', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      tree: {
+        registry_code: 'TT0000000001',
+        species_name: '榕樹',
+        scientific_name: 'Ficus microcarpa',
+        tree_category: 'street',
+        district: '大安區',
+        managing_unit: '仁愛路',
+        height_m: 8.5,
+        dbh_cm: 35,
+        crown_m: 7,
+      },
+    }),
+  }));
+
+  await page.goto(BASE + '/tree.html?code=TT0000000001');
+  await expect(page.locator('#tree-content')).toBeVisible();
+  await expect(page.locator('#tree-story-card')).toContainText('這棵榕樹');
+  await expect(page.locator('#tree-profile-metrics')).toContainText('樹高');
+  await expect(page.locator('#tree-profile-metrics')).toContainText('胸徑');
+  await expect(page.locator('#tree-location-card')).toContainText('大安區');
 });
 
 test('tree.html 計算說明折疊區存在', async ({ page }) => {
@@ -570,6 +604,37 @@ test('risk-report.html PDF 匯出內嵌繁中文字型避免中文亂碼', async
   expect(calls).toContainEqual(['setFont', 'NotoSansTC', 'bold']);
   expect(calls.map(c => c[0])).not.toContain('html2canvas');
   expect(calls.map(c => c[0])).not.toContain('addImage');
+});
+
+test('risk-report.html 顯示民眾版風險解讀', async ({ page }) => {
+  await page.route('**/public/assessment/88', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      assessment: {
+        id: 88,
+        final_grade: 'B',
+        health_score: -6,
+        critical_count: 1,
+        grade_a_hits: [],
+        notes: '現場可見枯枝',
+      },
+      tree: {
+        registry_code: 'TT0000000001',
+        species_name: '榕樹',
+        tree_category: 'street',
+        district: '大安區',
+        managing_unit: '仁愛路',
+      },
+      grade_info: { label: 'B 級', desc: '建議安排複查' },
+      treatments: ['安排專業人員複查'],
+    }),
+  }));
+
+  await page.goto(BASE + '/risk-report.html?id=88');
+  await expect(page.locator('#report-wrap')).toBeVisible();
+  await expect(page.locator('#public-risk-summary')).toContainText('建議安排複查');
+  await expect(page.locator('#public-risk-summary')).toContainText('民眾可以怎麼看');
+  await expect(page.locator('#rr-tree-identity')).toContainText('榕樹');
 });
 
 // ── about.html + guide.html ──────────────────────────────────────────────────

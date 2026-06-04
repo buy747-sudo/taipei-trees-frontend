@@ -47,6 +47,20 @@ function render(tree) {
   catEl.textContent = catMap[tree.tree_category] || '';
   catEl.className = 'cat-badge ' + (tree.tree_category === 'protected' ? 'badge-protected' : 'badge-street');
 
+  const speciesName = tree.species_name || '這棵樹';
+  const district = tree.district || '台北市';
+  const position = tree.managing_unit || '公開資料記錄位置';
+  document.getElementById('tr-story').textContent =
+    `這棵${speciesName}收錄在台北市樹木資料中。你可以把它當成一張城市樹木名片，快速了解它的位置、大小與生態效益。`;
+  document.getElementById('metric-height').textContent =
+    tree.height_m != null ? `${tree.height_m} m` : '未提供';
+  document.getElementById('metric-dbh').textContent =
+    tree.dbh_cm != null ? `${tree.dbh_cm} cm` : '未提供';
+  document.getElementById('metric-crown').textContent =
+    tree.crown_m != null ? `${tree.crown_m} m` : '未提供';
+  document.getElementById('tr-location-summary').textContent =
+    `${district}，${position}。實際位置請以地圖標記與現場樹牌為準。`;
+
   // 效益
   const b = calcBenefits(tree);
   const co2 = tree.annual_co2_kg || b?.co2_kg;

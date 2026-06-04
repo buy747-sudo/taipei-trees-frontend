@@ -1,6 +1,6 @@
 # PROJECT_MEMORY — taipei-trees.org 台北市樹木查詢平台
 
-> 最後整理：2026-06-04  
+> 最後整理：2026-06-05  
 > 來源：repo 內 Markdown、`~/.claude/projects/-Users-nash911-taipei-trees-frontend/memory/`、`.gstack` checkpoints、相關 Claude JSONL 聊天記錄、`~/MASTER_PLAN.md`、`~/API_CONTRACT.md`。  
 > 注意：原 AGENTS/CLAUDE 文件曾記錄 MarkerCluster；目前程式碼現況是 `L.layerGroup` 逐點顯示，不再使用 MarkerCluster 群集。
 
@@ -35,6 +35,8 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - `guide.html` 使用說明：一般版、長輩版、小朋友版與老師指南。
 - `data-policy.html`：資料來源、OGDL 授權、隱私與資料使用聲明。
 - `tree.html` 單棵樹詳情頁：基本資料、生態效益卡片、計算方式說明、分享。
+- `index.html` 保留 SEO `<title>` 不改，第一屏新增民眾導覽，但仍以搜尋、掃碼與地圖為主體。
+- `tree.html` 新增民眾版樹木名片摘要、樹高/胸徑/冠幅重點資訊與位置提示。
 - `manifest.json` + favicon + PWA 基本設定。
 - `sitemap.xml`、`robots.txt`、SEO meta、Open Graph、canonical、Google Search Console 驗證 meta。
 
@@ -101,9 +103,11 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - `risk.html` 前端：QR/輸入樹籍碼、22 題風險評估表、照片上傳、送出確認、A/B/C/D 評級。
 - `risk.html` 評估選項已參考 tree-app `/assessment/` 設計加入扣分色彩：0/-1 綠、-2/-3 黃、-5 橘、-10 紅；關鍵因子另顯示徽章。
 - `risk-report.html`：公開分享已送出的風險評估報告。
+- `risk-report.html` 已新增民眾版風險解讀卡片；可相容後端把 `tree`、`grade_info` 放在頂層或 `assessment` 內的格式。
 - PDF 匯出使用 jsPDF CDN，客戶端產生，不需後端。
 - 風險評估 PDF 為文字型 PDF，不轉圖片；為避免繁中亂碼，前端產生時按需載入並內嵌 Noto Sans CJK TC TTF。
 - 風險評估採台北市公園處官方樹木風險評估表格標準，不採 TRAQ。
+- `risk.html` 與 `survey.html` 屬於登入後作業功能，不作為一般民眾入口；首頁非登入狀態顯示「工作登入」。
 
 ### 測試與部署
 

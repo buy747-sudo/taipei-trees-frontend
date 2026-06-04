@@ -28,7 +28,12 @@
       border-bottom: 2px solid #e8f5e9;
     }
     /* 樹木 hero */
-    .tree-hero { text-align: center; padding: 20px 16px 12px; }
+    .tree-hero {
+      text-align: center; padding: 22px 16px 16px;
+      background:
+        linear-gradient(180deg, rgba(232,245,233,0.9), rgba(255,255,255,0.96)),
+        #fff;
+    }
     .tree-hero .icon { font-size: 3rem; }
     .tree-hero .name { font-size: 1.5rem; font-weight: 800; color: #1a5c2a; margin-top: 6px; }
     .tree-hero .sci  { font-size: 0.82rem; color: #888; font-style: italic; }
@@ -43,6 +48,32 @@
     }
     .badge-street    { background: #e8f5e9; color: #1a5c2a; }
     .badge-protected { background: #fff8e1; color: #92400e; }
+
+    .story-card {
+      border-left: 5px solid #76b985;
+      background: #fbfdf9;
+    }
+    .story-card p {
+      color: #3c5143; font-size: 0.95rem; line-height: 1.75;
+      margin: 0;
+    }
+    .profile-metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    @media (max-width: 480px) { .profile-metrics { grid-template-columns: 1fr; } }
+    .metric-tile {
+      background: #f8fbf7; border: 1px solid #dcebdd; border-radius: 12px;
+      padding: 12px; min-height: 78px;
+    }
+    .metric-label { color: #68796c; font-size: 0.76rem; margin-bottom: 5px; }
+    .metric-value { color: #173f24; font-size: 1.15rem; font-weight: 800; }
+    .location-card {
+      background: #fffdf7; border: 1px solid #f3dfaa;
+    }
+    .location-card .location-title {
+      color: #7c4f12; font-weight: 800; margin-bottom: 8px;
+    }
+    .location-card p { color: #5f4a25; font-size: 0.9rem; line-height: 1.65; margin: 0; }
 
     /* 效益卡片 */
     .benefit-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
@@ -130,6 +161,31 @@
           <span class="code-badge" id="tr-code"></span>
           <span class="cat-badge"  id="tr-cat"></span>
         </div>
+      </div>
+
+      <!-- 民眾摘要 -->
+      <div class="card story-card" id="tree-story-card">
+        <p id="tr-story">—</p>
+      </div>
+
+      <div class="profile-metrics" id="tree-profile-metrics">
+        <div class="metric-tile">
+          <div class="metric-label">樹高</div>
+          <div class="metric-value" id="metric-height">—</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">胸徑</div>
+          <div class="metric-value" id="metric-dbh">—</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">冠幅</div>
+          <div class="metric-value" id="metric-crown">—</div>
+        </div>
+      </div>
+
+      <div class="card location-card" id="tree-location-card">
+        <div class="location-title">這棵樹在哪裡</div>
+        <p id="tr-location-summary">—</p>
       </div>
 
       <!-- 效益卡片 -->
