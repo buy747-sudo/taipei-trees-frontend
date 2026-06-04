@@ -91,6 +91,75 @@ test('survey.html 登入後顯示步驟列', async ({ page }) => {
   await expect(page.locator('#qr-btn')).toBeVisible();
 });
 
+// ── risk.html ────────────────────────────────────────────────────────────────
+test('risk.html 風險選項依扣分與關鍵因子顯示嚴重度色彩', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('tt_token', 'fake-token');
+    localStorage.setItem('tt_user', JSON.stringify({
+      id: 1, username: 'nash911', display_name: '白老闆',
+      role: 'platform_admin', contractor_id: 'YR001'
+    }));
+  });
+
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      grade_a_items: [],
+      section_labels: { trunk: '二、樹幹狀況' },
+      env_risk_options: [
+        { value: 'low', label: '低風險', desc: '低使用頻率', example: '偏僻綠地' },
+        { value: 'mid', label: '中風險', desc: '一般道路', example: '社區道路' },
+        { value: 'high', label: '高風險', desc: '高頻活動區', example: '捷運出口' },
+      ],
+      angle_labels: {},
+      items: [{
+        no: 5,
+        key: 'q5',
+        section: 'trunk',
+        title: '生物性危害',
+        type: 'checkbox',
+        options: [
+          { value: -1, key: 'q5b', label: '寄生植物', hint: '如桑寄生，與樹木爭奪水分養分', cf: false },
+          { value: -5, key: 'q5e', label: '樹幹異常流膠或潰瘍', hint: '大量樹液滲出、樹皮下陷腐爛', cf: true },
+          { value: -10, key: 'q5g', label: '菇菌類（真菌子實體）', hint: '樹幹出現蕈類，木材已嚴重腐朽', cf: true },
+        ],
+      }],
+    }),
+  }));
+  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      tree: {
+        registry_code: 'JS0750021125',
+        species_name: '榕樹',
+        tree_category: 'street',
+        district: '大安區',
+        managing_unit: '仁愛路',
+      },
+    }),
+  }));
+  await page.route('**/api/assessment/start', route => route.fulfill({
+    contentType: 'application/json',
+    status: 201,
+    body: JSON.stringify({ assessment_id: 123 }),
+  }));
+
+  await page.goto(BASE + '/risk.html');
+  await page.locator('#tree-code-input').fill('JS0750021125');
+  await page.locator('#lookup-btn').click();
+  await expect(page.locator('#step-tree-info')).toBeVisible();
+  await page.locator('#start-assessment-btn').click();
+
+  const parasite = page.locator('.option-item', { hasText: '寄生植物' });
+  const canker = page.locator('.option-item', { hasText: '樹幹異常流膠或潰瘍' });
+  const fungus = page.locator('.option-item', { hasText: '菇菌類' });
+
+  await expect(parasite).toHaveClass(/score-ok/);
+  await expect(canker).toHaveClass(/score-alert/);
+  await expect(fungus).toHaveClass(/score-danger/);
+  await expect(canker.locator('.cf-badge')).toContainText('關鍵');
+});
+
 // ── about.html + guide.html ──────────────────────────────────────────────────
 test('about.html 頁面載入正常', async ({ page }) => {
   await page.goto(BASE + '/about.html');

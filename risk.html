@@ -118,10 +118,17 @@
       display: flex; align-items: flex-start; gap: 10px;
       padding: 10px 12px; border-radius: 8px; cursor: pointer;
       border: 1.5px solid #e0e0e0; transition: all 0.15s; background: #fafafa;
+      min-height: 48px;
     }
-    .option-item:hover { border-color: #1a5c2a; background: #f0faf2; }
-    .option-item.selected { border-color: #1a5c2a; background: #e8f5e9; }
-    .option-item.cf-selected { border-color: #c62828; background: #ffebee; }
+    .option-item:hover { filter: saturate(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .option-item.selected,
+    .option-item.cf-selected {
+      opacity: 1;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+      outline: 2px solid rgba(26, 92, 42, 0.35);
+    }
+    .option-item.cf-selected { outline-color: rgba(190, 18, 60, 0.45); }
+    .option-item:not(.selected):not(.cf-selected) { opacity: 0.78; }
     .option-item input[type="radio"],
     .option-item input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; }
     .opt-text { flex: 1; }
@@ -130,6 +137,32 @@
     .cf-badge  { font-size: 0.7rem; color: #c62828; font-weight: 700;
       background: #ffebee; padding: 2px 6px; border-radius: 4px;
       margin-left: auto; flex-shrink: 0; }
+
+    .option-item.score-ok {
+      background: #dcfce7; border-color: #86efac;
+    }
+    .option-item.score-warn {
+      background: #fef9c3; border-color: #fde047;
+    }
+    .option-item.score-alert {
+      background: #ffedd5; border-color: #fdba74;
+    }
+    .option-item.score-danger {
+      background: #fee2e2; border-color: #fca5a5;
+    }
+    .option-item.score-critical {
+      background: #ffe4e6; border-color: #fda4af;
+    }
+    .option-item.score-ok .opt-label { color: #14532d; }
+    .option-item.score-warn .opt-label { color: #713f12; }
+    .option-item.score-alert .opt-label { color: #7c2d12; }
+    .option-item.score-danger .opt-label { color: #7f1d1d; }
+    .option-item.score-critical .opt-label { color: #881337; }
+    .option-item.score-ok .opt-hint { color: #166534; }
+    .option-item.score-warn .opt-hint { color: #854d0e; }
+    .option-item.score-alert .opt-hint { color: #9a3412; }
+    .option-item.score-danger .opt-hint { color: #991b1b; }
+    .option-item.score-critical .opt-hint { color: #881337; }
 
     /* ── A 級重大危害 ─────────────────────────────── */
     .grade-a-section {

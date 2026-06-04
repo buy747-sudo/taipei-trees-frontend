@@ -217,13 +217,21 @@ function optionImgHTML(img_hint) {
                loading="lazy" onerror="this.style.display='none'">`;
 }
 
+function scoreClass(score) {
+  const n = Number(score) || 0;
+  if (n >= -1) return 'score-ok';
+  if (n >= -3) return 'score-warn';
+  if (n >= -5) return 'score-alert';
+  return 'score-danger';
+}
+
 function buildQuestionHTML(item) {
   let optionsHTML = '';
 
   if (item.type === 'radio') {
     optionsHTML = `<div class="option-list">` +
       item.options.map(opt => `
-        <div class="option-item" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf || false})">
+        <div class="option-item ${scoreClass(opt.value)}" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf || false})">
           <input type="radio" name="${item.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
             ${optionImgHTML(opt.img_hint)}
@@ -237,7 +245,7 @@ function buildQuestionHTML(item) {
   } else if (item.type === 'checkbox') {
     optionsHTML = `<div class="option-list">` +
       item.options.map(opt => `
-        <div class="option-item" onclick="toggleCheckbox(this,'${opt.key}')">
+        <div class="option-item ${scoreClass(opt.value)}" onclick="toggleCheckbox(this,'${opt.key}')">
           <input type="checkbox" name="${opt.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
             ${optionImgHTML(opt.img_hint)}
@@ -252,7 +260,7 @@ function buildQuestionHTML(item) {
     const ec = item.extra_checkbox;
     optionsHTML = `<div class="option-list">` +
       item.radio_options.map(opt => `
-        <div class="option-item" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf || false})">
+        <div class="option-item ${scoreClass(opt.value)}" onclick="selectRadio(this,'${item.key}',${opt.value},${opt.cf || false})">
           <input type="radio" name="${item.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
             ${optionImgHTML(opt.img_hint)}
@@ -262,7 +270,7 @@ function buildQuestionHTML(item) {
           ${opt.cf ? '<span class="cf-badge">⚠ 關鍵因子</span>' : ''}
         </div>
       `).join('') +
-      `<div class="option-item" onclick="toggleCheckbox(this,'${ec.key}')">
+      `<div class="option-item ${scoreClass(ec.value)}" onclick="toggleCheckbox(this,'${ec.key}')">
         <input type="checkbox" name="${ec.key}" value="${ec.value}" data-cf="${ec.cf ? 1 : 0}">
         <div class="opt-text">
           ${optionImgHTML(ec.img_hint)}
