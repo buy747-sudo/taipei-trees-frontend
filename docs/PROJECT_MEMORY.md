@@ -102,6 +102,7 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - `risk.html` 評估選項已參考 tree-app `/assessment/` 設計加入扣分色彩：0/-1 綠、-2/-3 黃、-5 橘、-10 紅；關鍵因子另顯示徽章。
 - `risk-report.html`：公開分享已送出的風險評估報告。
 - PDF 匯出使用 jsPDF CDN，客戶端產生，不需後端。
+- 風險評估 PDF 為文字型 PDF，不轉圖片；為避免繁中亂碼，前端產生時按需載入並內嵌 Noto Sans CJK TC TTF。
 - 風險評估採台北市公園處官方樹木風險評估表格標準，不採 TRAQ。
 
 ### 測試與部署

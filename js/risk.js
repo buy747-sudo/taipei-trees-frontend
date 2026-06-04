@@ -677,12 +677,12 @@ async function exportPDF() {
   if (btn) { btn.disabled = true; btn.textContent = '產生中…'; }
 
   try {
-    // 動態載入 jsPDF + html2canvas
+    // 動態載入 jsPDF，並內嵌繁中文字型避免中文亂碼。
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    await loadPdfCjkFont(doc);
     const pageW = 210, margin = 14, contentW = pageW - margin * 2;
     let y = 18;
 
@@ -694,18 +694,18 @@ async function exportPDF() {
     doc.setFillColor(26, 92, 42);
     doc.rect(0, 0, 210, 24, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14); doc.setFont(PDF_CJK_FONT_NAME, 'bold');
     doc.text('Tree Risk Assessment Report', margin, 10);
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9); doc.setFont(PDF_CJK_FONT_NAME, 'normal');
     doc.text('台北市樹木風險評估報告  taipei-trees.org', margin, 17);
     doc.setTextColor(0, 0, 0);
     y = 32;
 
     // ── 樹木基本資料 ──
     if (_tree) {
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11); doc.setFont(PDF_CJK_FONT_NAME, 'bold');
       doc.text('樹木基本資料', margin, y); y += 7;
-      doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9); doc.setFont(PDF_CJK_FONT_NAME, 'normal');
       const treeRows = [
         ['樹籍編號', _tree.registry_code || '—'],
         ['樹種',     _tree.species_name || '—'],
@@ -715,8 +715,8 @@ async function exportPDF() {
         ['胸徑',     _tree.dbh_cm   != null ? `${_tree.dbh_cm} cm` : '—'],
       ];
       treeRows.forEach(([k, v]) => {
-        doc.setFont('helvetica', 'bold'); doc.text(k + '：', margin, y);
-        doc.setFont('helvetica', 'normal'); doc.text(v, margin + 22, y);
+        doc.setFont(PDF_CJK_FONT_NAME, 'bold'); doc.text(k + '：', margin, y);
+        doc.setFont(PDF_CJK_FONT_NAME, 'normal'); doc.text(v, margin + 22, y);
         y += 5.5;
       });
       y += 4;
@@ -726,11 +726,11 @@ async function exportPDF() {
     doc.setFillColor(...gradeColor);
     doc.roundedRect(margin, y, contentW, 22, 3, 3, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(28); doc.setFont('helvetica', 'bold');
+    doc.setFontSize(28); doc.setFont(PDF_CJK_FONT_NAME, 'bold');
     doc.text(grade, margin + 8, y + 16);
     doc.setFontSize(13);
     doc.text(gradeInfo.label || `${grade} 級`, margin + 22, y + 10);
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9); doc.setFont(PDF_CJK_FONT_NAME, 'normal');
     doc.text(gradeInfo.desc || '', margin + 22, y + 18);
     doc.setTextColor(0, 0, 0);
     y += 28;
@@ -749,11 +749,11 @@ async function exportPDF() {
     if (hits.length > 0) {
       doc.setFillColor(255, 243, 205);
       doc.rect(margin, y, contentW, 6 + hits.length * 5.5, 'F');
-      doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9); doc.setFont(PDF_CJK_FONT_NAME, 'bold');
       doc.setTextColor(180, 83, 9);
       doc.text('⚠ A 級重大危害因子', margin + 3, y + 5);
       y += 8;
-      doc.setFont('helvetica', 'normal');
+      doc.setFont(PDF_CJK_FONT_NAME, 'normal');
       hits.forEach(h => {
         doc.text(`• ${h}`, margin + 5, y); y += 5.5;
       });
@@ -764,9 +764,9 @@ async function exportPDF() {
     // ── 建議處置 ──
     const treatments = _lastResult.treatments || [];
     if (treatments.length > 0) {
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11); doc.setFont(PDF_CJK_FONT_NAME, 'bold');
       doc.text('建議處置措施', margin, y); y += 7;
-      doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9); doc.setFont(PDF_CJK_FONT_NAME, 'normal');
       treatments.forEach(t => {
         doc.text(`▶  ${t}`, margin + 3, y); y += 5.5;
       });
