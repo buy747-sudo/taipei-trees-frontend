@@ -2,6 +2,16 @@ const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:8080';
 
+async function loginAsTester(page) {
+  await page.addInitScript(() => {
+    localStorage.setItem('tt_token', 'fake-token');
+    localStorage.setItem('tt_user', JSON.stringify({
+      id: 1, username: 'demo', display_name: 'Demo 測試帳號',
+      role: 'inspector', contractor_id: 'YR001'
+    }));
+  });
+}
+
 async function installPdfFontMocks(page) {
   await page.evaluate(() => {
     window.__pdfCalls = [];
@@ -81,6 +91,15 @@ test('行政區下拉選單有 12 個選項', async ({ page }) => {
   await page.goto(BASE);
   const options = await page.locator('#filter-district option').count();
   expect(options).toBe(13); // 1 empty + 12 districts
+});
+
+// ── login.html ───────────────────────────────────────────────────────────────
+test('login.html 顯示 demo 測試帳密', async ({ page }) => {
+  await page.goto(BASE);
+  await page.evaluate(() => localStorage.clear());
+  await page.goto(BASE + '/login.html');
+  await expect(page.locator('#demo-login-hint')).toContainText('demo');
+  await expect(page.locator('#demo-login-hint')).toContainText('demo / demo');
 });
 
 // ── tree.html ────────────────────────────────────────────────────────────────
@@ -195,6 +214,194 @@ test('risk.html 風險選項依扣分與關鍵因子顯示嚴重度色彩', asyn
   await expect(canker.locator('.cf-badge')).toContainText('關鍵');
 });
 
+test('risk.html 選完一題後自動捲到下一題', async ({ page }) => {
+  await loginAsTester(page);
+  await page.addInitScript(() => {
+    window.__lastScrolledQuestion = '';
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (...args) {
+      if (this.classList && this.classList.contains('question-block')) {
+        window.__lastScrolledQuestion = this.querySelector('.q-title')?.textContent || '';
+      }
+      return original.apply(this, args);
+    };
+  });
+
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      grade_a_items: [],
+      section_labels: { trunk: '二、樹幹狀況' },
+      env_risk_options: [{ value: 'mid', label: '中風險', desc: '一般道路', example: '社區道路' }],
+      angle_labels: {},
+      items: [
+        { no: 1, key: 'q1', section: 'trunk', title: '樹冠狀況', type: 'radio',
+          options: [{ value: 0, label: '正常' }, { value: -3, label: '異常' }] },
+        { no: 2, key: 'q2', section: 'trunk', title: '樹幹狀況', type: 'radio',
+          options: [{ value: 0, label: '正常' }, { value: -3, label: '異常' }] },
+      ],
+    }),
+  }));
+  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
+  }));
+  await page.route('**/api/assessment/start', route => route.fulfill({
+    contentType: 'application/json',
+    status: 201,
+    body: JSON.stringify({ assessment_id: 123 }),
+  }));
+
+  await page.goto(BASE + '/risk.html');
+  await page.locator('#tree-code-input').fill('JS0750021125');
+  await page.locator('#lookup-btn').click();
+  await page.locator('#start-assessment-btn').click();
+  await page.locator('.question-block').first().locator('.option-item').first().click();
+
+  await expect.poll(() => page.evaluate(() => window.__lastScrolledQuestion)).toContain('Q2');
+});
+
+test('risk.html 儲存前提示未填題目', async ({ page }) => {
+  await loginAsTester(page);
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      grade_a_items: [],
+      section_labels: { trunk: '二、樹幹狀況' },
+      env_risk_options: [{ value: 'mid', label: '中風險', desc: '一般道路', example: '社區道路' }],
+      angle_labels: {},
+      items: [
+        { no: 1, key: 'q1', section: 'trunk', title: '樹冠狀況', type: 'radio',
+          options: [{ value: 0, label: '正常' }, { value: -3, label: '異常' }] },
+        { no: 2, key: 'q2', section: 'trunk', title: '樹幹狀況', type: 'radio',
+          options: [{ value: 0, label: '正常' }, { value: -3, label: '異常' }] },
+      ],
+    }),
+  }));
+  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
+  }));
+  await page.route('**/api/assessment/start', route => route.fulfill({
+    contentType: 'application/json',
+    status: 201,
+    body: JSON.stringify({ assessment_id: 123 }),
+  }));
+  await page.route('**/api/assessment/123/save', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ final_grade: 'D', grade_info: { label: 'D 級' }, treatments: [] }),
+  }));
+
+  await page.goto(BASE + '/risk.html');
+  await page.locator('#tree-code-input').fill('JS0750021125');
+  await page.locator('#lookup-btn').click();
+  await page.locator('#start-assessment-btn').click();
+  await page.locator('.question-block').first().locator('.option-item').first().click();
+
+  let dialogMessage = '';
+  page.once('dialog', async dialog => {
+    dialogMessage = dialog.message();
+    await dialog.dismiss();
+  });
+  await page.locator('#save-draft-btn').click();
+  expect(dialogMessage).toContain('Q2');
+});
+
+test('risk.html 儲存時會把評估人員備注併入 notes', async ({ page }) => {
+  await loginAsTester(page);
+  let savedBody = null;
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      grade_a_items: [],
+      section_labels: { trunk: '二、樹幹狀況' },
+      env_risk_options: [{ value: 'mid', label: '中風險', desc: '一般道路', example: '社區道路' }],
+      angle_labels: {},
+      items: [{ no: 1, key: 'q1', section: 'trunk', title: '樹冠狀況', type: 'radio',
+        options: [{ value: 0, label: '正常' }] }],
+    }),
+  }));
+  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
+  }));
+  await page.route('**/api/assessment/start', route => route.fulfill({
+    contentType: 'application/json',
+    status: 201,
+    body: JSON.stringify({ assessment_id: 123 }),
+  }));
+  await page.route('**/api/assessment/123/save', async route => {
+    savedBody = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ final_grade: 'D', grade_info: { label: 'D 級' }, treatments: [] }),
+    });
+  });
+
+  await page.goto(BASE + '/risk.html');
+  await page.locator('#tree-code-input').fill('JS0750021125');
+  await page.locator('#lookup-btn').click();
+  await page.locator('#start-assessment-btn').click();
+  await page.locator('.question-block .option-item').first().click();
+  await page.locator('#assessor-name-input').fill('王小明');
+  await page.locator('#notes-input').fill('現場可見腐朽');
+  await page.locator('#save-draft-btn').click();
+
+  await expect.poll(() => savedBody && savedBody.notes).toContain('評估人員：王小明');
+  expect(savedBody.notes).toContain('現場可見腐朽');
+});
+
+test('risk.html 照片上傳使用 multipart/form-data 並包含 angle', async ({ page }) => {
+  await loginAsTester(page);
+  let contentType = '';
+  let postText = '';
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      grade_a_items: [],
+      section_labels: {},
+      env_risk_options: [{ value: 'mid', label: '中風險', desc: '一般道路', example: '社區道路' }],
+      angle_labels: { 0: '全景' },
+      items: [],
+    }),
+  }));
+  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
+  }));
+  await page.route('**/api/assessment/start', route => route.fulfill({
+    contentType: 'application/json',
+    status: 201,
+    body: JSON.stringify({ assessment_id: 123 }),
+  }));
+  await page.route('**/api/assessment/123/photos', async route => {
+    contentType = route.request().headers()['content-type'] || '';
+    postText = (route.request().postDataBuffer() || Buffer.from('')).toString('latin1');
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, photo_id: 7, url: '/uploads/demo.jpg', angle: 0, angle_label: '全景' }),
+    });
+  });
+
+  await page.goto(BASE + '/risk.html');
+  await page.locator('#tree-code-input').fill('JS0750021125');
+  await page.locator('#lookup-btn').click();
+  await page.locator('#start-assessment-btn').click();
+  await page.locator('.photo-slot[data-angle="0"]').click();
+  await page.locator('#photo-file-input').setInputFiles({
+    name: 'photo.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lLq2SAAAAABJRU5ErkJggg==',
+      'base64'
+    ),
+  });
+
+  await expect.poll(() => contentType).toContain('multipart/form-data');
+  expect(postText).toContain('angle');
+  expect(postText).toContain('0');
+});
+
 test('risk.html PDF 匯出內嵌繁中文字型避免中文亂碼', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('tt_token', 'fake-token');
@@ -255,6 +462,7 @@ test('risk.html PDF 匯出內嵌繁中文字型避免中文亂碼', async ({ pag
   await page.locator('#tree-code-input').fill('DA0313031015');
   await page.locator('#lookup-btn').click();
   await page.locator('#start-assessment-btn').click();
+  await page.locator('.question-block .option-item', { hasText: '菇菌類' }).click();
   await page.locator('#preview-result-btn').click();
   await expect(page.locator('#step-result')).toBeVisible();
 

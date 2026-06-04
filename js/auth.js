@@ -42,8 +42,11 @@ const Auth = (() => {
   async function authFetch(url, options = {}) {
     const token = getToken();
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    // allow callers to skip Content-Type (e.g. multipart FormData) by passing null
-    if (headers['Content-Type'] === null) delete headers['Content-Type'];
+    // FormData must let the browser set multipart/form-data with its boundary.
+    if ((typeof FormData !== 'undefined' && options.body instanceof FormData) ||
+        headers['Content-Type'] === null) {
+      delete headers['Content-Type'];
+    }
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(url, { ...options, headers });
     if (res.status === 401) {

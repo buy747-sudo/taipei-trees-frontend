@@ -244,8 +244,15 @@ function buildQuestionHTML(item) {
 
   } else if (item.type === 'checkbox') {
     optionsHTML = `<div class="option-list">` +
+      `<div class="option-item score-ok" onclick="toggleNoIssue(this,'${item.key}')">
+        <input type="checkbox" name="none_${item.key}" value="1" data-none-for="${item.key}">
+        <div class="opt-text">
+          <div class="opt-label">無上述異常</div>
+          <div class="opt-hint">本題檢查項目均未發現異常</div>
+        </div>
+      </div>` +
       item.options.map(opt => `
-        <div class="option-item ${scoreClass(opt.value)}" onclick="toggleCheckbox(this,'${opt.key}')">
+        <div class="option-item ${scoreClass(opt.value)}" onclick="toggleCheckbox(this,'${opt.key}','${item.key}')">
           <input type="checkbox" name="${opt.key}" value="${opt.value}" data-cf="${opt.cf ? 1 : 0}">
           <div class="opt-text">
             ${optionImgHTML(opt.img_hint)}
@@ -283,7 +290,7 @@ function buildQuestionHTML(item) {
   }
 
   return `
-    <div class="question-block">
+    <div class="question-block" data-question-key="${item.key}" data-question-no="${item.no}" data-question-type="${item.type}">
       <div class="q-title">Q${item.no}. ${item.title}</div>
       ${item.note ? `<div class="q-note">💡 ${item.note}</div>` : ''}
       ${optionsHTML}
@@ -308,14 +315,48 @@ function selectRadio(el, name, value, isCf) {
   });
   el.classList.add(isCf ? 'cf-selected' : 'selected');
   el.querySelector('input').checked = true;
+  scrollToNextQuestion(el);
 }
 
-function toggleCheckbox(el, name) {
+function toggleCheckbox(el, name, groupKey) {
   const inp = el.querySelector('input');
   inp.checked = !inp.checked;
   const isCf = inp.dataset.cf === '1';
   el.classList.toggle('selected', inp.checked && !isCf);
   el.classList.toggle('cf-selected', inp.checked && isCf);
+  if (inp.checked && groupKey) {
+    const none = document.querySelector(`input[name="none_${groupKey}"]`);
+    if (none) {
+      none.checked = false;
+      none.closest('.option-item')?.classList.remove('selected', 'cf-selected');
+    }
+    scrollToNextQuestion(el);
+  }
+}
+
+function toggleNoIssue(el, groupKey) {
+  const inp = el.querySelector('input');
+  inp.checked = !inp.checked;
+  el.classList.toggle('selected', inp.checked);
+  el.classList.remove('cf-selected');
+  if (inp.checked) {
+    const item = (_formData.items || []).find(q => q.key === groupKey);
+    (item?.options || []).forEach(opt => {
+      const optInput = document.querySelector(`input[name="${opt.key}"]`);
+      const optEl = optInput?.closest('.option-item');
+      if (optInput) optInput.checked = false;
+      optEl?.classList.remove('selected', 'cf-selected');
+    });
+    scrollToNextQuestion(el);
+  }
+}
+
+function scrollToNextQuestion(el) {
+  const current = el.closest('.question-block');
+  const blocks = Array.from(document.querySelectorAll('.question-block'));
+  const next = blocks[blocks.indexOf(current) + 1];
+  if (!next) return;
+  setTimeout(() => next.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
 }
 
 function selectEnvRisk(el) {
@@ -364,14 +405,54 @@ function collectFormData() {
   result.env_risk = envEl ? envEl.value : 'mid';
 
   // 備注
-  result.notes = document.getElementById('notes-input').value;
+  const assessor = (document.getElementById('assessor-name-input')?.value || '').trim();
+  const notes = document.getElementById('notes-input').value.trim();
+  result.notes = [assessor ? `評估人員：${assessor}` : '', notes].filter(Boolean).join('\n\n');
 
   return result;
+}
+
+function isQuestionAnswered(item) {
+  if (item.type === 'radio' || item.type === 'radio_plus_checkbox') {
+    return !!document.querySelector(`input[name="${item.key}"]:checked`);
+  }
+  if (item.type === 'checkbox') {
+    const hasCheckedOption = item.options.some(opt =>
+      document.querySelector(`input[name="${opt.key}"]`)?.checked
+    );
+    const noneChecked = !!document.querySelector(`input[name="none_${item.key}"]:checked`);
+    return hasCheckedOption || noneChecked;
+  }
+  return true;
+}
+
+function getMissingQuestions() {
+  return (_formData.items || [])
+    .filter(item => !isQuestionAnswered(item))
+    .map(item => ({ no: item.no, title: item.title, key: item.key }));
+}
+
+function scrollToQuestion(key) {
+  const block = document.querySelector(`.question-block[data-question-key="${key}"]`);
+  if (block) block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function confirmMissingQuestions(actionLabel) {
+  const missing = getMissingQuestions();
+  if (missing.length === 0) return true;
+
+  const list = missing.slice(0, 8).map(q => `Q${q.no}. ${q.title}`).join('\n');
+  const more = missing.length > 8 ? `\n...另有 ${missing.length - 8} 題` : '';
+  const ok = confirm(`還有 ${missing.length} 題尚未填寫：\n${list}${more}\n\n仍要${actionLabel}嗎？`);
+  if (!ok) scrollToQuestion(missing[0].key);
+  return ok;
 }
 
 // ── 儲存 & 顯示結果 ──────────────────────────────────────────────────────────
 async function saveAndPreview(goToResult) {
   showError('form-error', '');
+  if (!confirmMissingQuestions(goToResult ? '查看評級結果' : '儲存草稿')) return;
+
   const btn = goToResult
     ? document.getElementById('preview-result-btn')
     : document.getElementById('save-draft-btn');
@@ -462,6 +543,7 @@ async function doSubmit() {
     showError('submit-error', '請輸入密碼');
     return;
   }
+  if (!confirmMissingQuestions('送出文件')) return;
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
@@ -673,6 +755,8 @@ function resetToLookup() {
 // ── PDF 匯出 ─────────────────────────────────────────────────────────────────
 async function exportPDF() {
   if (!_assessId || !_lastResult) return;
+  if (!confirmMissingQuestions('下載 PDF')) return;
+
   const btn = document.getElementById('pdf-btn');
   if (btn) { btn.disabled = true; btn.textContent = '產生中…'; }
 

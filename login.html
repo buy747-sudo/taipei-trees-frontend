@@ -72,6 +72,13 @@
     }
     .info-msg.show { display: block; }
 
+    .demo-hint {
+      background: #fff8e1; color: #7c4a03; border: 1px solid #f6d365;
+      border-radius: 10px; padding: 10px 12px; font-size: 0.86rem;
+      margin-bottom: 16px; line-height: 1.55;
+    }
+    .demo-hint strong { color: #4a2b00; }
+
     .login-footer { text-align: center; margin-top: 16px; font-size: 0.78rem; color: #999; }
   </style>
 </head>
@@ -93,6 +100,10 @@
 
       <div id="info-msg" class="info-msg"></div>
       <div id="error-msg" class="error-msg"></div>
+
+      <div id="demo-login-hint" class="demo-hint">
+        測試帳號：<strong>demo / demo</strong>
+      </div>
 
       <form id="login-form" novalidate>
         <div class="form-group">

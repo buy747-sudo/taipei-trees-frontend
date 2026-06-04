@@ -223,11 +223,15 @@
     }
 
     /* ── 備注欄 ──────────────────────────────────── */
+    .assessor-input,
     textarea.notes-input {
       width: 100%; padding: 11px 14px; font-size: 0.9rem;
       border: 1.5px solid #d0d0d0; border-radius: 10px; outline: none;
-      background: #fafafa; min-height: 80px; resize: vertical; font-family: inherit;
+      background: #fafafa; font-family: inherit;
     }
+    .assessor-input { margin-bottom: 10px; }
+    textarea.notes-input { min-height: 80px; resize: vertical; }
+    .assessor-input:focus,
     textarea.notes-input:focus { border-color: #1a5c2a; background: #fff; }
 
     /* ── 操作按鈕 ────────────────────────────────── */
@@ -390,6 +394,8 @@
       <!-- 備注 -->
       <div class="card">
         <div class="card-title">七、備注說明</div>
+        <input class="assessor-input" id="assessor-name-input" type="text"
+               placeholder="評估人員姓名（選填，會寫入備注）">
         <textarea class="notes-input" id="notes-input" placeholder="現場觀察補充說明（選填）"></textarea>
       </div>
 
