@@ -437,21 +437,21 @@ function scrollToQuestion(key) {
   if (block) block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-function confirmMissingQuestions(actionLabel) {
+function hasCompleteQuestions(actionLabel) {
   const missing = getMissingQuestions();
   if (missing.length === 0) return true;
 
   const list = missing.slice(0, 8).map(q => `Q${q.no}. ${q.title}`).join('\n');
   const more = missing.length > 8 ? `\n...另有 ${missing.length - 8} 題` : '';
-  const ok = confirm(`還有 ${missing.length} 題尚未填寫：\n${list}${more}\n\n仍要${actionLabel}嗎？`);
-  if (!ok) scrollToQuestion(missing[0].key);
-  return ok;
+  alert(`還有 ${missing.length} 題尚未填寫，無法${actionLabel}：\n${list}${more}`);
+  scrollToQuestion(missing[0].key);
+  return false;
 }
 
 // ── 儲存 & 顯示結果 ──────────────────────────────────────────────────────────
 async function saveAndPreview(goToResult) {
   showError('form-error', '');
-  if (!confirmMissingQuestions(goToResult ? '查看評級結果' : '儲存草稿')) return;
+  if (!hasCompleteQuestions(goToResult ? '查看評級結果' : '儲存草稿')) return;
 
   const btn = goToResult
     ? document.getElementById('preview-result-btn')
@@ -543,7 +543,7 @@ async function doSubmit() {
     showError('submit-error', '請輸入密碼');
     return;
   }
-  if (!confirmMissingQuestions('送出文件')) return;
+  if (!hasCompleteQuestions('送出文件')) return;
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
@@ -755,7 +755,7 @@ function resetToLookup() {
 // ── PDF 匯出 ─────────────────────────────────────────────────────────────────
 async function exportPDF() {
   if (!_assessId || !_lastResult) return;
-  if (!confirmMissingQuestions('下載 PDF')) return;
+  if (!hasCompleteQuestions('下載 PDF')) return;
 
   const btn = document.getElementById('pdf-btn');
   if (btn) { btn.disabled = true; btn.textContent = '產生中…'; }

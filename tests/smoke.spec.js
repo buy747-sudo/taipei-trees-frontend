@@ -307,6 +307,59 @@ test('risk.html 儲存前提示未填題目', async ({ page }) => {
   expect(dialogMessage).toContain('Q2');
 });
 
+test('risk.html 查看評級結果時未填完不得進行評估', async ({ page }) => {
+  await loginAsTester(page);
+  let saveCalled = false;
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      grade_a_items: [],
+      section_labels: { trunk: '二、樹幹狀況' },
+      env_risk_options: [{ value: 'mid', label: '中風險', desc: '一般道路', example: '社區道路' }],
+      angle_labels: {},
+      items: [
+        { no: 1, key: 'q1', section: 'trunk', title: '樹冠狀況', type: 'radio',
+          options: [{ value: 0, label: '正常' }, { value: -3, label: '異常' }] },
+        { no: 2, key: 'q2', section: 'trunk', title: '樹幹狀況', type: 'radio',
+          options: [{ value: 0, label: '正常' }, { value: -3, label: '異常' }] },
+      ],
+    }),
+  }));
+  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
+  }));
+  await page.route('**/api/assessment/start', route => route.fulfill({
+    contentType: 'application/json',
+    status: 201,
+    body: JSON.stringify({ assessment_id: 123 }),
+  }));
+  await page.route('**/api/assessment/123/save', route => {
+    saveCalled = true;
+    return route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ final_grade: 'D', grade_info: { label: 'D 級' }, treatments: [] }),
+    });
+  });
+
+  await page.goto(BASE + '/risk.html');
+  await page.locator('#tree-code-input').fill('JS0750021125');
+  await page.locator('#lookup-btn').click();
+  await page.locator('#start-assessment-btn').click();
+  await page.locator('.question-block').first().locator('.option-item').first().click();
+
+  let dialogMessage = '';
+  page.once('dialog', async dialog => {
+    dialogMessage = dialog.message();
+    await dialog.accept();
+  });
+  await page.locator('#preview-result-btn').click();
+
+  expect(dialogMessage).toContain('Q2');
+  expect(saveCalled).toBe(false);
+  await expect(page.locator('#step-result')).toBeHidden();
+});
+
 test('risk.html 儲存時會把評估人員備注併入 notes', async ({ page }) => {
   await loginAsTester(page);
   let savedBody = null;
