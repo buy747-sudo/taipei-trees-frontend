@@ -56,6 +56,7 @@ function openSheet(tree) {
   // 效益摘要小卡
   const benefitEl = document.getElementById('sheet-benefits');
   const detailBtn = document.getElementById('sheet-detail-btn');
+  const reportBtn = document.getElementById('sheet-report-btn');
   if (benefitData) {
     const rain = benefitData.rain_L >= 1000
       ? (benefitData.rain_L / 1000).toFixed(1) + ' 噸'
@@ -79,6 +80,19 @@ function openSheet(tree) {
     detailBtn.hidden = false;
   } else if (detailBtn) {
     detailBtn.hidden = true;
+  }
+
+  if (reportBtn) {
+    const params = new URLSearchParams();
+    if (tree.registry_code) params.set('tree_code', tree.registry_code);
+    if (tree.tree_category) params.set('tree_category', tree.tree_category);
+    if (tree.species_name) params.set('species_name', tree.species_name);
+    if (tree.district) params.set('district', tree.district);
+    if (tree.managing_unit) params.set('managing_unit', tree.managing_unit);
+    if (tree.lat != null) params.set('lat', tree.lat);
+    if (tree.lng != null) params.set('lng', tree.lng);
+    reportBtn.href = `/report.html?${params.toString()}`;
+    reportBtn.hidden = false;
   }
 
   // 樹種生態說明

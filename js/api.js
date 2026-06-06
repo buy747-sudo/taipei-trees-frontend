@@ -20,3 +20,30 @@ async function apiFetchStats() {
   if (!res.ok) throw new Error(`fetchStats HTTP ${res.status}`);
   return res.json();
 }
+
+async function apiCreatePublicReport(payload) {
+  const res = await fetch(`${API_BASE}/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `createPublicReport HTTP ${res.status}`);
+  }
+  return data;
+}
+
+async function apiUploadPublicReportPhoto(reportId, file) {
+  const body = new FormData();
+  body.append('photo', file);
+  const res = await fetch(`${API_BASE}/reports/${encodeURIComponent(reportId)}/photos`, {
+    method: 'POST',
+    body,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `uploadPublicReportPhoto HTTP ${res.status}`);
+  }
+  return data;
+}

@@ -124,6 +124,160 @@ test('daan-forest-dashboard.html 顯示大安森林公園碳匯儀表板', async
   await expect(page.locator('#daan-map')).toBeVisible();
 });
 
+// ── report.html ─────────────────────────────────────────────────────────────
+test('首頁提供明顯的民眾通報入口', async ({ page }) => {
+  await page.goto(BASE);
+  await expect(page.locator('#report-nav-btn')).toContainText('通報異常');
+  await expect(page.locator('.intro-report-link')).toContainText('通報樹木異常');
+});
+
+test('report.html 顯示民眾通報表單與 1999 提醒', async ({ page }) => {
+  await page.goto(BASE + '/report.html');
+  await expect(page).toHaveTitle(/通報樹木異常/);
+  await expect(page.locator('h1')).toContainText('通報樹木異常');
+  await expect(page.locator('#report-notice')).toContainText('不保證個案回覆');
+  await expect(page.locator('#report-emergency-note')).toContainText('1999');
+  await expect(page.locator('#issue-type-group')).toContainText('遮擋交通號誌、路牌、民宅');
+  await expect(page.locator('#urgency')).toBeVisible();
+});
+
+test('report.html 未填必填欄位會提示', async ({ page }) => {
+  await page.goto(BASE + '/report.html');
+  await page.locator('#report-submit').click();
+  await expect(page.locator('#report-error')).toContainText('請選擇問題類型');
+});
+
+test('report.html 未指定樹木且無位置會提示', async ({ page }) => {
+  await page.goto(BASE + '/report.html');
+  await page.locator('input[name="issue_type"][value="其他問題"]').check();
+  await page.locator('#description').fill('樹木旁邊看起來有異常狀況，需要管理人員協助查看。');
+  await page.locator('#report-submit').click();
+  await expect(page.locator('#report-error')).toContainText('請提供位置描述');
+});
+
+test('report.html 照片超過 3 張會提示', async ({ page }) => {
+  const tinyPng = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lLq2SAAAAABJRU5ErkJggg==',
+    'base64'
+  );
+  await page.goto(BASE + '/report.html?tree_code=TT0000000001&tree_category=street');
+  await page.locator('input[name="issue_type"][value="其他問題"]').check();
+  await page.locator('#description').fill('樹木旁邊看起來有異常狀況，需要管理人員協助查看。');
+  await page.locator('#photos').setInputFiles([1, 2, 3, 4].map(i => ({
+    name: `photo-${i}.png`,
+    mimeType: 'image/png',
+    buffer: tinyPng,
+  })));
+  await page.locator('#report-submit').click();
+  await expect(page.locator('#report-error')).toContainText('照片最多 3 張');
+});
+
+test('report.html 照片超過 8MB 會提示', async ({ page }) => {
+  await page.goto(BASE + '/report.html?tree_code=TT0000000001&tree_category=street');
+  await page.locator('input[name="issue_type"][value="其他問題"]').check();
+  await page.locator('#description').fill('樹木旁邊看起來有異常狀況，需要管理人員協助查看。');
+  await page.locator('#photos').setInputFiles({
+    name: 'large.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.alloc(8 * 1024 * 1024 + 1),
+  });
+  await page.locator('#report-submit').click();
+  await expect(page.locator('#report-error')).toContainText('超過 8MB');
+});
+
+test('report.html 非圖片檔案會在送出前提示', async ({ page }) => {
+  await page.goto(BASE + '/report.html?tree_code=TT0000000001&tree_category=street');
+  await page.locator('input[name="issue_type"][value="其他問題"]').check();
+  await page.locator('#description').fill('樹木旁邊看起來有異常狀況，需要管理人員協助查看。');
+  await page.locator('#photos').setInputFiles({
+    name: 'note.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('not an image'),
+  });
+  await page.locator('#report-submit').click();
+  await expect(page.locator('#report-error')).toContainText('不是支援的圖片格式');
+});
+
+test('report.html 可從樹木頁帶入樹籍資料', async ({ page }) => {
+  await page.goto(BASE + '/report.html?tree_code=TT0000000001&tree_category=street&species_name=%E6%A6%95%E6%A8%B9&district=%E5%A4%A7%E5%AE%89%E5%8D%80&managing_unit=%E4%BB%81%E6%84%9B%E8%B7%AF');
+  await expect(page.locator('#context-title')).toContainText('榕樹｜TT0000000001');
+  await expect(page.locator('#location-text')).toHaveValue(/大安區/);
+});
+
+test('首頁底部 sheet 提供帶樹籍的通報入口', async ({ page }) => {
+  await page.route('**/public/tree/TT0000000001', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      tree: {
+        registry_code: 'TT0000000001',
+        species_name: '榕樹',
+        tree_category: 'street',
+        district: '大安區',
+        managing_unit: '仁愛路',
+        lat: 25.03,
+        lng: 121.54,
+      },
+    }),
+  }));
+
+  await page.goto(BASE + '/?id=TT0000000001');
+  await expect(page.locator('#detail-sheet')).toBeVisible({ timeout: 5000 });
+  const reportLink = page.locator('#sheet-report-btn');
+  await expect(reportLink).toBeVisible();
+  await expect(reportLink).toHaveAttribute('href', /tree_code=TT0000000001/);
+  await expect(reportLink).toHaveAttribute('href', /species_name=/);
+});
+
+test('report.html 送出通報後上傳照片且不需要 angle', async ({ page }) => {
+  let reportPayload = null;
+  let photoContentType = '';
+  let photoPostText = '';
+
+  await page.route('**/public/reports', async route => {
+    reportPayload = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        report_id: 42,
+        report_no: 'TR-20260606-0001',
+        message: '已收到您的通報，案件編號 TR-20260606-0001。若為緊急事項請立即聯絡 1999。',
+      }),
+    });
+  });
+  await page.route('**/public/reports/42/photos', async route => {
+    photoContentType = route.request().headers()['content-type'] || '';
+    photoPostText = (route.request().postDataBuffer() || Buffer.from('')).toString('latin1');
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, photo_id: 7, url: '/uploads/public_reports/42/demo.png' }),
+    });
+  });
+
+  await page.goto(BASE + '/report.html?tree_code=TT0000000001&tree_category=street&species_name=%E6%A6%95%E6%A8%B9&district=%E5%A4%A7%E5%AE%89%E5%8D%80&managing_unit=%E4%BB%81%E6%84%9B%E8%B7%AF');
+  await page.locator('input[name="issue_type"][value="遮擋交通號誌、路牌、民宅"]').check();
+  await page.locator('#urgency').selectOption('possible_danger');
+  await page.locator('#description').fill('樹枝遮擋交通號誌，轉彎時不容易看到紅綠燈。');
+  await page.locator('#photos').setInputFiles({
+    name: 'photo.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lLq2SAAAAABJRU5ErkJggg==',
+      'base64'
+    ),
+  });
+  await page.locator('#report-submit').click();
+
+  await expect(page.locator('#report-form')).toContainText('案件編號 TR-20260606-0001');
+  expect(reportPayload.issue_type).toBe('遮擋交通號誌、路牌、民宅');
+  expect(reportPayload.urgency).toBe('possible_danger');
+  expect(reportPayload.tree_code).toBe('TT0000000001');
+  await expect.poll(() => photoContentType).toContain('multipart/form-data');
+  expect(photoPostText).toContain('photo');
+  expect(photoPostText).not.toContain('angle');
+});
+
 // ── login.html ───────────────────────────────────────────────────────────────
 test('login.html 顯示 demo 測試帳密', async ({ page }) => {
   await page.goto(BASE);
@@ -170,6 +324,7 @@ test('tree.html 樹木名片提供民眾摘要', async ({ page }) => {
   await expect(page.locator('#tree-profile-metrics')).toContainText('樹高');
   await expect(page.locator('#tree-profile-metrics')).toContainText('胸徑');
   await expect(page.locator('#tree-location-card')).toContainText('大安區');
+  await expect(page.locator('#tr-report')).toHaveAttribute('href', /tree_code=TT0000000001/);
 });
 
 test('tree.html 計算說明折疊區存在', async ({ page }) => {

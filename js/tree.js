@@ -46,6 +46,16 @@ function render(tree) {
   const catMap = { street: '行道樹', protected: '受保護樹木', park: '公園樹' };
   catEl.textContent = catMap[tree.tree_category] || '';
   catEl.className = 'cat-badge ' + (tree.tree_category === 'protected' ? 'badge-protected' : 'badge-street');
+  const reportBtn = document.getElementById('tr-report');
+  const reportParams = new URLSearchParams();
+  if (tree.registry_code) reportParams.set('tree_code', tree.registry_code);
+  if (tree.tree_category) reportParams.set('tree_category', tree.tree_category);
+  if (tree.species_name) reportParams.set('species_name', tree.species_name);
+  if (tree.district) reportParams.set('district', tree.district);
+  if (tree.managing_unit) reportParams.set('managing_unit', tree.managing_unit);
+  if (tree.lat != null) reportParams.set('lat', tree.lat);
+  if (tree.lng != null) reportParams.set('lng', tree.lng);
+  reportBtn.href = `/report.html?${reportParams.toString()}`;
 
   const speciesName = tree.species_name || '這棵樹';
   const district = tree.district || '台北市';

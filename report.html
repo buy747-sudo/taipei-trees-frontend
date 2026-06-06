@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>通報樹木異常｜台北市樹木查詢</title>
+  <meta name="description" content="回報台北市樹木異常狀況，可提供問題類型、位置描述與照片。緊急事項請立即聯絡 1999。">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="report-page">
+  <header class="report-header">
+    <a href="/">&#8592; 地圖</a>
+    <strong>民眾通報</strong>
+  </header>
+
+  <main class="report-wrap">
+    <section class="report-hero">
+      <p class="report-kicker">協助發現樹木異常</p>
+      <h1>通報樹木異常</h1>
+      <p id="report-notice">本平台協助收集樹木異常資訊，通報內容將提供管理人員檢視；本站僅接受通報，不保證個案回覆、處理時程或派工結果。</p>
+      <div id="report-emergency-note" class="report-alert">若為緊急事項，例如樹木倒伏、枝幹即將掉落、已影響人車安全，請立即聯絡 1999。</div>
+    </section>
+
+    <form class="report-panel" id="report-form" novalidate>
+      <div class="hp-field" aria-hidden="true">
+        <label for="website">Website</label>
+        <input id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <section class="report-section" id="tree-context-card">
+        <div>
+          <p class="section-kicker">通報對象</p>
+          <h2 id="context-title">尚未指定樹木</h2>
+          <p id="context-summary">可從地圖或樹木詳情頁進入通報；也可以直接描述位置。</p>
+        </div>
+        <a class="report-link-btn" href="/">選擇地圖上的樹</a>
+      </section>
+
+      <section class="report-section">
+        <p class="section-kicker">問題內容</p>
+
+        <fieldset class="report-choice-group">
+          <legend>問題類型</legend>
+          <div class="issue-grid" id="issue-type-group">
+            <label><input type="radio" name="issue_type" value="枯枝、斷枝、掉枝風險"><span>枯枝、斷枝、掉枝風險</span></label>
+            <label><input type="radio" name="issue_type" value="樹木明顯傾斜或倒伏"><span>樹木明顯傾斜或倒伏</span></label>
+            <label><input type="radio" name="issue_type" value="病蟲害或菇菌異常"><span>病蟲害或菇菌異常</span></label>
+            <label><input type="radio" name="issue_type" value="樹穴、支架、鋪面問題"><span>樹穴、支架、鋪面問題</span></label>
+            <label><input type="radio" name="issue_type" value="樹牌或 QR Code 損壞"><span>樹牌或 QR Code 損壞</span></label>
+            <label><input type="radio" name="issue_type" value="遮擋交通號誌、路牌、民宅"><span>遮擋交通號誌、路牌、民宅</span></label>
+            <label><input type="radio" name="issue_type" value="其他問題"><span>其他問題</span></label>
+          </div>
+        </fieldset>
+
+        <label class="report-field" for="urgency">
+          <span>緊急程度</span>
+          <select id="urgency" name="urgency">
+            <option value="normal">一般，可供管理人員後續檢視</option>
+            <option value="possible_danger">可能危險，建議優先查看</option>
+            <option value="affecting_safety">已影響人車安全，我也會聯絡 1999</option>
+          </select>
+        </label>
+
+        <label class="report-field" for="description">
+          <span>問題描述</span>
+          <textarea id="description" name="description" maxlength="500" placeholder="請描述你看到的狀況，例如枝條斷裂位置、傾斜方向、是否靠近道路或住家。"></textarea>
+        </label>
+      </section>
+
+      <section class="report-section">
+        <p class="section-kicker">位置與照片</p>
+
+        <label class="report-field" for="location-text">
+          <span>位置描述</span>
+          <input id="location-text" name="location_text" placeholder="例如：大安森林公園捷運站 5 號出口旁、仁愛路二段人行道">
+        </label>
+
+        <div class="geo-row">
+          <button id="use-location-btn" class="report-ghost-btn" type="button">使用目前位置</button>
+          <span id="geo-status">定位只用於本次通報。</span>
+        </div>
+
+        <label class="report-field" for="photos">
+          <span>照片（選填，最多 3 張）</span>
+          <input id="photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+          <small>請避免拍到人臉、車牌、門牌等個資。每張照片上限 8MB。</small>
+        </label>
+        <div id="photo-preview" class="photo-preview" aria-live="polite"></div>
+      </section>
+
+      <section class="report-section">
+        <p class="section-kicker">聯絡方式</p>
+        <label class="report-field" for="contact-info">
+          <span>聯絡方式（選填）</span>
+          <input id="contact-info" name="contact_info" placeholder="電話或 Email，可留空">
+        </label>
+      </section>
+
+      <div id="report-error" class="report-error" role="alert"></div>
+
+      <div class="report-actions">
+        <button id="report-submit" class="report-primary" type="submit">送出通報</button>
+        <a class="report-secondary" href="/">回到地圖</a>
+      </div>
+    </form>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/report.js"></script>
+</body>
+</html>
