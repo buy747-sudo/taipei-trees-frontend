@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#f4faf5">
+  <title>大安森林公園碳匯儀表板｜台北市樹木查詢</title>
+  <meta name="description" content="大安森林公園周邊樹木碳匯儀表板，展示樹種統計、碳儲存、年度吸碳量、雨水截留與互動式空間分析。">
+  <link rel="canonical" href="https://taipei-trees.org/daan-forest-dashboard.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="大安森林公園碳匯儀表板">
+  <meta property="og:description" content="以台北市樹木公開資料製作的大安森林公園周邊碳匯與樹種儀表板。">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { min-height: 100vh; color: #173f24; background: #f4faf5; }
+    .carbon-page { min-height: 100vh; }
+    .carbon-map-bg {
+      position: fixed; inset: 0; pointer-events: none; opacity: 0.8;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(126,203,148,0.24), transparent 18rem),
+        radial-gradient(circle at 82% 12%, rgba(44,181,165,0.18), transparent 22rem),
+        linear-gradient(120deg, rgba(255,255,255,0.88), rgba(244,250,245,0.92));
+    }
+    .carbon-shell { position: relative; max-width: 1240px; margin: 0 auto; padding: 18px 16px 34px; }
+    .carbon-nav {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .carbon-nav a {
+      color: #1a5c2a; text-decoration: none; border: 1px solid #cfe8d4;
+      border-radius: 999px; padding: 8px 12px; font-size: 0.88rem; background: rgba(255,255,255,0.86);
+    }
+    .carbon-hero {
+      display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px;
+      align-items: end; margin-bottom: 18px;
+    }
+    .hero-kicker { color: #2f7d4a; font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
+    .carbon-hero h1 { font-size: clamp(2rem, 4vw, 4rem); line-height: 1.05; margin: 0 0 10px; }
+    .carbon-hero p { color: #3f5948; line-height: 1.75; max-width: 760px; }
+    .hero-status {
+      border: 1px solid #d4e8d8; background: rgba(255,255,255,0.88);
+      border-radius: 8px; padding: 14px; box-shadow: 0 14px 34px rgba(21,83,43,0.12);
+    }
+    .status-label { color: #2f7d4a; font-size: 0.78rem; margin-bottom: 6px; font-weight: 800; }
+    .status-value { font-size: 1.7rem; font-weight: 900; }
+    .status-note { color: #607468; font-size: 0.82rem; margin-top: 6px; line-height: 1.55; }
+
+    .dashboard-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .carbon-panel {
+      border: 1px solid #d4e8d8;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 18px 42px rgba(21,83,43,0.1);
+      border-radius: 8px; padding: 16px; backdrop-filter: blur(8px);
+    }
+    .panel-title {
+      color: #1a5c2a; font-size: 1rem; font-weight: 900;
+      margin-bottom: 12px; letter-spacing: 0;
+    }
+    .field-card { min-height: 156px; display: flex; flex-direction: column; justify-content: space-between; }
+    .field-card p { color: #3f5948; line-height: 1.75; }
+    .field-tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .field-tag {
+      border-radius: 999px; padding: 6px 10px; background: #edf8ef;
+      color: #1a5c2a; border: 1px solid #cfe8d4; font-size: 0.8rem; font-weight: 700;
+    }
+    .word-cloud { min-height: 156px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px 18px; }
+    .word-cloud span { color: #13816f; font-weight: 800; }
+    .word-cloud .big { font-size: 1.6rem; }
+    .word-cloud .mid { font-size: 1.2rem; color: #2f7d4a; }
+    .word-cloud .small { font-size: 0.92rem; color: #607468; }
+
+    .metric-grid { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .metric-card {
+      border: 1px solid #d4e8d8; background: rgba(255,255,255,0.92);
+      border-radius: 8px; padding: 14px; min-height: 116px;
+    }
+    .metric-label { color: #607468; font-size: 0.82rem; }
+    .metric-value { color: #173f24; font-size: 1.8rem; font-weight: 900; margin: 8px 0 4px; }
+    .metric-unit { color: #13816f; font-size: 0.82rem; font-weight: 800; }
+
+    .map-panel { grid-column: 1 / -1; min-height: 540px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; }
+    #daan-map {
+      min-height: 500px; border-radius: 8px; overflow: hidden;
+      border: 1px solid #d4e8d8; background: #e8f1e8;
+    }
+    .map-side { display: flex; flex-direction: column; gap: 12px; }
+    .analysis-box {
+      border: 1px solid #d4e8d8; border-radius: 8px;
+      background: #f8fbf7; padding: 13px;
+    }
+    .analysis-box label { display: block; color: #3f5948; font-size: 0.84rem; margin-bottom: 10px; }
+    .analysis-box input { width: 100%; accent-color: #17f4df; }
+    .analysis-number { font-size: 1.55rem; font-weight: 900; color: #173f24; margin: 6px 0; }
+    .analysis-copy { color: #607468; font-size: 0.86rem; line-height: 1.65; }
+
+    .species-bars { display: grid; gap: 10px; }
+    .species-row {
+      display: grid; grid-template-columns: 96px 1fr 42px; gap: 10px; align-items: center;
+      color: #173f24; font-size: 0.88rem;
+    }
+    .bar-track { height: 10px; border-radius: 999px; background: #e3efe5; overflow: hidden; }
+    .bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, #1a5c2a, #2cb5a5); border-radius: inherit; }
+
+    .carbon-total { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; }
+    .carbon-ring {
+      width: 140px; aspect-ratio: 1; border-radius: 50%;
+      background: conic-gradient(#2cb5a5 var(--ring, 68%), #dcebdd 0);
+      display: grid; place-items: center; box-shadow: 0 0 26px rgba(44,181,165,0.16);
+    }
+    .carbon-ring::after {
+      content: ""; width: 92px; aspect-ratio: 1; border-radius: 50%;
+      background: #fff; border: 1px solid #d4e8d8;
+    }
+    .carbon-copy strong { display: block; font-size: 2rem; margin-bottom: 8px; }
+    .carbon-copy p { color: #607468; line-height: 1.7; }
+
+    .data-note {
+      color: #607468; font-size: 0.78rem; line-height: 1.7; margin-top: 16px;
+      border-top: 1px solid #d4e8d8; padding-top: 12px;
+    }
+    .leaflet-container { background: #e8f1e8; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #fff; color: #173f24; }
+
+    @media (max-width: 900px) {
+      .carbon-hero, .dashboard-grid, .map-panel { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+      #daan-map { min-height: 420px; }
+    }
+    @media (max-width: 540px) {
+      .carbon-shell { padding: 14px 12px 26px; }
+      .carbon-nav { align-items: flex-start; flex-direction: column; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .carbon-total { grid-template-columns: 1fr; }
+      .species-row { grid-template-columns: 82px 1fr 34px; }
+    }
+  </style>
+</head>
+<body>
+<main class="carbon-page">
+  <div class="carbon-map-bg" aria-hidden="true"></div>
+  <div class="carbon-shell">
+    <nav class="carbon-nav" aria-label="頁面導覽">
+      <a href="/">← 回到台北市樹木查詢</a>
+      <a href="/data-policy.html">資料來源與授權</a>
+    </nav>
+
+    <section class="carbon-hero" aria-label="大安森林公園碳匯儀表板">
+      <div>
+        <div class="hero-kicker">台北市樹木公開資料 · 碳匯儀表板</div>
+        <h1>大安森林公園</h1>
+        <p>以大安森林公園周邊公開樹木資料建立的互動式儀表板，呈現樹種組成、碳儲存、年度吸碳、雨水截留與空間半徑分析。</p>
+      </div>
+      <aside class="hero-status">
+        <div class="status-label">目前資料狀態</div>
+        <div class="status-value" id="data-status">載入中</div>
+        <div class="status-note" id="data-note">正在讀取大安森林公園周邊樹木資料。</div>
+      </aside>
+    </section>
+
+    <section class="dashboard-grid" aria-label="大安森林公園樹木碳匯資料">
+      <article class="carbon-panel field-card">
+        <div>
+          <div class="panel-title">場域介紹</div>
+          <p>大安森林公園是台北市中心大型綠地，周邊行道樹與公園綠蔭共同形成都市降溫、休憩與生態教育的核心節點。</p>
+        </div>
+        <div class="field-tag-row">
+          <span class="field-tag">都市降溫</span>
+          <span class="field-tag">鳥類棲地</span>
+          <span class="field-tag">雨水截留</span>
+        </div>
+      </article>
+
+      <article class="carbon-panel field-card">
+        <div>
+          <div class="panel-title">生態導覽介紹</div>
+          <p id="eco-guide-copy">載入樹種後，會挑出最常見的樹種作為導覽入口。</p>
+        </div>
+        <div class="field-tag-row" id="eco-tags">
+          <span class="field-tag">樹種分析中</span>
+        </div>
+      </article>
+
+      <article class="carbon-panel">
+        <div class="panel-title">熱門場域</div>
+        <div class="word-cloud" aria-label="大安森林公園熱門場域">
+          <span class="big">森林步道</span>
+          <span class="mid">露天音樂台</span>
+          <span class="small">捷運大安森林公園站</span>
+          <span class="big">生態池</span>
+          <span class="mid">建國南路林蔭</span>
+          <span class="small">信義路綠廊</span>
+        </div>
+      </article>
+
+      <article class="carbon-panel">
+        <div class="panel-title">場域全區樹木固碳量</div>
+        <div class="carbon-total">
+          <div class="carbon-ring" id="carbon-ring" aria-hidden="true"></div>
+          <div class="carbon-copy">
+            <strong id="carbon-total">—</strong>
+            <p id="carbon-copy">以公開資料中的胸徑、樹高與樹種估算。數值適合做導覽展示，正式盤查仍應以完整現地調查為準。</p>
+          </div>
+        </div>
+      </article>
+
+      <div class="metric-grid" aria-label="碳匯與環境效益指標">
+        <article class="metric-card">
+          <div class="metric-label">載入樹木</div>
+          <div class="metric-value" id="metric-count">—</div>
+          <div class="metric-unit">株</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">碳儲存估算</div>
+          <div class="metric-value" id="metric-carbon">—</div>
+          <div class="metric-unit">公噸 CO₂e</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">年度吸碳估算</div>
+          <div class="metric-value" id="metric-annual">—</div>
+          <div class="metric-unit">公斤 CO₂e / 年</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">雨水截留估算</div>
+          <div class="metric-value" id="metric-rain">—</div>
+          <div class="metric-unit">公升 / 年</div>
+        </article>
+      </div>
+
+      <article class="carbon-panel">
+        <div class="panel-title">樹種統計分析</div>
+        <div class="species-bars" id="species-bars"></div>
+      </article>
+
+      <article class="carbon-panel">
+        <div class="panel-title">資料摘要</div>
+        <div class="analysis-box">
+          <div class="analysis-number" id="top-species-name">—</div>
+          <p class="analysis-copy" id="top-species-copy">樹種資料載入中。</p>
+        </div>
+        <p class="data-note">本頁參考 i-Tree 碳匯儀表板的資訊架構，並使用 taipei-trees.org 現有公開資料與生態效益估算方式製作。</p>
+      </article>
+
+      <article class="carbon-panel map-panel">
+        <div>
+          <div class="panel-title">空間分析固碳量</div>
+          <div id="daan-map" role="img" aria-label="大安森林公園周邊樹木分布地圖"></div>
+        </div>
+        <aside class="map-side">
+          <div class="analysis-box">
+            <label for="radius-range">環域半徑搜尋：<strong id="radius-label">250</strong> M</label>
+            <input id="radius-range" type="range" min="100" max="600" step="50" value="250">
+            <p class="analysis-copy">點選地圖任一位置，即可估算該半徑內載入樹木的碳儲存量。</p>
+          </div>
+          <div class="analysis-box">
+            <div class="status-label">半徑內樹木</div>
+            <div class="analysis-number" id="radius-count">—</div>
+            <div class="status-label">半徑內碳儲存</div>
+            <div class="analysis-number" id="radius-carbon">—</div>
+            <p class="analysis-copy" id="radius-copy">預設以公園中心點分析。</p>
+          </div>
+        </aside>
+      </article>
+    </section>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/config.js"></script>
+<script src="js/benefits.js"></script>
+<script src="js/daan-dashboard.js"></script>
+</body>
+</html>

@@ -37,6 +37,7 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - `tree.html` 單棵樹詳情頁：基本資料、生態效益卡片、計算方式說明、分享。
 - `index.html` 保留 SEO `<title>` 不改，第一屏新增民眾導覽，但仍以搜尋、掃碼與地圖為主體。
 - `tree.html` 新增民眾版樹木名片摘要、樹高/胸徑/冠幅重點資訊與位置提示。
+- `daan-forest-dashboard.html` 大安森林公園周邊碳匯儀表板：參考 i-Tree 的資訊架構，但採 taipei-trees.org 自有清爽公益資料風格；包含樹種排行、碳儲存、年度吸碳、雨水截留與 Leaflet 半徑分析。
 - `manifest.json` + favicon + PWA 基本設定。
 - `sitemap.xml`、`robots.txt`、SEO meta、Open Graph、canonical、Google Search Console 驗證 meta。
 

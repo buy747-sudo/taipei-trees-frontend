@@ -18,8 +18,13 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   padding: 8px 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
+#top-title-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 10px; flex-wrap: wrap;
+}
 #site-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
 #version-badge { font-size: 0.65rem; font-weight: 400; opacity: 0.55; letter-spacing: 0.02em; vertical-align: middle; }
+.top-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
 /* ── Auth area（右上角登入/登出）───────────────────────── */
 #auth-login-btn {
@@ -255,6 +260,8 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 
 @media (max-width: 640px) {
+  #top-title-row { display: block; }
+  .top-nav-links { justify-content: flex-start; margin-bottom: 6px; }
   #public-intro { grid-template-columns: 1fr; gap: 10px; }
   .intro-steps { justify-content: flex-start; }
   #map-container { height: calc(100vh - 304px); }

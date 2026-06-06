@@ -101,6 +101,29 @@ test('行政區下拉選單有 12 個選項', async ({ page }) => {
   expect(options).toBe(13); // 1 empty + 12 districts
 });
 
+test('daan-forest-dashboard.html 顯示大安森林公園碳匯儀表板', async ({ page }) => {
+  await page.route('**/public/trees**', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      total: 4,
+      trees: [
+        { registry_code: 'DA001', species_name: '樟樹', dbh_cm: 40, height_m: 12, crown_m: 8, lat: 25.031, lng: 121.535, carbon_kg: 500, annual_co2_kg: 20 },
+        { registry_code: 'DA002', species_name: '樟樹', dbh_cm: 35, height_m: 11, crown_m: 7, lat: 25.030, lng: 121.536, carbon_kg: 390, annual_co2_kg: 15 },
+        { registry_code: 'DA003', species_name: '榕樹', dbh_cm: 62, height_m: 17, crown_m: 13, lat: 25.029, lng: 121.537, carbon_kg: 1180, annual_co2_kg: 48 },
+        { registry_code: 'DA004', species_name: '茄苳', dbh_cm: 32, height_m: 10, crown_m: 6, lat: 25.032, lng: 121.534, carbon_kg: 260, annual_co2_kg: 10 },
+      ],
+    }),
+  }));
+
+  await page.goto(BASE + '/daan-forest-dashboard.html');
+  await expect(page).toHaveTitle(/大安森林公園碳匯儀表板/);
+  await expect(page.locator('h1')).toContainText('大安森林公園');
+  await expect(page.locator('#data-status')).toContainText('即時資料');
+  await expect(page.locator('#metric-count')).toContainText('4');
+  await expect(page.locator('#species-bars')).toContainText('樟樹');
+  await expect(page.locator('#daan-map')).toBeVisible();
+});
+
 // ── login.html ───────────────────────────────────────────────────────────────
 test('login.html 顯示 demo 測試帳密', async ({ page }) => {
   await page.goto(BASE);
