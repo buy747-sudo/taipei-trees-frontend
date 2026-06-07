@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台北市常見樹種百科｜行道樹樹種介紹｜台北市樹木查詢</title>
+  <meta name="description" content="台北市行道樹與受保護樹木229種樹種資料庫，含榕樹、樟樹、茄苳、鳳凰木等常見樹種的特徵、原生/外來種分類、官方樹種編碼。">
+  <meta name="keywords" content="台北市行道樹樹種,榕樹,樟樹,茄苳,楓香,鳳凰木,黑板樹,樹種介紹,原生種外來種">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://taipei-trees.org/species.html">
+  <meta property="og:title" content="台北市常見樹種百科">
+  <meta property="og:description" content="台北市行道樹 229 種樹種資料庫，含特徵介紹與原生/外來分類">
+  <meta property="og:url" content="https://taipei-trees.org/species.html">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Page Nav ────────────────────────────────────── */
+    .page-nav {
+      background: #1a5c2a; padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .page-nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.88rem; }
+    .page-nav a.home { color: #fff; font-weight: 600; }
+    .page-nav a:hover { color: #fff; }
+    .page-nav .sep { color: rgba(255,255,255,0.4); }
+
+    /* ── Page Layout ─────────────────────────────────── */
+    .page-wrap { max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
+
+    /* ── Hero ────────────────────────────────────────── */
+    .page-hero {
+      background: linear-gradient(135deg, #1a5c2a 0%, #2d7a45 100%);
+      color: #fff; padding: 28px 20px; text-align: center;
+      border-radius: 12px; margin-bottom: 24px;
+    }
+    .page-hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .page-hero p  { font-size: 0.88rem; opacity: 0.85; line-height: 1.5; }
+
+    /* ── Controls ────────────────────────────────────── */
+    .sp-controls {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    #sp-search {
+      flex: 1; min-width: 200px; padding: 9px 14px; font-size: 0.95rem;
+      border: 1.5px solid #cde8d0; border-radius: 24px; outline: none;
+      background: #fff;
+    }
+    #sp-search:focus { border-color: #1a5c2a; }
+    .sp-filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sp-chip {
+      padding: 6px 14px; border-radius: 20px; border: 1.5px solid #cde8d0;
+      background: #fff; font-size: 0.82rem; color: #3a5a42; cursor: pointer;
+      white-space: nowrap;
+    }
+    .sp-chip.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+
+    /* ── Count ───────────────────────────────────────── */
+    #sp-count { font-size: 0.82rem; color: #888; margin-bottom: 14px; }
+
+    /* ── Species Grid ────────────────────────────────── */
+    .sp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── Species Card ────────────────────────────────── */
+    .sp-card {
+      background: #fff; border-radius: 12px; padding: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .sp-card-head {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    }
+    .sp-card-name { font-size: 1.05rem; font-weight: 700; color: #1a1a1a; }
+    .sp-badges { display: flex; gap: 5px; flex-wrap: wrap; flex-shrink: 0; }
+    .badge-native   { background: #d1fae5; color: #065f46; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+    .badge-intro    { background: #fef3c7; color: #92400e; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+    .badge-code     { background: #e0e7ff; color: #3730a3; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+
+    .sp-aliases { font-size: 0.78rem; color: #777; }
+    .sp-traits  { font-size: 0.83rem; color: #444; line-height: 1.55; flex: 1; }
+    .sp-traits.empty { color: #bbb; font-style: italic; }
+
+    .sp-action {
+      display: inline-block; margin-top: 4px;
+      font-size: 0.78rem; color: #1a5c2a; text-decoration: none;
+      border: 1px solid #cde8d0; border-radius: 14px; padding: 4px 12px;
+      align-self: flex-start;
+    }
+    .sp-action:hover { background: #f0faf3; }
+
+    /* ── Compact Card (no traits) ────────────────────── */
+    .sp-card.compact { flex-direction: row; align-items: center; gap: 10px; padding: 12px 14px; }
+    .sp-card.compact .sp-card-name { font-size: 0.92rem; }
+    .sp-card.compact .sp-card-head { flex: 1; }
+
+    /* ── Section Header ──────────────────────────────── */
+    .sp-section-title {
+      font-size: 0.85rem; font-weight: 600; color: #1a5c2a;
+      margin: 24px 0 10px; padding-bottom: 6px;
+      border-bottom: 2px solid #cde8d0;
+    }
+
+    /* ── Empty ───────────────────────────────────────── */
+    #sp-empty {
+      text-align: center; padding: 40px; color: #888;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="/" class="home">🌳 台北市樹木查詢</a>
+  <span class="sep">›</span>
+  <span style="color:#fff;">樹種百科</span>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-hero">
+    <h1>🌿 台北市樹種百科</h1>
+    <p>收錄台北市行道樹官方普查 229 種樹種，含特徵介紹、原生/外來分類與官方樹種編碼</p>
+  </div>
+
+  <!-- 搜尋與篩選 -->
+  <div class="sp-controls">
+    <input id="sp-search" type="search" placeholder="搜尋樹種名稱或別名…" autocomplete="off">
+    <div class="sp-filter-chips">
+      <button class="sp-chip active" data-filter="all">全部樹種</button>
+      <button class="sp-chip" data-filter="原生">🟢 原生種</button>
+      <button class="sp-chip" data-filter="外來">🟡 外來種</button>
+    </div>
+  </div>
+  <div id="sp-count"></div>
+
+  <!-- 結果 -->
+  <div id="sp-results"></div>
+  <div id="sp-empty">找不到符合的樹種，請嘗試其他關鍵字</div>
+
+</div>
+
+<script src="js/species.js"></script>
+<script>
+(function () {
+  let _filter = 'all';
+  let _query  = '';
+
+  // ── 分出有性狀描述 vs 無描述 ─────────────────────────
+  const ALL_ENTRIES = Object.entries(SPECIES_INFO);
+  const WITH_TRAITS = ALL_ENTRIES.filter(([, v]) => v.traits);
+  const NO_TRAITS   = ALL_ENTRIES.filter(([, v]) => !v.traits);
+
+  // ── 過濾 ──────────────────────────────────────────────
+  function filterEntries(entries) {
+    return entries.filter(([name, v]) => {
+      // 原生/外來過濾
+      if (_filter !== 'all') {
+        const origin = v.origin || '';
+        if (_filter === '原生' && !origin.includes('原生')) return false;
+        if (_filter === '外來' && !origin.includes('外來')) return false;
+      }
+      // 關鍵字搜尋
+      if (_query) {
+        const q = _query.toLowerCase();
+        const searchable = [
+          name,
+          ...(v.aliases || []),
+          v.traits || '',
+        ].join(' ').toLowerCase();
+        if (!searchable.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  // ── 渲染單張詳細卡片 ─────────────────────────────────
+  function renderCard([name, v]) {
+    const originBadge = v.origin === '原生'
+      ? `<span class="badge-native">原生種</span>`
+      : `<span class="badge-intro">外來種</span>`;
+    const codeBadge = v.code
+      ? `<span class="badge-code">編碼 ${v.code}</span>` : '';
+    const aliases = (v.aliases || []).length
+      ? `<div class="sp-aliases">別名：${v.aliases.join('、')}</div>` : '';
+    const traits = v.traits
+      ? `<div class="sp-traits">${v.traits}</div>`
+      : `<div class="sp-traits empty">—</div>`;
+    const mapLink = `<a class="sp-action" href="/?species=${encodeURIComponent(name)}" target="_blank">🗺 地圖查詢</a>`;
+
+    return `<div class="sp-card">
+      <div class="sp-card-head">
+        <div class="sp-card-name">${name}</div>
+        <div class="sp-badges">${originBadge}${codeBadge}</div>
+      </div>
+      ${aliases}
+      ${traits}
+      ${mapLink}
+    </div>`;
+  }
+
+  // ── 渲染緊湊卡片（無描述） ────────────────────────────
+  function renderCompact([name, v]) {
+    const originBadge = v.origin === '原生'
+      ? `<span class="badge-native">原生種</span>`
+      : `<span class="badge-intro">外來種</span>`;
+    const codeBadge = v.code
+      ? `<span class="badge-code">編碼 ${v.code}</span>` : '';
+    const mapLink = `<a class="sp-action" href="/?species=${encodeURIComponent(name)}" target="_blank">查詢</a>`;
+
+    return `<div class="sp-card compact">
+      <div class="sp-card-head">
+        <div class="sp-card-name">${name}</div>
+        <div class="sp-badges">${originBadge}${codeBadge}</div>
+      </div>
+      ${mapLink}
+    </div>`;
+  }
+
+  // ── 渲染主體 ──────────────────────────────────────────
+  function render() {
+    const filteredWith  = filterEntries(WITH_TRAITS);
+    const filteredNo    = filterEntries(NO_TRAITS);
+    const total = filteredWith.length + filteredNo.length;
+
+    document.getElementById('sp-count').textContent =
+      total > 0 ? `共 ${total} 種` : '';
+
+    const empty = document.getElementById('sp-empty');
+    const results = document.getElementById('sp-results');
+
+    if (total === 0) {
+      results.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    let html = '';
+
+    // 有詳細介紹的
+    if (filteredWith.length > 0) {
+      if (filteredNo.length > 0 || !_query) {
+        html += `<div class="sp-section-title">✦ 詳細介紹（${filteredWith.length} 種）</div>`;
+      }
+      html += `<div class="sp-grid">`;
+      html += filteredWith.map(renderCard).join('');
+      html += `</div>`;
+    }
+
+    // 其他樹種（緊湊）
+    if (filteredNo.length > 0) {
+      html += `<div class="sp-section-title">其他收錄樹種（${filteredNo.length} 種）</div>`;
+      html += `<div class="sp-grid">`;
+      html += filteredNo.map(renderCompact).join('');
+      html += `</div>`;
+    }
+
+    results.innerHTML = html;
+  }
+
+  // ── 搜尋框 ────────────────────────────────────────────
+  document.getElementById('sp-search').addEventListener('input', function () {
+    _query = this.value.trim();
+    render();
+  });
+
+  // ── 篩選 chip ─────────────────────────────────────────
+  document.querySelectorAll('.sp-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sp-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _filter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  // 處理 URL 參數：?species=XXX 直接搜尋
+  const urlParams = new URLSearchParams(location.search);
+  const preSearch = urlParams.get('species');
+  if (preSearch) {
+    const inp = document.getElementById('sp-search');
+    inp.value = preSearch;
+    _query = preSearch;
+  }
+
+  // 初始渲染
+  render();
+})();
+</script>
+
+</body>
+</html>

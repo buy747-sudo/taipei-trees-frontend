@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台北市各行政區固碳排行｜台北市樹木查詢</title>
+  <meta name="description" content="台北市 12 個行政區行道樹與受保護樹木固碳量排行榜，顯示各區累積碳儲量、年固碳量與樹木數量統計。">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://taipei-trees.org/carbon-ranking.html">
+  <meta property="og:title" content="台北市各行政區固碳排行">
+  <meta property="og:description" content="台北市 12 行政區行道樹固碳量完整排行榜">
+  <meta property="og:url" content="https://taipei-trees.org/carbon-ranking.html">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Page Layout ─────────────────────────────────── */
+    .page-wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; }
+
+    /* ── Page Hero ───────────────────────────────────── */
+    .page-hero {
+      background: linear-gradient(135deg, #1a5c2a 0%, #2d7a45 100%);
+      color: #fff; padding: 28px 20px; text-align: center;
+      border-radius: 12px; margin-bottom: 24px;
+    }
+    .page-hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .page-hero p  { font-size: 0.9rem; opacity: 0.85; line-height: 1.5; }
+
+    /* ── Global Total Cards ──────────────────────────── */
+    .total-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 28px;
+    }
+    .total-card {
+      background: #fff; border-radius: 10px; padding: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center;
+    }
+    .total-card .tc-num  { font-size: 1.7rem; font-weight: 700; color: #1a5c2a; line-height: 1.1; }
+    .total-card .tc-unit { font-size: 0.75rem; color: #555; margin-top: 2px; }
+    .total-card .tc-label{ font-size: 0.8rem; color: #888; margin-top: 6px; }
+
+    /* ── Sort Tabs ───────────────────────────────────── */
+    .sort-bar {
+      display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .sort-tab {
+      padding: 7px 16px; border-radius: 20px; border: 1.5px solid #cde8d0;
+      background: #fff; font-size: 0.85rem; color: #3a5a42; cursor: pointer;
+    }
+    .sort-tab.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+
+    /* ── Ranking Table ───────────────────────────────── */
+    .rank-list { display: flex; flex-direction: column; gap: 10px; }
+    .rank-card {
+      background: #fff; border-radius: 10px; padding: 14px 16px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.07);
+      display: grid; grid-template-columns: 36px 1fr auto; gap: 0 12px;
+      align-items: center;
+    }
+    .rank-card.top1 { border-left: 4px solid #f59e0b; }
+    .rank-card.top2 { border-left: 4px solid #94a3b8; }
+    .rank-card.top3 { border-left: 4px solid #cd7c41; }
+
+    .rank-num {
+      font-size: 1.2rem; font-weight: 700; color: #aaa; text-align: center;
+    }
+    .rank-card.top1 .rank-num { color: #f59e0b; }
+    .rank-card.top2 .rank-num { color: #94a3b8; }
+    .rank-card.top3 .rank-num { color: #cd7c41; }
+
+    .rank-body { min-width: 0; }
+    .rank-name { font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+    .rank-bar-track {
+      height: 7px; background: #e8f0ea; border-radius: 4px; margin-bottom: 6px;
+    }
+    .rank-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, #2d7a45, #6abf81);
+      transition: width 0.6s ease;
+    }
+    .rank-sub {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      font-size: 0.76rem; color: #555;
+    }
+    .rank-sub span strong { color: #1a5c2a; }
+
+    .rank-main-num {
+      text-align: right; white-space: nowrap;
+    }
+    .rank-main-num .rmn-val { font-size: 1.3rem; font-weight: 700; color: #1a5c2a; }
+    .rank-main-num .rmn-unit { font-size: 0.72rem; color: #888; display: block; }
+
+    /* ── Source Note ─────────────────────────────────── */
+    .source-note {
+      margin-top: 24px; font-size: 0.78rem; color: #888;
+      background: #f8f8f8; padding: 12px 14px; border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    /* ── Nav ─────────────────────────────────────────── */
+    .page-nav {
+      background: #1a5c2a; padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .page-nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.88rem; }
+    .page-nav a.home { color: #fff; font-weight: 600; }
+    .page-nav a:hover { color: #fff; }
+    .page-nav .sep { color: rgba(255,255,255,0.4); }
+  </style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="/" class="home">🌳 台北市樹木查詢</a>
+  <span class="sep">›</span>
+  <a href="eco-benefits.html">生態效益</a>
+  <span class="sep">›</span>
+  <span style="color:#fff;">各區固碳排行</span>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-hero">
+    <h1>🏆 台北市各行政區固碳排行</h1>
+    <p>全市行道樹與受保護樹木的固碳量與年吸碳量，依行政區統計排行</p>
+  </div>
+
+  <!-- 全市總數 -->
+  <div class="total-cards" id="total-cards">
+    <div class="total-card">
+      <div class="tc-num" id="tc-total">—</div>
+      <div class="tc-unit">棵</div>
+      <div class="tc-label">全市樹木總數</div>
+    </div>
+    <div class="total-card">
+      <div class="tc-num" id="tc-carbon">—</div>
+      <div class="tc-unit">公噸 CO₂</div>
+      <div class="tc-label">累積固碳總量</div>
+    </div>
+    <div class="total-card">
+      <div class="tc-num" id="tc-annual">—</div>
+      <div class="tc-unit">公噸 CO₂／年</div>
+      <div class="tc-label">全市年固碳量</div>
+    </div>
+    <div class="total-card">
+      <div class="tc-num" id="tc-avg">—</div>
+      <div class="tc-unit">公噸／區</div>
+      <div class="tc-label">平均每區年固碳</div>
+    </div>
+  </div>
+
+  <!-- 排序切換 -->
+  <div class="sort-bar">
+    <button class="sort-tab active" data-sort="annual">年固碳量 ▾</button>
+    <button class="sort-tab" data-sort="carbon">累積固碳量 ▾</button>
+    <button class="sort-tab" data-sort="total">樹木總數 ▾</button>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="rank-list" id="rank-list">
+    <div style="text-align:center;padding:30px;color:#888;">載入中…</div>
+  </div>
+
+  <div class="source-note">
+    📊 資料來源：台北市政府開放資料平台（data.taipei），行道樹與受保護樹木資料，依 OGDL 授權使用。<br>
+    碳儲量依 Brown (1997) 地上生物量方程式及 IPCC (2006) Tier 1 碳分率計算。年固碳量為固碳總量 × 年增量率估算。
+    實際數值可能因調查日期與測量誤差有所差異，僅供參考。
+  </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script>
+(async function () {
+  let _districtData = [];
+  let _sortKey = 'annual';
+
+  // ── 取得統計資料 ─────────────────────────────────────────
+  async function loadData() {
+    try {
+      const res = await fetch(`${API_BASE}/stats`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+
+      // 全市大數字
+      setText('tc-total',  (d.total || 0).toLocaleString('zh-TW'));
+      setText('tc-carbon', (d.total_carbon_tonnes || 0).toLocaleString('zh-TW'));
+      setText('tc-annual', (d.total_annual_co2_tonnes || 0).toLocaleString('zh-TW'));
+      const districts = Object.values(d.by_district || {});
+      const avgAnnual = districts.length
+        ? Math.round((d.total_annual_co2_tonnes || 0) / districts.length * 10) / 10
+        : 0;
+      setText('tc-avg', avgAnnual.toLocaleString('zh-TW'));
+
+      // 各區資料
+      _districtData = Object.entries(d.by_district || {}).map(([name, v]) => ({
+        name,
+        total:      v.total || 0,
+        street:     v.street || 0,
+        protected:  v.protected || 0,
+        carbon:     v.carbon_tonnes || 0,
+        annual:     v.annual_co2_tonnes || 0,
+      }));
+
+      render();
+    } catch (e) {
+      document.getElementById('rank-list').innerHTML =
+        '<div style="text-align:center;padding:30px;color:#c00;">無法載入資料，請稍後再試</div>';
+    }
+  }
+
+  // ── 渲染排行榜 ────────────────────────────────────────────
+  function render() {
+    const sorted = [..._districtData].sort((a, b) => b[_sortKey] - a[_sortKey]);
+    const maxVal = sorted[0] ? sorted[0][_sortKey] : 1;
+    const unitMap = { annual: '公噸CO₂/年', carbon: '公噸CO₂', total: '棵' };
+    const unit = unitMap[_sortKey];
+
+    document.getElementById('rank-list').innerHTML = sorted.map((d, i) => {
+      const pct = maxVal > 0 ? Math.round((d[_sortKey] / maxVal) * 100) : 0;
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      const mainVal = _sortKey === 'total'
+        ? d.total.toLocaleString('zh-TW')
+        : d[_sortKey].toLocaleString('zh-TW');
+
+      return `<div class="rank-card ${rankClass}">
+        <div class="rank-num">${i + 1}</div>
+        <div class="rank-body">
+          <div class="rank-name">${d.name}</div>
+          <div class="rank-bar-track">
+            <div class="rank-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="rank-sub">
+            <span>樹木 <strong>${d.total.toLocaleString()}</strong> 棵</span>
+            <span>年固碳 <strong>${d.annual.toLocaleString()}</strong> 噸</span>
+            <span>累積碳儲 <strong>${d.carbon.toLocaleString()}</strong> 噸</span>
+          </div>
+        </div>
+        <div class="rank-main-num">
+          <div class="rmn-val">${mainVal}</div>
+          <span class="rmn-unit">${unit}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── 排序按鈕 ─────────────────────────────────────────────
+  document.querySelectorAll('.sort-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _sortKey = btn.dataset.sort;
+      render();
+    });
+  });
+
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  loadData();
+})();
+</script>
+
+</body>
+</html>

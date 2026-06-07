@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台北市樹木法規查詢｜樹木保護自治條例白話說明</title>
+  <meta name="description" content="台北市樹木保護自治條例與行道樹管理相關法規白話整理，包含受保護樹木認定標準、砍伐申請程序、罰則與民眾通報管道。">
+  <meta name="keywords" content="台北市樹木保護自治條例,受保護樹木,行道樹法規,樹木砍伐申請,樹木保護">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://taipei-trees.org/law.html">
+  <meta property="og:title" content="台北市樹木法規查詢">
+  <meta property="og:description" content="台北市樹木保護自治條例白話整理，受保護樹木標準、砍伐申請、罰則說明">
+  <meta property="og:url" content="https://taipei-trees.org/law.html">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Page Nav ────────────────────────────────────── */
+    .page-nav {
+      background: #1a5c2a; padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .page-nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.88rem; }
+    .page-nav a.home { color: #fff; font-weight: 600; }
+    .page-nav a:hover { color: #fff; }
+    .page-nav .sep { color: rgba(255,255,255,0.4); }
+
+    /* ── Layout ──────────────────────────────────────── */
+    .page-wrap { max-width: 800px; margin: 0 auto; padding: 20px 16px 60px; }
+
+    /* ── Hero ────────────────────────────────────────── */
+    .page-hero {
+      background: linear-gradient(135deg, #1a5c2a, #2d7a45);
+      color: #fff; padding: 28px 20px; text-align: center;
+      border-radius: 12px; margin-bottom: 28px;
+    }
+    .page-hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .page-hero p  { font-size: 0.88rem; opacity: 0.85; line-height: 1.5; }
+
+    /* ── Quick Nav ───────────────────────────────────── */
+    .quick-nav {
+      background: #f7fbf8; border: 1px solid #cde8d0; border-radius: 10px;
+      padding: 14px 18px; margin-bottom: 28px;
+    }
+    .quick-nav h3 { font-size: 0.88rem; color: #1a5c2a; margin-bottom: 8px; }
+    .quick-nav a  {
+      display: inline-block; margin: 3px 6px 3px 0;
+      font-size: 0.82rem; color: #1a5c2a; text-decoration: none;
+      background: #fff; border: 1px solid #cde8d0; border-radius: 12px;
+      padding: 3px 10px;
+    }
+    .quick-nav a:hover { background: #e8f5eb; }
+
+    /* ── Section ─────────────────────────────────────── */
+    .law-section {
+      margin-bottom: 32px; scroll-margin-top: 70px;
+    }
+    .law-section-title {
+      font-size: 1.1rem; font-weight: 700; color: #1a5c2a;
+      border-left: 4px solid #1a5c2a; padding-left: 12px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Article Card ────────────────────────────────── */
+    .law-card {
+      background: #fff; border-radius: 10px; padding: 18px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.07); margin-bottom: 12px;
+    }
+    .law-card h3 {
+      font-size: 0.95rem; font-weight: 700; color: #1a1a1a;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .law-card h3 .tag {
+      font-size: 0.7rem; background: #e0e7ff; color: #3730a3;
+      padding: 2px 7px; border-radius: 8px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .law-card p, .law-card li {
+      font-size: 0.88rem; color: #444; line-height: 1.65;
+    }
+    .law-card ul, .law-card ol {
+      padding-left: 18px; margin-top: 6px;
+    }
+    .law-card li { margin-bottom: 5px; }
+    .law-card .ref {
+      margin-top: 10px; font-size: 0.76rem; color: #aaa;
+      border-top: 1px solid #f0f0f0; padding-top: 8px;
+    }
+
+    /* ── FAQ ─────────────────────────────────────────── */
+    details.faq-item {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.07); margin-bottom: 8px;
+      overflow: hidden;
+    }
+    summary.faq-q {
+      padding: 14px 18px; font-size: 0.9rem; font-weight: 600;
+      color: #1a1a1a; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    summary.faq-q::after { content: '＋'; color: #1a5c2a; font-size: 1rem; }
+    details[open] summary.faq-q::after { content: '－'; }
+    summary.faq-q::-webkit-details-marker { display: none; }
+    .faq-a {
+      padding: 0 18px 16px; font-size: 0.87rem; color: #444; line-height: 1.65;
+    }
+    .faq-a p { margin-bottom: 8px; }
+    .faq-a ul { padding-left: 18px; }
+    .faq-a li { margin-bottom: 5px; }
+
+    /* ── Highlight Box ───────────────────────────────── */
+    .highlight-box {
+      border-radius: 10px; padding: 16px 18px; margin-bottom: 12px;
+    }
+    .highlight-box.green  { background: #d1fae5; border-left: 4px solid #059669; }
+    .highlight-box.yellow { background: #fef3c7; border-left: 4px solid #d97706; }
+    .highlight-box.red    { background: #fee2e2; border-left: 4px solid #dc2626; }
+    .highlight-box h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .highlight-box p, .highlight-box li { font-size: 0.85rem; line-height: 1.6; }
+    .highlight-box ul { padding-left: 16px; }
+
+    /* ── Contact ─────────────────────────────────────── */
+    .contact-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .contact-card {
+      background: #fff; border-radius: 10px; padding: 16px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.07); text-align: center;
+    }
+    .contact-card .cc-icon  { font-size: 1.6rem; margin-bottom: 6px; }
+    .contact-card .cc-name  { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
+    .contact-card .cc-phone { font-size: 1rem; font-weight: 700; color: #1a5c2a; margin: 4px 0; }
+    .contact-card .cc-note  { font-size: 0.75rem; color: #888; }
+    .contact-card a.cc-link {
+      display: inline-block; margin-top: 8px;
+      font-size: 0.78rem; color: #1a5c2a; text-decoration: none;
+      border: 1px solid #cde8d0; border-radius: 12px; padding: 3px 10px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="/" class="home">🌳 台北市樹木查詢</a>
+  <span class="sep">›</span>
+  <span style="color:#fff;">法規查詢</span>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-hero">
+    <h1>⚖️ 台北市樹木法規查詢</h1>
+    <p>台北市樹木保護自治條例與行道樹管理規範白話整理<br>
+       讓民眾快速了解樹木保護規定與通報管道</p>
+  </div>
+
+  <!-- 快速跳轉 -->
+  <div class="quick-nav">
+    <h3>📋 快速跳轉</h3>
+    <a href="#what-is-protected">什麼是受保護樹木？</a>
+    <a href="#standards">認定標準</a>
+    <a href="#prohibitions">禁止行為</a>
+    <a href="#apply-cut">申請砍伐程序</a>
+    <a href="#penalties">罰則</a>
+    <a href="#faq">常見問題</a>
+    <a href="#contacts">通報聯絡</a>
+  </div>
+
+  <!-- 1. 什麼是受保護樹木 -->
+  <div class="law-section" id="what-is-protected">
+    <div class="law-section-title">🌳 什麼是受保護樹木？</div>
+
+    <div class="highlight-box green">
+      <h4>✅ 簡單說</h4>
+      <p>符合一定條件的重要樹木，由台北市政府公告列管，受法律保護，任何人不得任意砍伐、移植或損害。</p>
+    </div>
+
+    <div class="law-card" id="standards">
+      <h3>認定標準 <span class="tag">第3條</span></h3>
+      <p>台北市樹木保護自治條例規定，符合下列任一條件的樹木，主管機關得列為受保護樹木：</p>
+      <ul>
+        <li>胸圍達 <strong>150 公分以上</strong>（約胸高直徑 47.7 公分以上）</li>
+        <li>樹齡達 <strong>50 年以上</strong>，且胸圍達 60 公分以上</li>
+        <li>具有生態、文化、歷史或景觀等重要意義</li>
+        <li>稀有或瀕臨滅絕之植物種類</li>
+        <li>行道樹中具有代表性之植株</li>
+      </ul>
+      <div class="ref">依據：台北市樹木保護自治條例 第3條</div>
+    </div>
+
+    <div class="law-card">
+      <h3>主管機關 <span class="tag">第2條</span></h3>
+      <p>台北市樹木保護的主管機關為<strong>臺北市政府工務局公園路燈工程管理處</strong>（公園處）。</p>
+      <p>若樹木位於學校、機關用地，由各該機關配合辦理。</p>
+    </div>
+  </div>
+
+  <!-- 2. 禁止行為 -->
+  <div class="law-section" id="prohibitions">
+    <div class="law-section-title">🚫 禁止行為</div>
+
+    <div class="highlight-box red">
+      <h4>❌ 這些事不能做（受保護樹木範圍內）</h4>
+      <ul>
+        <li>砍伐、移植受保護樹木</li>
+        <li>在樹幹或樹根周圍 <strong>3 公尺以內</strong> 進行工程或翻土（需事先提送保護計畫）</li>
+        <li>在樹幹掛釘、攀爬、刻字、塗鴉</li>
+        <li>排放廢水、化學物質污染樹根土壤</li>
+        <li>以有害方式纏繞或固定物品</li>
+      </ul>
+    </div>
+
+    <div class="highlight-box yellow">
+      <h4>⚠️ 行道樹也有保護</h4>
+      <ul>
+        <li>行道樹由公園處統一管理，私人不可自行砍伐或修剪主幹</li>
+        <li>因施工影響行道樹，需向公園處提出樹木保護計畫</li>
+        <li>工地圍籬、開挖作業前，應先向公園處申請</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3. 申請砍伐 -->
+  <div class="law-section" id="apply-cut">
+    <div class="law-section-title">📝 申請砍伐或移植程序</div>
+
+    <div class="law-card">
+      <h3>一般行道樹砍伐申請 <span class="tag">行政程序</span></h3>
+      <ol>
+        <li>向公園處提出申請，說明原因（如妨礙交通、病蟲害嚴重等）</li>
+        <li>公園處派員現場勘查</li>
+        <li>由樹藝師或專業人員評估樹況與風險</li>
+        <li>公園處核准後，由合格廠商執行</li>
+        <li>砍伐後木料依規定處理</li>
+      </ol>
+      <div class="ref">一般民眾無法自行申請砍伐行道樹，需透過 1999 或直接聯繫公園處</div>
+    </div>
+
+    <div class="law-card">
+      <h3>受保護樹木移植申請 <span class="tag">第9條</span></h3>
+      <ol>
+        <li>填具申請書，說明移植必要性與目的地</li>
+        <li>附上移植計畫書（含移植方法、後續照顧措施）</li>
+        <li>主管機關召開審查會議，必要時公告徵詢意見</li>
+        <li>審查通過，核發許可證後方可執行</li>
+        <li>移植完成後定期回報樹況</li>
+      </ol>
+      <div class="ref">依據：台北市樹木保護自治條例 第9條</div>
+    </div>
+
+    <div class="highlight-box yellow">
+      <h4>⚠️ 緊急危木處理</h4>
+      <p>如樹木因颱風、病蟲害等原因造成立即公共危險，公園處得緊急處理，不受一般申請程序限制。
+      民眾發現危木，請立即撥打 <strong>1999</strong> 或聯繫公園處。</p>
+    </div>
+  </div>
+
+  <!-- 4. 罰則 -->
+  <div class="law-section" id="penalties">
+    <div class="law-section-title">💰 罰則</div>
+
+    <div class="law-card">
+      <h3>違規罰則 <span class="tag">第14、15條</span></h3>
+      <p>違反台北市樹木保護自治條例者，依情節輕重裁罰：</p>
+      <ul>
+        <li>未申請擅自砍伐、移植受保護樹木：<strong>罰鍰新台幣 6 萬至 30 萬元</strong>，並得令其回復原狀</li>
+        <li>損害受保護樹木（刻字、掛釘、排放污水等）：<strong>罰鍰新台幣 6,000 至 3 萬元</strong></li>
+        <li>施工未提保護計畫或違反計畫內容：<strong>罰鍰新台幣 3 萬至 15 萬元</strong></li>
+        <li>情節重大且拒不改善者，得移送司法機關</li>
+      </ul>
+      <div class="ref">依據：台北市樹木保護自治條例 第14、15條</div>
+    </div>
+
+    <div class="highlight-box red">
+      <h4>🚨 刑事責任</h4>
+      <p>故意毀損受保護樹木，可能另觸刑法毀損罪（刑法第354條），處2年以下有期徒刑、拘役或20萬元以下罰金。</p>
+    </div>
+  </div>
+
+  <!-- 5. 常見問題 -->
+  <div class="law-section" id="faq">
+    <div class="law-section-title">❓ 常見問題</div>
+
+    <details class="faq-item">
+      <summary class="faq-q">鄰居的大樹根長進我家地基，我可以自行剪根嗎？</summary>
+      <div class="faq-a">
+        <p>若該樹屬於行道樹或受保護樹木，<strong>不可自行剪根</strong>，應聯繫公園處由專業人員評估處理。</p>
+        <p>若是私有土地上的樹木，可向地主溝通協商，或依民法第792條規定，越界的樹根可通知對方在相當期間內自行剪除，若不處理可自行剪除。</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q">行道樹的果實掉落砸傷車輛或行人，可以求償嗎？</summary>
+      <div class="faq-a">
+        <p>可能涉及國家賠償。若能證明主管機關（公園處）對樹木管理有疏失，受害者可依<strong>國家賠償法</strong>向台北市政府提出賠償申請。</p>
+        <p>建議立即保留現場照片、就醫紀錄、車損評估等證據，並向公園處提出書面申訴。</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q">我看到有人在砍行道樹，沒有人員在場，怎麼辦？</summary>
+      <div class="faq-a">
+        <p>請立即：</p>
+        <ul>
+          <li>撥打 <strong>1999</strong> 市民服務專線通報</li>
+          <li>或直接聯繫公園處 <strong>（02）2361-3521</strong></li>
+          <li>拍照存證（含現場人員、工程車輛、樹木狀況）</li>
+          <li>若現場有工程告示牌，拍下施工單位與許可證字號</li>
+        </ul>
+        <p>未經許可砍伐行道樹者，最高可罰款30萬元。</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q">我家旁的路樹一直長大、影響採光，可以要求修剪嗎？</summary>
+      <div class="faq-a">
+        <p>可以，但修剪工作須由公園處安排。民眾可透過以下方式申請：</p>
+        <ul>
+          <li>撥打 <strong>1999</strong> 提出修剪申請</li>
+          <li>至台北市政府市政信箱線上申請</li>
+          <li>直接至各行政區公園管理所申請</li>
+        </ul>
+        <p>注意：私自修剪行道樹主幹或大枝條，可能違反相關規定，請勿自行處理。</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q">如何知道某棵樹是否為「受保護樹木」？</summary>
+      <div class="faq-a">
+        <p>有幾種方式可以確認：</p>
+        <ul>
+          <li>樹幹上掛有<strong>橢圓形金屬標牌</strong>，標示「台北市受保護樹木」及樹籍編號</li>
+          <li>在本站地圖上，受保護樹木以<strong>金色星形</strong>標示</li>
+          <li>掃描樹牌上的 <strong>QR Code</strong>，可即時查詢樹籍資料</li>
+          <li>至台北市政府開放資料平台查詢受保護樹木資料集</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q">我的土地上有一棵大樹，是否受保護條例管制？</summary>
+      <div class="faq-a">
+        <p>若尚未被公告列為受保護樹木，私有土地上的樹木<strong>基本上不受樹木保護自治條例管制</strong>。</p>
+        <p>但如果樹木符合受保護標準（胸圍150公分以上或樹齡50年以上等），公園處可能主動勘查並公告列管。一旦被列管，即使在私有土地上，也受到保護條例規範。</p>
+        <p>建議在進行大樹相關工程前，先向公園處確認樹木狀態。</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q">施工工地旁的行道樹要如何保護？</summary>
+      <div class="faq-a">
+        <p>依規定，工程施工前應向公園處提出<strong>樹木保護計畫</strong>，內容包含：</p>
+        <ul>
+          <li>樹木調查清冊（位置、胸徑、樹種）</li>
+          <li>施工影響範圍評估</li>
+          <li>保護措施（護板圍籬、根部保護、地基設計調整等）</li>
+          <li>樹況定期監測計畫</li>
+        </ul>
+        <p>工程完成後，需提送樹木保護成果報告。未提送保護計畫擅自施工，可罰款3萬至15萬元。</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- 6. 相關法規 -->
+  <div class="law-section">
+    <div class="law-section-title">📚 相關法規列表</div>
+    <div class="law-card">
+      <h3>主要適用法規</h3>
+      <ul>
+        <li><strong>台北市樹木保護自治條例</strong>——樹木列管、砍伐申請、罰則的核心法規</li>
+        <li><strong>台北市行道樹管理養護作業規範</strong>——行道樹日常養護、修剪、補植標準</li>
+        <li><strong>國家賠償法</strong>——因公有道路設施（含行道樹）管理缺失造成損害的賠償依據</li>
+        <li><strong>民法第792條</strong>——越界植物的處理規定</li>
+        <li><strong>刑法第354條</strong>——故意毀損財物（含受保護樹木）的刑事責任</li>
+        <li><strong>文化資產保存法</strong>——若樹木被列為自然地景，適用文資法保護</li>
+      </ul>
+      <div class="ref">
+        完整法規內容可至
+        <a href="https://www.laws.taipei.gov.tw" target="_blank" rel="noopener">台北市法規查詢系統</a>
+        查閱最新版本
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 聯絡資訊 -->
+  <div class="law-section" id="contacts">
+    <div class="law-section-title">📞 通報與聯絡管道</div>
+
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="cc-icon">📱</div>
+        <div class="cc-name">市民服務專線</div>
+        <div class="cc-phone">1999</div>
+        <div class="cc-note">24小時，緊急危木優先</div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">🏛️</div>
+        <div class="cc-name">公園路燈工程管理處</div>
+        <div class="cc-phone">(02) 2361-3521</div>
+        <div class="cc-note">週一至五 08:00-17:30</div>
+        <a class="cc-link" href="https://pkl.gov.taipei" target="_blank" rel="noopener">官網</a>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">💻</div>
+        <div class="cc-name">台北市市政信箱</div>
+        <div class="cc-phone" style="font-size:0.85rem;">線上申訴</div>
+        <div class="cc-note">可上傳照片附件</div>
+        <a class="cc-link" href="https://hello.gov.taipei" target="_blank" rel="noopener">前往申訴</a>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">🌳</div>
+        <div class="cc-name">本站異常通報</div>
+        <div class="cc-phone" style="font-size:0.85rem;">快速通報</div>
+        <div class="cc-note">掃 QR Code 直接點樹通報</div>
+        <a class="cc-link" href="report.html">前往通報</a>
+      </div>
+    </div>
+
+    <div class="highlight-box yellow" style="margin-top:14px;">
+      <h4>⚠️ 重要提醒</h4>
+      <p>本頁為法規白話整理，僅供民眾初步參考。法規內容若有更新，以台北市政府公告版本為準。
+      具體法律問題建議諮詢法律專業人士或直接洽詢主管機關。</p>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
