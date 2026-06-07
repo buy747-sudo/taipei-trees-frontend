@@ -61,16 +61,17 @@ async function searchByAddress(address) {
     const results = await res.json();
 
     if (!results.length) {
-      showToast('⚠️ 找不到此地址，請試試更完整的地址（如：大安路一段99號）');
+      showToast('⚠️ 找不到此路段，請試試「路名＋段」（如：仁愛路四段、忠孝東路三段）');
       return;
     }
 
     const { lat, lon, display_name } = results[0];
-    _map.flyTo([parseFloat(lat), parseFloat(lon)], 17);
+    // 路段搜尋用 zoom 16，可看到更長範圍的樹木分布
+    _map.flyTo([parseFloat(lat), parseFloat(lon)], 16);
 
     // 顯示地址第一段（逗號前），避免太長
     const short = display_name.split(',')[0];
-    showToast('📍 已定位：' + short, 3500);
+    showToast('📍 ' + short + '　地圖已定位', 3500);
   } catch (e) {
     showToast('地址搜尋失敗，請稍後再試');
     console.error('Nominatim error', e);
