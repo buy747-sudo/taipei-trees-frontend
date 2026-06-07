@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initQr();
   initStats();
   initMeasure();
+  initExport();
 
   loadTrees();
 });
