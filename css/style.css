@@ -165,7 +165,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   border: none; border-radius: 14px; font-size: 1rem; font-weight: 700;
   cursor: pointer; margin-top: 4px;
 }
-#adv-submit:active { background: #14482100; }
+#adv-submit:active { background: #144821; }
 #adv-reset {
   width: 100%; padding: 9px; background: none; color: #888;
   border: none; font-size: 0.88rem; cursor: pointer; margin-bottom: 4px;
