@@ -27,9 +27,28 @@ function initMap() {
 
   osm.addTo(_map);
 
+  // 覆蓋圖層：土地使用（可疊加在任一底圖上）
+  const luimap = L.tileLayer(
+    'https://wmts.nlsc.gov.tw/wmts/LUIMAP/default/GoogleMapsCompatible/{z}/{y}/{x}',
+    {
+      attribution: '© 內政部國土測繪中心 國土利用調查成果圖',
+      maxZoom: 20,
+      opacity: 0.72,
+    }
+  );
+
+  const urbanPlan = L.tileLayer(
+    'https://www.historygis.udd.gov.taipei/arcgis/rest/services/Urban/UrbanPlan/MapServer/WMTS/tile/1.0.0/Urban_UrbanPlan/default/GoogleMapsCompatible/{z}/{y}/{x}',
+    {
+      attribution: '© 臺北市政府都市發展局 都市計畫使用分區圖',
+      maxZoom: 20,
+      opacity: 0.75,
+    }
+  );
+
   L.control.layers(
     { '街道圖 (OSM)': osm, '衛星圖 (ESRI)': esri, '正射影像 (NLSC)': nlsc },
-    {},
+    { '國土利用調查': luimap, '台北都市計畫分區': urbanPlan },
     { position: 'topright', collapsed: true }
   ).addTo(_map);
 
