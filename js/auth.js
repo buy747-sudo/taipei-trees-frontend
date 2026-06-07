@@ -42,9 +42,8 @@ const Auth = (() => {
   async function authFetch(url, options = {}) {
     const token = getToken();
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    // FormData must let the browser set multipart/form-data with its boundary.
-    if ((typeof FormData !== 'undefined' && options.body instanceof FormData) ||
-        headers['Content-Type'] === null) {
+    // body 是 FormData 時不設 Content-Type，讓瀏覽器自動填 multipart boundary。
+    if (typeof FormData !== 'undefined' && options.body instanceof FormData) {
       delete headers['Content-Type'];
     }
     if (token) headers['Authorization'] = `Bearer ${token}`;

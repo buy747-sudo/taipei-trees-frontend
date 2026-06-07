@@ -507,7 +507,8 @@ async function uploadPhoto(id, dir, file) {
     form.append('angle_label', DIR_LABEL[dir]);
     const res = await Auth.authFetch(`${SURVEY_API}/${id}/photos`, {
       method: 'POST',
-      headers: { 'Content-Type': null },  // let browser set multipart boundary
+      // 不傳 Content-Type，讓 authFetch 偵測到 FormData 後自動刪除，
+      // 瀏覽器才能正確填入 multipart/form-data 的 boundary。
       body: form,
     });
     return res && res.ok;
