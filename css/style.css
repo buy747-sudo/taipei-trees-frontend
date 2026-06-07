@@ -107,13 +107,84 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── Filter Row ───────────────────────────────────────── */
 #filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-#filter-district, #filter-species {
-  padding: 6px 10px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.4);
-  background: rgba(255,255,255,0.12); color: #fff; font-size: 0.85rem;
-}
-#filter-district option { background: #1a5c2a; }
-#filter-species::placeholder { color: rgba(255,255,255,0.6); }
 #category-chips { display: flex; gap: 6px; }
+
+/* 進階查詢按鈕 */
+#adv-search-btn {
+  padding: 5px 14px; border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.15); color: #fff;
+  font-size: 0.85rem; cursor: pointer; font-weight: 600;
+  transition: background 0.15s;
+}
+#adv-search-btn:hover, #adv-search-btn.active {
+  background: rgba(255,255,255,0.3);
+}
+
+/* ── 進階查詢 Drawer ──────────────────────────────────── */
+#adv-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 1100; backdrop-filter: blur(2px);
+}
+#adv-drawer {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-radius: 20px 20px 0 0;
+  z-index: 1101; padding: 0 0 env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+  max-width: 540px; margin: 0 auto;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+#adv-grab {
+  width: 40px; height: 4px; background: #ddd; border-radius: 2px;
+  margin: 12px auto 4px;
+}
+#adv-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 20px 12px; border-bottom: 1px solid #eee;
+}
+#adv-header h2 { font-size: 1rem; font-weight: 700; color: #1a5c2a; margin: 0; }
+#adv-close {
+  background: #f5f5f5; border: none; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 0.9rem; cursor: pointer; color: #555;
+}
+#adv-body { padding: 16px 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+.adv-label { font-size: 0.82rem; font-weight: 600; color: #3a5a42; margin-bottom: -6px; }
+.adv-select, .adv-input {
+  width: 100%; padding: 10px 14px; border-radius: 12px;
+  border: 1.5px solid #cde8d0; font-size: 0.95rem; color: #1a1a1a;
+  background: #f8fdf9; outline: none;
+}
+.adv-select:focus, .adv-input:focus { border-color: #1a5c2a; background: #fff; }
+.adv-input::placeholder { color: #aaa; }
+#adv-submit {
+  width: 100%; padding: 13px; background: #1a5c2a; color: #fff;
+  border: none; border-radius: 14px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; margin-top: 4px;
+}
+#adv-submit:active { background: #14482100; }
+#adv-reset {
+  width: 100%; padding: 9px; background: none; color: #888;
+  border: none; font-size: 0.88rem; cursor: pointer; margin-bottom: 4px;
+}
+
+/* 已套用條件標籤（顯示在 filter-row） */
+#adv-active-tags {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 4px 0 2px;
+}
+.adv-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #e0f4e8; border: 1px solid #a7d9b5; color: #1a5c2a;
+  border-radius: 14px; padding: 3px 10px; font-size: 0.78rem; font-weight: 600;
+}
+.adv-tag button {
+  background: none; border: none; color: #1a5c2a; cursor: pointer;
+  font-size: 0.85rem; padding: 0; line-height: 1;
+}
 .chip {
   padding: 5px 12px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.4);
   background: transparent; color: rgba(255,255,255,0.8); font-size: 0.85rem;

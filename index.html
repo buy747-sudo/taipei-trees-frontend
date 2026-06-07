@@ -59,23 +59,48 @@
       <button id="scan-btn" aria-label="掃碼查詢"><span aria-hidden="true">📷</span> 掃碼</button>
     </div>
     <div id="filter-row">
-      <label for="filter-district" class="sr-only">行政區篩選</label>
-      <select id="filter-district">
-        <option value="">全部行政區</option>
-        <option>信義區</option><option>大安區</option><option>中正區</option>
-        <option>萬華區</option><option>中山區</option><option>松山區</option>
-        <option>大同區</option><option>內湖區</option><option>南港區</option>
-        <option>文山區</option><option>士林區</option><option>北投區</option>
-      </select>
-      <label for="filter-species" class="sr-only">樹種篩選</label>
-      <input id="filter-species" type="search" placeholder="樹種（如：榕樹）" autocomplete="off">
       <div id="category-chips">
         <button class="chip active" data-cat="all">全部</button>
         <button class="chip" data-cat="street">行道樹</button>
         <button class="chip" data-cat="protected">受保護</button>
       </div>
+      <button id="adv-search-btn" aria-label="進階查詢">🔍 進階查詢</button>
+      <div id="adv-active-tags" hidden></div>
     </div>
   </header>
+
+  <!-- ── 進階查詢 Drawer ────────────────────────────────── -->
+  <div id="adv-overlay" hidden></div>
+  <div id="adv-drawer" role="dialog" aria-modal="true" aria-label="進階查詢" hidden>
+    <div id="adv-grab"></div>
+    <div id="adv-header">
+      <h2>🔍 進階查詢</h2>
+      <button id="adv-close" aria-label="關閉">✕</button>
+    </div>
+    <div id="adv-body">
+      <label class="adv-label" for="adv-district">行政區</label>
+      <select id="adv-district" class="adv-select">
+        <option value="">不限行政區</option>
+        <option>信義區</option><option>大安區</option><option>中正區</option>
+        <option>萬華區</option><option>中山區</option><option>松山區</option>
+        <option>大同區</option><option>內湖區</option><option>南港區</option>
+        <option>文山區</option><option>士林區</option><option>北投區</option>
+      </select>
+
+      <label class="adv-label" for="adv-road">路段</label>
+      <input id="adv-road" class="adv-input" type="search"
+        placeholder="如：仁愛路四段、忠孝東路三段"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+
+      <label class="adv-label" for="adv-species">樹種</label>
+      <input id="adv-species" class="adv-input" type="search"
+        placeholder="如：榕樹、樟樹、茄苳"
+        autocomplete="off">
+
+      <button id="adv-submit">開始查詢</button>
+      <button id="adv-reset">清除條件</button>
+    </div>
+  </div>
 
   <main id="main-content">
 

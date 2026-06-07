@@ -2,7 +2,8 @@
 
 const filterState = {
   district: '',
-  species: '',
+  road:     '',   // 進階查詢路段（僅用於定位，不傳給 API）
+  species:  '',
   category: 'all',
 };
 
@@ -23,20 +24,104 @@ function scheduleReload() {
   }, 400);
 }
 
+// ── 進階查詢 Drawer ──────────────────────────────────────
+function initAdvSearch() {
+  const btn      = document.getElementById('adv-search-btn');
+  const overlay  = document.getElementById('adv-overlay');
+  const drawer   = document.getElementById('adv-drawer');
+  const closeBtn = document.getElementById('adv-close');
+  const distSel  = document.getElementById('adv-district');
+  const roadInp  = document.getElementById('adv-road');
+  const specInp  = document.getElementById('adv-species');
+  const submit   = document.getElementById('adv-submit');
+  const reset    = document.getElementById('adv-reset');
+  const tagsDiv  = document.getElementById('adv-active-tags');
+
+  function openDrawer() {
+    overlay.hidden = false;
+    drawer.hidden  = false;
+    btn.classList.add('active');
+  }
+  function closeDrawer() {
+    overlay.hidden = true;
+    drawer.hidden  = true;
+    btn.classList.remove('active');
+  }
+
+  btn.addEventListener('click', openDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+
+  // Enter 鍵直接送出
+  [roadInp, specInp].forEach(el =>
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') submit.click(); })
+  );
+
+  // ── 套用條件標籤 ─────────────────────────────────────
+  function renderTags() {
+    const tags = [];
+    if (filterState.district) tags.push({ key: 'district', label: '區：' + filterState.district });
+    if (filterState.road)     tags.push({ key: 'road',     label: '路：' + filterState.road });
+    if (filterState.species)  tags.push({ key: 'species',  label: '種：' + filterState.species });
+
+    if (!tags.length) { tagsDiv.hidden = true; return; }
+    tagsDiv.hidden = false;
+    tagsDiv.innerHTML = tags.map(t =>
+      `<span class="adv-tag">${t.label}
+        <button data-key="${t.key}" aria-label="移除${t.label}">✕</button>
+      </span>`
+    ).join('');
+    tagsDiv.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const k = b.dataset.key;
+        filterState[k] = '';
+        if (k === 'district') distSel.value = '';
+        if (k === 'road')     roadInp.value = '';
+        if (k === 'species')  specInp.value = '';
+        renderTags();
+        scheduleReload();
+      });
+    });
+  }
+
+  // ── 查詢 ──────────────────────────────────────────────
+  submit.addEventListener('click', async () => {
+    const dist = distSel.value;
+    const road = roadInp.value.trim();
+    const spec = specInp.value.trim();
+
+    filterState.district = dist;
+    filterState.road     = road;
+    filterState.species  = spec;
+
+    closeDrawer();
+    renderTags();
+
+    // 定位：路段優先，其次行政區
+    if (road) {
+      await searchByAddress(road);          // 已含台北市補前綴邏輯
+    } else if (dist) {
+      flyToDistrict(dist);
+    }
+
+    scheduleReload();
+  });
+
+  // ── 清除 ─────────────────────────────────────────────
+  reset.addEventListener('click', () => {
+    distSel.value = '';
+    roadInp.value = '';
+    specInp.value = '';
+    filterState.district = '';
+    filterState.road     = '';
+    filterState.species  = '';
+    renderTags();
+    scheduleReload();
+  });
+}
+
 function initFilters() {
-  const districtSel = document.getElementById('filter-district');
-  districtSel.addEventListener('change', () => {
-    filterState.district = districtSel.value;
-    if (filterState.district) flyToDistrict(filterState.district);
-    scheduleReload();
-  });
-
-  const speciesInput = document.getElementById('filter-species');
-  speciesInput.addEventListener('input', () => {
-    filterState.species = speciesInput.value.trim();
-    scheduleReload();
-  });
-
+  // category chips（全部 / 行道樹 / 受保護）
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -45,6 +130,8 @@ function initFilters() {
       scheduleReload();
     });
   });
+
+  initAdvSearch();
 }
 
 // ── 地址地理編碼（Nominatim / OpenStreetMap）────────────
