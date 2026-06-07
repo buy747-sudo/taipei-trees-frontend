@@ -24,7 +24,35 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 #site-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
 #version-badge { font-size: 0.65rem; font-weight: 400; opacity: 0.55; letter-spacing: 0.02em; vertical-align: middle; }
-.top-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.top-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; justify-content: flex-end; }
+
+/* ── 功能頁導覽列（title row 下方，橫向捲動）────────────── */
+#page-nav-strip {
+  display: flex; gap: 0; align-items: stretch;
+  overflow-x: auto; white-space: nowrap;
+  scrollbar-width: none;
+  margin: 6px -12px 6px;          /* 向左右出血對齊 header padding */
+  padding: 0 12px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+#page-nav-strip::-webkit-scrollbar { display: none; }
+#page-nav-strip a {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none; font-size: 0.82rem; font-weight: 500;
+  white-space: nowrap; flex-shrink: 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+#page-nav-strip a:hover {
+  color: #fff;
+  border-bottom-color: #7ecb94;
+}
+#page-nav-strip a.active {
+  color: #fff; font-weight: 700;
+  border-bottom-color: #7ecb94;
+}
 
 /* ── Auth area（右上角登入/登出）───────────────────────── */
 #auth-login-btn {
