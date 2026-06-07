@@ -56,9 +56,7 @@ async function searchByAddress(address) {
     const url = 'https://nominatim.openstreetmap.org/search?' +
       'q=' + encodeURIComponent(q) +
       '&format=json&limit=1&countrycodes=tw&accept-language=zh-TW';
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'taipei-trees.org/1.0 (yireneco@gmail.com)' }
-    });
+    const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const results = await res.json();
 
