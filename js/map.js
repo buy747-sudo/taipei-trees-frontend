@@ -54,6 +54,9 @@ function initMap() {
     if (typeof onMapMoved === 'function') onMapMoved();
   });
 
+  // 確保 layout 穩定後重算地圖尺寸，避免 #public-intro 高度影響初始中心點
+  setTimeout(() => _map.invalidateSize(), 150);
+
   return _map;
 }
 

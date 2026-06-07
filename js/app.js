@@ -14,7 +14,7 @@ function renderTreeList(trees) {
     ul.innerHTML = '<li style="padding:16px;color:#888;text-align:center;">此範圍內無樹木資料</li>';
     return;
   }
-  ul.innerHTML = trees.slice(0, 100).map((t, i) => {
+  ul.innerHTML = trees.slice(0, 50).map((t, i) => {
     const badgeClass = t.tree_category === 'protected' ? 'badge-protected' : 'badge-street';
     const label = CATEGORY_LABEL[t.tree_category] || '';
     const sub = [t.district, t.height_m ? `${t.height_m}m` : null, t.dbh_cm ? `DBH ${t.dbh_cm}cm` : null]
@@ -29,7 +29,7 @@ function renderTreeList(trees) {
     </li>`;
   }).join('');
 
-  let _cachedTrees = trees.slice(0, 100);
+  let _cachedTrees = trees.slice(0, 50);
   ul.querySelectorAll('li').forEach(li => {
     const idx = parseInt(li.dataset.idx, 10);
     li.addEventListener('click', () => openSheet(_cachedTrees[idx]));
@@ -57,8 +57,8 @@ async function loadTrees() {
     const trees = data.trees || [];
     addTreeMarkers(trees);
     renderTreeList(trees);
-    document.getElementById('count-label').textContent =
-      `共 ${(data.total || trees.length).toLocaleString()} 棵 | 顯示 ${trees.length} 棵`;
+    const shown = Math.min(trees.length, 50);
+    document.getElementById('count-label').textContent = `此範圍顯示 ${shown} 棵`;
   } catch (e) {
     document.getElementById('count-label').textContent = '載入失敗，請稍後再試';
     showToast('無法載入樹木資料');
