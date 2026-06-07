@@ -46,11 +46,84 @@ function initMap() {
     }
   );
 
-  L.control.layers(
-    { '街道圖 (OSM)': osm, '衛星圖 (ESRI)': esri, '正射影像 (NLSC)': nlsc },
-    { '國土利用調查': luimap, '台北都市計畫分區': urbanPlan },
-    { position: 'topright', collapsed: true }
-  ).addTo(_map);
+  // ── 自訂底圖縮圖切換器 ────────────────────────────────
+  // 縮圖：台北市中心附近 zoom=10 tile(x=857, y=438)
+  const THUMBS = {
+    osm:  'https://a.tile.openstreetmap.org/10/857/438.png',
+    esri: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/438/857',
+    nlsc: 'https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/10/438/857',
+  };
+
+  const BasemapControl = L.Control.extend({
+    _currentBase: null,
+
+    onAdd(map) {
+      this._currentBase = osm;
+      const c = L.DomUtil.create('div', 'bm-ctrl leaflet-bar');
+      L.DomEvent.disableClickPropagation(c);
+      L.DomEvent.disableScrollPropagation(c);
+
+      // 切換按鈕
+      const btn = L.DomUtil.create('a', 'bm-btn', c);
+      btn.href = '#'; btn.title = '切換底圖 / 圖層';
+      btn.innerHTML = '<span aria-hidden="true">🗺</span>';
+
+      // 展開面板
+      const panel = L.DomUtil.create('div', 'bm-panel', c);
+      panel.hidden = true;
+
+      // 底圖縮圖
+      const lbBase = L.DomUtil.create('p', 'bm-section-label', panel);
+      lbBase.textContent = '底圖';
+      const row = L.DomUtil.create('div', 'bm-base-row', panel);
+
+      [
+        { label: '街道圖',   layer: osm,  thumb: THUMBS.osm  },
+        { label: '衛星圖',   layer: esri, thumb: THUMBS.esri },
+        { label: '正射影像', layer: nlsc, thumb: THUMBS.nlsc },
+      ].forEach(({ label, layer, thumb }) => {
+        const item = L.DomUtil.create('div', 'bm-item' + (layer === osm ? ' bm-active' : ''), row);
+        const img  = L.DomUtil.create('img', 'bm-thumb', item);
+        img.src = thumb; img.alt = label; img.loading = 'lazy';
+        const sp = L.DomUtil.create('span', 'bm-name', item);
+        sp.textContent = label;
+        L.DomEvent.on(item, 'click', () => {
+          map.removeLayer(this._currentBase);
+          map.addLayer(layer);
+          this._currentBase = layer;
+          row.querySelectorAll('.bm-item').forEach(el => el.classList.remove('bm-active'));
+          item.classList.add('bm-active');
+        });
+      });
+
+      // 覆蓋圖層
+      const hr = L.DomUtil.create('div', 'bm-hr', panel);
+      const lbOv = L.DomUtil.create('p', 'bm-section-label', panel);
+      lbOv.textContent = '覆蓋圖層';
+
+      [
+        { label: '國土利用調查', layer: luimap    },
+        { label: '都市計畫分區', layer: urbanPlan },
+      ].forEach(({ label, layer }) => {
+        const lbl = L.DomUtil.create('label', 'bm-overlay', panel);
+        const cb  = L.DomUtil.create('input', '', lbl);
+        cb.type = 'checkbox';
+        lbl.appendChild(document.createTextNode(' ' + label));
+        L.DomEvent.on(cb, 'change', () => {
+          cb.checked ? map.addLayer(layer) : map.removeLayer(layer);
+        });
+      });
+
+      // 開關
+      L.DomEvent.on(btn, 'click', (e) => {
+        L.DomEvent.preventDefault(e);
+        panel.hidden = !panel.hidden;
+      });
+
+      return c;
+    }
+  });
+  new BasemapControl({ position: 'topright' }).addTo(_map);
 
   // 定位按鈕
   const LocControl = L.Control.extend({
