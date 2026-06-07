@@ -80,6 +80,31 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 .data-sep { color: #aac4b0; font-size: 0.85rem; }
 .data-stat--hint { color: #7a9e84; font-size: 0.78rem; }
 @media (max-width: 480px) { .data-sep--hide, .data-stat--hint { display: none; } }
+
+/* ── Quick Links ──────────────────────────────────────── */
+#quick-links {
+  display: flex; gap: 8px; align-items: center;
+  padding: 8px 14px;
+  background: #f0f7f1;
+  border-bottom: 1px solid #dbe7dd;
+  overflow-x: auto; white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#quick-links::-webkit-scrollbar { display: none; }
+#quick-links a {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px;
+  background: #fff; border: 1.5px solid #cde8d0;
+  border-radius: 20px; text-decoration: none;
+  color: #1a5c2a; font-size: 0.8rem; font-weight: 600;
+  white-space: nowrap; flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+#quick-links a:hover, #quick-links a:active {
+  background: #e0f4e8; border-color: #1a5c2a;
+}
+
 /* ── Filter Row ───────────────────────────────────────── */
 #filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 #filter-district, #filter-species {
