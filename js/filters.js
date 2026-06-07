@@ -47,6 +47,38 @@ function initFilters() {
   });
 }
 
+// ── 地址地理編碼（Nominatim / OpenStreetMap）────────────
+async function searchByAddress(address) {
+  showToast('🔍 正在搜尋地址…', 5000);
+  try {
+    // 若未含「台北」自動補前綴，提高精準度
+    const q = /台北/.test(address) ? address : '台北市 ' + address;
+    const url = 'https://nominatim.openstreetmap.org/search?' +
+      'q=' + encodeURIComponent(q) +
+      '&format=json&limit=1&countrycodes=tw&accept-language=zh-TW';
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'taipei-trees.org/1.0 (yireneco@gmail.com)' }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const results = await res.json();
+
+    if (!results.length) {
+      showToast('⚠️ 找不到此地址，請試試更完整的地址（如：大安路一段99號）');
+      return;
+    }
+
+    const { lat, lon, display_name } = results[0];
+    _map.flyTo([parseFloat(lat), parseFloat(lon)], 17);
+
+    // 顯示地址第一段（逗號前），避免太長
+    const short = display_name.split(',')[0];
+    showToast('📍 已定位：' + short, 3500);
+  } catch (e) {
+    showToast('地址搜尋失敗，請稍後再試');
+    console.error('Nominatim error', e);
+  }
+}
+
 function initSearch() {
   const input = document.getElementById('search-input');
 
@@ -54,23 +86,38 @@ function initSearch() {
     const raw = input.value.trim();
     if (!raw) return;
 
-    // 嘗試從 geopkl URL 解析 treeid
-    let code = raw;
-    try {
-      const u = new URL(raw);
-      const tid = u.searchParams.get('treeid') || u.searchParams.get('id');
-      if (tid) code = tid;
-    } catch (_) { /* raw 不是 URL，直接當 code 用 */ }
-
-    const data = await apiFetchTree(code);
-    if (data && data.tree) {
-      openSheet(data.tree);
-      if (data.tree.lat && data.tree.lng) {
-        _map.flyTo([data.tree.lat, data.tree.lng], 17);
+    // ── 情況 1：QR Code / geopkl URL ───────────────────────
+    if (raw.startsWith('http')) {
+      let code = raw;
+      try {
+        const u = new URL(raw);
+        const tid = u.searchParams.get('treeid') || u.searchParams.get('id');
+        if (tid) code = tid;
+      } catch (_) {}
+      const data = await apiFetchTree(code);
+      if (data && data.tree) {
+        openSheet(data.tree);
+        if (data.tree.lat && data.tree.lng) _map.flyTo([data.tree.lat, data.tree.lng], 17);
+      } else {
+        showToast('找不到對應的樹木資料');
       }
-    } else {
-      showToast(`找不到樹籍編號「${code}」`);
+      return;
     }
+
+    // ── 情況 2：樹籍編號（2字母 + 8~12數字，如 SY0030551077）
+    if (/^[A-Za-z]{2}\d{8,12}$/.test(raw)) {
+      const data = await apiFetchTree(raw.toUpperCase());
+      if (data && data.tree) {
+        openSheet(data.tree);
+        if (data.tree.lat && data.tree.lng) _map.flyTo([data.tree.lat, data.tree.lng], 17);
+      } else {
+        showToast(`找不到樹籍編號「${raw}」`);
+      }
+      return;
+    }
+
+    // ── 情況 3：其他輸入 → 當地址處理 ──────────────────────
+    await searchByAddress(raw);
   }
 
   input.addEventListener('keydown', (e) => {
