@@ -81,29 +81,6 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 .data-stat--hint { color: #7a9e84; font-size: 0.78rem; }
 @media (max-width: 480px) { .data-sep--hide, .data-stat--hint { display: none; } }
 
-/* ── Quick Links ──────────────────────────────────────── */
-#quick-links {
-  display: flex; gap: 8px; align-items: center;
-  padding: 8px 14px;
-  background: #f0f7f1;
-  border-bottom: 1px solid #dbe7dd;
-  overflow-x: auto; white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-#quick-links::-webkit-scrollbar { display: none; }
-#quick-links a {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 12px;
-  background: #fff; border: 1.5px solid #cde8d0;
-  border-radius: 20px; text-decoration: none;
-  color: #1a5c2a; font-size: 0.8rem; font-weight: 600;
-  white-space: nowrap; flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
-}
-#quick-links a:hover, #quick-links a:active {
-  background: #e0f4e8; border-color: #1a5c2a;
-}
 
 /* ── Filter Row ───────────────────────────────────────── */
 #filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -452,12 +429,12 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── Top Title Row ───────────────────────────────────── */
 #top-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-#guide-btn {
+.nav-link {
   font-size: 0.78rem; color: rgba(255,255,255,0.85);
   border: 1px solid rgba(255,255,255,0.4); border-radius: 14px;
   padding: 3px 10px; text-decoration: none; white-space: nowrap;
 }
-#guide-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.nav-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
 #report-nav-btn {
   font-size: 0.78rem; color: #fff; background: #b45309;
   border: 1px solid rgba(255,255,255,0.4); border-radius: 14px;
