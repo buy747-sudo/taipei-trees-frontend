@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initQr();
   initStats();
+  initMeasure();
 
   loadTrees();
 });

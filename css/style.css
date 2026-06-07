@@ -143,6 +143,31 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 .bm-overlay input { margin: 0; cursor: pointer; accent-color: #1a5c2a; }
 
+/* ── 量測工具 ─────────────────────────────────────────── */
+.measure-ctrl { margin-bottom: 10px; }
+.measure-mode-btn, .measure-finish-btn, .measure-clear-btn {
+  font-size: 15px !important; line-height: 30px !important;
+  display: block !important; width: 30px !important; height: 30px !important;
+  text-align: center; text-decoration: none !important;
+  background: #fff !important; color: #444 !important;
+}
+.measure-mode-btn:hover, .measure-clear-btn:hover { background: #f0f7f1 !important; }
+.measure-mode-btn.msr-active { background: #1a5c2a !important; color: #fff !important; }
+.measure-finish-btn {
+  background: #f0fdf4 !important; color: #1a5c2a !important; font-weight: 700 !important;
+}
+.measure-finish-btn:hover { background: #dcfce7 !important; }
+.measure-clear-btn { color: #999 !important; }
+.leaflet-container.measure-cursor { cursor: crosshair !important; }
+.measure-tooltip.leaflet-tooltip {
+  background: rgba(26,92,42,0.92) !important; border: none !important;
+  border-radius: 6px !important; color: #fff !important;
+  font-size: 0.82rem !important; padding: 4px 9px !important;
+  white-space: nowrap; pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif;
+}
+.measure-tooltip.leaflet-tooltip::before { border-top-color: rgba(26,92,42,0.92) !important; }
+
 /* ── Stats Bar ────────────────────────────────────────── */
 #stats-bar {
   display: flex; justify-content: space-between; align-items: center;
