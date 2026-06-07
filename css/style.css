@@ -39,7 +39,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 #page-nav-strip a {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 7px 14px;
-  color: rgba(255,255,255,0.75);
+  color: #fff;
   text-decoration: none; font-size: 0.82rem; font-weight: 500;
   white-space: nowrap; flex-shrink: 0;
   border-bottom: 2px solid transparent;
