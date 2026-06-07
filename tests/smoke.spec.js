@@ -128,7 +128,7 @@ test('daan-forest-dashboard.html 顯示大安森林公園碳匯儀表板', async
 test('首頁提供明顯的民眾通報入口', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.locator('#report-nav-btn')).toContainText('通報異常');
-  await expect(page.locator('.intro-report-link')).toContainText('通報樹木異常');
+  await expect(page.locator('.intro-report-link')).toHaveCount(0);
 });
 
 test('report.html 顯示民眾通報表單與 1999 提醒', async ({ page }) => {

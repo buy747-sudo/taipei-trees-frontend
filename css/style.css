@@ -96,15 +96,6 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   color: #1a5c2a; font-size: 0.78rem; font-weight: 700;
   white-space: nowrap;
 }
-.intro-report-link {
-  justify-self: end; display: inline-flex; align-items: center; justify-content: center;
-  min-height: 38px; padding: 9px 14px; border-radius: 8px;
-  background: #b45309; color: #fff; text-decoration: none;
-  font-size: 0.86rem; font-weight: 800; white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.22);
-}
-.intro-report-link:hover { background: #92400e; }
-
 /* ── Filter Row ───────────────────────────────────────── */
 #filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 #filter-district, #filter-species {
@@ -469,7 +460,6 @@ a.btn-report:hover { background: #ffedd5; }
 .btn-report-tree:hover { background: #ffedd5; }
 
 @media (max-width: 640px) {
-  .intro-report-link { justify-self: start; }
   .report-wrap { padding: 12px; }
   .report-hero, .report-panel { padding: 16px; }
   .report-section:first-of-type { display: block; }
