@@ -162,7 +162,8 @@
   <div class="source-note">
     📊 資料來源：台北市政府開放資料平台（data.taipei），行道樹與受保護樹木資料，依 OGDL 授權使用。<br>
     碳儲量依 Brown (1997) 地上生物量方程式及 IPCC (2006) Tier 1 碳分率計算。年固碳量為固碳總量 × 年增量率估算。
-    實際數值可能因調查日期與測量誤差有所差異，僅供參考。
+    實際數值可能因調查日期與測量誤差有所差異，僅供參考。<br>
+    <span style="color:#b08020;">* 標示值為依全市總碳量按各區樹木數比例估算，非各區獨立計算值。</span>
   </div>
 
 </div>
@@ -181,24 +182,40 @@
       const d = await res.json();
 
       // 全市大數字
-      setText('tc-total',  (d.total || 0).toLocaleString('zh-TW'));
-      setText('tc-carbon', (d.total_carbon_tonnes || 0).toLocaleString('zh-TW'));
-      setText('tc-annual', (d.total_annual_co2_tonnes || 0).toLocaleString('zh-TW'));
-      const districts = Object.values(d.by_district || {});
-      const avgAnnual = districts.length
-        ? Math.round((d.total_annual_co2_tonnes || 0) / districts.length * 10) / 10
+      const totalTrees      = d.total || 0;
+      const totalCarbon     = d.total_carbon_tonnes    || 0;
+      const totalAnnual     = d.total_annual_co2_tonnes || 0;
+      setText('tc-total',  totalTrees.toLocaleString('zh-TW'));
+      setText('tc-carbon', totalCarbon.toLocaleString('zh-TW'));
+      setText('tc-annual', totalAnnual.toLocaleString('zh-TW'));
+
+      // 各區資料（過濾掉空白區名；若 API 尚未提供每區碳量，依樹木比例估算）
+      _districtData = Object.entries(d.by_district || {})
+        .filter(([name]) => name !== '')           // 排除空白行政區
+        .map(([name, v]) => {
+          const cnt = v.total || 0;
+          const ratio = totalTrees > 0 ? cnt / totalTrees : 0;
+          // 若 API 已回傳真實碳量則用真實值，否則按比例估算
+          const carbon = (v.carbon_tonnes     > 0) ? v.carbon_tonnes
+                       : Math.round(totalCarbon * ratio * 10) / 10;
+          const annual = (v.annual_co2_tonnes > 0) ? v.annual_co2_tonnes
+                       : Math.round(totalAnnual * ratio * 10) / 10;
+          return {
+            name,
+            total:     cnt,
+            street:    v.street    || 0,
+            protected: v.protected || 0,
+            carbon,
+            annual,
+            estimated: !(v.carbon_tonnes > 0),   // 標記是否為估算值
+          };
+        });
+
+      const validDistricts = _districtData.length;
+      const avgAnnual = validDistricts
+        ? Math.round(totalAnnual / validDistricts * 10) / 10
         : 0;
       setText('tc-avg', avgAnnual.toLocaleString('zh-TW'));
-
-      // 各區資料
-      _districtData = Object.entries(d.by_district || {}).map(([name, v]) => ({
-        name,
-        total:      v.total || 0,
-        street:     v.street || 0,
-        protected:  v.protected || 0,
-        carbon:     v.carbon_tonnes || 0,
-        annual:     v.annual_co2_tonnes || 0,
-      }));
 
       render();
     } catch (e) {
@@ -230,8 +247,8 @@
           </div>
           <div class="rank-sub">
             <span>樹木 <strong>${d.total.toLocaleString()}</strong> 棵</span>
-            <span>年固碳 <strong>${d.annual.toLocaleString()}</strong> 噸</span>
-            <span>累積碳儲 <strong>${d.carbon.toLocaleString()}</strong> 噸</span>
+            <span>年固碳 <strong>${d.annual.toLocaleString()}</strong> 噸${d.estimated ? '<sup title="依全市比例估算">*</sup>' : ''}</span>
+            <span>累積碳儲 <strong>${d.carbon.toLocaleString()}</strong> 噸${d.estimated ? '<sup title="依全市比例估算">*</sup>' : ''}</span>
           </div>
         </div>
         <div class="rank-main-num">
