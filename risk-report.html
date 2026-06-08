@@ -511,10 +511,9 @@ async function exportReportPDF() {
       const photoH = photoW * 0.75; // 4:3 比例
       const PHOTO_BASE = new URL(API_BASE).origin; // e.g. https://office.yiren-eco.online
 
-      // 依角度排序：角度標籤對應
+      // 依角度排序：角度標籤對應（與 DB ASSESSMENT_ANGLE_LABELS 一致）
       const ANGLE_LABELS = {
-        1:'正面（南）',2:'背面（北）',3:'左側（西）',4:'右側（東）',
-        5:'樹冠（上）',6:'根部（下）',7:'損傷特寫',8:'環境全景',
+        0:'全貌', 1:'樹幹', 2:'樹冠', 3:'根部', 4:'損傷特寫',
       };
 
       // 把照片轉為 dataURL 後嵌入
