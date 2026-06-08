@@ -3,7 +3,15 @@
  * 依賴：config.js（API_BASE）、auth.js（Auth）
  */
 
-const RISK_API = API_BASE.replace('/public', '') + '/api/assessment';
+const RISK_API   = API_BASE.replace('/public', '') + '/api/assessment';
+const NAS_ORIGIN = new URL(API_BASE).origin;   // https://office.yiren-eco.online
+
+/** 把伺服器回傳的相對路徑（/uploads/...）補上 NAS domain */
+function nasUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return NAS_ORIGIN + (url.startsWith('/') ? url : '/' + url);
+}
 
 // ── 狀態 ────────────────────────────────────────────────────────────────────
 let _formData    = null;   // 從 API 取得的題目資料
@@ -646,7 +654,7 @@ async function handlePhotoFile(file) {
     }
     _photoSlots[angle] = { photo_id: data.photo_id, url: data.url };
     slot.innerHTML =
-      `<img src="${data.url}" alt="${data.angle_label}">` +
+      `<img src="${nasUrl(data.url)}" alt="${data.angle_label}">` +
       `<button class="photo-del" onclick="deletePhoto(event,${angle})">✕</button>`;
     slot.classList.add('has-photo');
   } catch (e) {
