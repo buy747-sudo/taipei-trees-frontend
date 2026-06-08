@@ -444,10 +444,7 @@ function openCodeStatusHelp() {
     '7 — 無名牌，系統有此位點，但位置存在偏差',
     '8 — 有名牌，但名牌位置與系統不符',
   ];
-  alert('【115年規範 編碼狀態定義】
-
-' + lines.join('
-'));
+  alert('【115年規範 編碼狀態定義】\n\n' + lines.join('\n'));
 }
 
 function updateCodeStatusOptions() {
