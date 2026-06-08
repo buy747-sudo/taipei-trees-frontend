@@ -438,20 +438,21 @@ async function exportReportPDF() {
     doc.text('重大危害（A 級）', PW/2, y+5, {align:'center'});
     y += 7;
 
+    const GA_LH = 8.5;   // A 級每列行高
     doc.setDrawColor(140,140,140); doc.setLineWidth(0.25);
-    doc.rect(M, y, CW, grade_a_detail.length * 6.5 + 3);
-    sf(7.5,'normal');
-    doc.text('確認樹的目標區有標的物且發生下述重大危害狀況：', M+2, y+5);
-    y += 7;
+    doc.rect(M, y, CW, grade_a_detail.length * GA_LH + 6);
+    sf(8,'normal');
+    doc.text('確認樹的目標區有標的物且發生下述重大危害狀況：', M+3, y+6);
+    y += 9;
     grade_a_detail.forEach(item => {
       const triggered = item.triggered;
-      sf(8, triggered?'bold':'normal', triggered?[150,0,0]:[60,60,60]);
-      doc.text(`${triggered?'☑':'□'}  ${item.label}`, M+4, y);
+      sf(9, triggered?'bold':'normal', triggered?[150,0,0]:[60,60,60]);
+      doc.text(`${triggered?'☑':'□'}  ${item.label}`, M+5, y);
       if (triggered) {
-        sf(7.5,'normal',[200,50,50]);
-        doc.text('◀ 已觸發', PW-M-2, y, {align:'right'});
+        sf(8,'normal',[200,50,50]);
+        doc.text('◀ 已觸發', PW-M-3, y, {align:'right'});
       }
-      y += 6.5;
+      y += GA_LH;
     });
     sf(8,'normal');
     y += 2;
