@@ -24,6 +24,8 @@ let treeData = null;        // from /public/tree/<code>
 let surveyId = null;        // set after first draft save
 let photoFiles = {};        // direction -> File
 let stepGOriginalHTML = ''; // G 段原始 HTML，用於重置
+let isNewTree = false;      // 新補植流程
+let tempTreeCode = null;    // TEMP-YYYYMMDD-NNN
 
 // ── init ─────────────────────────────────────────────────────────────────────
 (function init() {
@@ -84,6 +86,12 @@ function bindEvents() {
 
   // GPS
   document.getElementById('gps-refresh-btn').addEventListener('click', requestGPS);
+  document.getElementById('gps-db-btn').addEventListener('click', useDbCoordinates);
+
+  // GPS source radio → show/hide RS3 hint
+  document.querySelectorAll('[name=gps_source]').forEach(r => {
+    r.addEventListener('change', onGpsSourceChange);
+  });
 
   // DBH auto-calc circumference
   ['dbh1','dbh2','dbh3','dbh4','dbh5','dbh6'].forEach(id => {
@@ -94,9 +102,14 @@ function bindEvents() {
     document.getElementById('circ-1m').value = v ? (v * Math.PI).toFixed(1) : '';
   });
 
-  // tree_status 聯動：危木 → 備註必填提示；死亡缺株 → 跳段提示
+  // tree_status 聯動
   document.querySelectorAll('[name=tree_status]').forEach(r => {
     r.addEventListener('change', onTreeStatusChange);
+  });
+
+  // tag_anomaly checkbox toggle
+  document.getElementById('tag-anomaly-cb').addEventListener('change', e => {
+    document.getElementById('tag-anomaly-note-row').style.display = e.target.checked ? 'block' : 'none';
   });
 
   // is_street_tree toggle park-name
@@ -114,14 +127,15 @@ function bindEvents() {
   document.getElementById('draft-btn').addEventListener('click', () => submitSurvey('draft'));
 }
 
-// ── 死亡缺株跳段邏輯 ──────────────────────────────────────────────────────────
+// ── 死亡缺株 / 已移除跳段邏輯 ────────────────────────────────────────────────
 const DEAD_SKIP_STEPS = new Set([3, 4]); // D量測、E樹穴
 
 function isDeadTree() {
-  return radio('tree_status') === '死亡缺株';
+  const val = radio('tree_status');
+  return val === '死亡缺株' || val === '已移除';
 }
 
-/** 取得實際應跳轉的步驟（死亡缺株時略過 D/E）*/
+/** 取得實際應跳轉的步驟（死亡缺株/已移除時略過 D/E）*/
 function resolveStep(target) {
   if (!isDeadTree()) return target;
   if (!DEAD_SKIP_STEPS.has(target)) return target;
@@ -142,21 +156,25 @@ function goStep(raw) {
   const n = resolveStep(raw);
 
   document.querySelectorAll('[data-step]').forEach(el => el.classList.remove('active'));
-  document.querySelector(`[data-step="${n}"]`).classList.add('active');
+  document.querySelector('[data-step="' + n + '"]').classList.add('active');
 
   const dead = isDeadTree();
   document.querySelectorAll('#step-bar span').forEach(sp => {
     const s = parseInt(sp.dataset.s);
     sp.classList.remove('active', 'done', 'skipped');
-    if (s === n)                          sp.classList.add('active');
-    else if (dead && DEAD_SKIP_STEPS.has(s)) sp.classList.add('skipped');
-    else if (s < n)                       sp.classList.add('done');
+    if (s === n)                               sp.classList.add('active');
+    else if (dead && DEAD_SKIP_STEPS.has(s))   sp.classList.add('skipped');
+    else if (s < n)                            sp.classList.add('done');
   });
 
   currentStep = n;
 
   // side effects on entering steps
-  if (n === 2) requestGPS();
+  if (n === 2) {
+    requestGPS();
+    const dbBtn = document.getElementById('gps-db-btn');
+    if (dbBtn) dbBtn.style.display = (treeData && treeData.lat) ? 'inline-block' : 'none';
+  }
   if (n === 6) buildPhotoSlots();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -167,11 +185,16 @@ async function lookupTree(code) {
   if (!code) return;
   const errEl = document.getElementById('step-a-error');
   errEl.style.display = 'none';
+  isNewTree = false;
+  tempTreeCode = null;
 
   try {
-    const res = await fetch(`${API_BASE}/tree/${encodeURIComponent(code)}`);
+    const res = await fetch(API_BASE + '/tree/' + encodeURIComponent(code));
     if (!res.ok) {
-      errEl.textContent = `找不到樹籍編碼「${code}」，請確認後重試。`;
+      errEl.innerHTML = '找不到樹籍編碼「' + code + '」，請確認後重試。' +
+        '<br><button onclick="startNewTree()" style="margin-top:8px;padding:8px 16px;' +
+        'background:#f59e0b;color:#fff;border:none;border-radius:8px;cursor:pointer;' +
+        'font-size:0.88rem;font-weight:600;">🌱 這是新補植樹木，建立暫時編碼</button>';
       errEl.style.display = 'block';
       document.getElementById('tree-found-card').hidden = true;
       return;
@@ -180,18 +203,15 @@ async function lookupTree(code) {
     treeData = data.tree;
     showTreeInfo(treeData);
     document.getElementById('tree-found-card').hidden = false;
-    // pre-fill species name → 觸發 onSpeciesChange 自動帶入樹種編碼與原生/外來
     if (treeData.species_name) {
       document.getElementById('species-name').value = treeData.species_name;
       onSpeciesChange();
     }
-    // 若 API 直接回傳樹種編碼，優先使用（比 species.js 查表更準確）
     if (treeData.species_code) {
       document.getElementById('species-code').value = treeData.species_code;
     }
-    // 若 API 直接回傳原生/外來，優先使用
     if (treeData.origin) {
-      const originRadio = document.querySelector(`[name=origin][value="${treeData.origin}"]`);
+      const originRadio = document.querySelector('[name=origin][value="' + treeData.origin + '"]');
       if (originRadio) originRadio.checked = true;
     }
   } catch (e) {
@@ -201,10 +221,35 @@ async function lookupTree(code) {
 }
 
 function showTreeInfo(tree) {
-  document.getElementById('ti-species').textContent =
-    (tree.species_name || '（未知樹種）') + '　' + tree.registry_code;
-  document.getElementById('ti-meta').textContent =
-    [tree.district, tree.managing_unit].filter(Boolean).join('　');
+  const label = isNewTree
+    ? ('🌱 新補植樹木　' + tempTreeCode)
+    : ((tree && tree.species_name ? tree.species_name : '（未知樹種）') + '　' + (tree ? tree.registry_code : ''));
+  document.getElementById('ti-species').textContent = label;
+  document.getElementById('ti-meta').textContent = isNewTree
+    ? '待審核，編碼暫時使用 TEMP 前綴'
+    : (tree ? [tree.district, tree.managing_unit].filter(Boolean).join('　') : '');
+}
+
+// ── 新補植流程 ────────────────────────────────────────────────────────────────
+function generateTempCode() {
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const key = 'temp_code_seq_' + today;
+  let seq = parseInt(localStorage.getItem(key) || '0') + 1;
+  localStorage.setItem(key, seq);
+  return 'TEMP-' + today + '-' + String(seq).padStart(3, '0');
+}
+
+function startNewTree() {
+  isNewTree = true;
+  tempTreeCode = generateTempCode();
+  treeData = null;
+
+  document.getElementById('step-a-error').style.display = 'none';
+  document.getElementById('tree-found-card').hidden = false;
+  showTreeInfo(null);
+  document.getElementById('code-input').value = tempTreeCode;
+
+  showToast('已建立暫時編碼 ' + tempTreeCode);
 }
 
 // ── QR scanner ───────────────────────────────────────────────────────────────
@@ -243,22 +288,39 @@ function scanQRFrame(video) {
   if (code && code.data) {
     stopQR();
     const raw = code.data.trim();
-    // extract registry_code from URL or raw string
-    // 支援格式：
-    //   政府樹牌 QR：http://trees.gov.taipei/show/?treeid=SY0420041044
-    //   本站 QR：    https://taipei-trees.org/tree.html?id=JS0750021125
-    //   舊格式：     ...?code=JS0750021125 或 .../tree/JS0750021125
     const match = raw.match(/(?:treeid=|[?&]id=|code=|\/tree\/)([A-Za-z0-9]+)/);
     const extracted = match ? match[1] : raw;
     document.getElementById('code-input').value = extracted;
     lookupTree(extracted);
-    showToast(`掃到：${extracted}`);
+    showToast('掃到：' + extracted);
     return;
   }
   qrTimer = requestAnimationFrame(() => scanQRFrame(video));
 }
 
 // ── GPS ──────────────────────────────────────────────────────────────────────
+function onGpsSourceChange() {
+  const src = radio('gps_source');
+  const rs3Hint = document.getElementById('rs3-hint');
+  if (rs3Hint) rs3Hint.style.display = src === 'RS3儀器' ? 'block' : 'none';
+  if (src === '沿用資料庫') useDbCoordinates();
+}
+
+function useDbCoordinates() {
+  if (!treeData || !treeData.lat || !treeData.lng) {
+    showToast('此樹木無資料庫座標可沿用');
+    return;
+  }
+  document.getElementById('gps-phone-lat').value = treeData.lat.toFixed(6);
+  document.getElementById('gps-phone-lng').value = treeData.lng.toFixed(6);
+  const badge = document.getElementById('gps-badge');
+  badge.className = 'gps-badge gps-warn';
+  badge.textContent = '🗃️ 沿用資料庫座標（未實測）';
+  const r = document.querySelector('[name=gps_source][value="沿用資料庫"]');
+  if (r) r.checked = true;
+  showToast('已填入資料庫座標');
+}
+
 function requestGPS() {
   const badge = document.getElementById('gps-badge');
   badge.className = 'gps-badge';
@@ -276,15 +338,26 @@ function requestGPS() {
       document.getElementById('gps-phone-lat').value = lat;
       document.getElementById('gps-phone-lng').value = lng;
 
-      if (acc < 5) {
+      // 自動推斷來源：精度 <1m 很可能是 RS3 via Mock Location
+      const src = radio('gps_source');
+      if (!src || src === '手機GPS') {
+        const autoSrc = acc < 1 ? 'RS3儀器' : '手機GPS';
+        const r = document.querySelector('[name=gps_source][value="' + autoSrc + '"]');
+        if (r) r.checked = true;
+      }
+
+      if (acc < 1) {
         badge.className = 'gps-badge gps-ok';
-        badge.textContent = `✅ 精度 ${acc.toFixed(1)}m`;
+        badge.textContent = '✅ 精度 ' + acc.toFixed(2) + 'm（RS3）';
+      } else if (acc < 5) {
+        badge.className = 'gps-badge gps-ok';
+        badge.textContent = '✅ 精度 ' + acc.toFixed(1) + 'm';
       } else if (acc < 15) {
         badge.className = 'gps-badge gps-warn';
-        badge.textContent = `⚠️ 精度 ${acc.toFixed(1)}m（偏低）`;
+        badge.textContent = '⚠️ 精度 ' + acc.toFixed(1) + 'm（偏低）';
       } else {
         badge.className = 'gps-badge gps-err';
-        badge.textContent = `❌ 精度 ${acc.toFixed(1)}m（需儀器）`;
+        badge.textContent = '❌ 精度 ' + acc.toFixed(1) + 'm（建議用 RS3）';
       }
 
       // compare with tree's stored position
@@ -296,9 +369,9 @@ function requestGPS() {
         const hint = document.getElementById('gps-dist-hint');
         const style = dist < 5 ? 'gps-ok' : dist < 15 ? 'gps-warn' : 'gps-err';
         const emoji = dist < 5 ? '✅' : dist < 15 ? '⚠️' : '❌';
-        hint.className = `gps-badge ${style}`;
+        hint.className = 'gps-badge ' + style;
         hint.style.display = 'inline-flex';
-        hint.textContent = `${emoji} 與資料庫距離 ${dist.toFixed(1)}m`;
+        hint.textContent = emoji + ' 與資料庫距離 ' + dist.toFixed(1) + 'm';
       }
     },
     err => {
@@ -318,7 +391,7 @@ function haversineM(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ── species datalist ─────────────────────────────────────────────────────────────
+// ── species datalist ──────────────────────────────────────────────────────────
 function populateSpeciesDatalist() {
   const dl = document.getElementById('species-list');
   if (!dl || typeof getSpeciesNames !== 'function') return;
@@ -326,7 +399,7 @@ function populateSpeciesDatalist() {
     const opt = document.createElement('option');
     opt.value = name;
     const info = getSpeciesInfo(name);
-    if (info) opt.label = `${name}（${info.origin}，編碼 ${info.code}）`;
+    if (info) opt.label = name + '（' + info.origin + '，編碼 ' + info.code + '）';
     dl.appendChild(opt);
   });
 }
@@ -337,10 +410,9 @@ function onSpeciesChange() {
   const info = getSpeciesInfo(name);
   if (!info) return;
   if (info.code) document.getElementById('species-code').value = info.code;
-  // auto-select origin radio
   if (info.origin) {
-    const radio = document.querySelector(`[name=origin][value="${info.origin}"]`);
-    if (radio) radio.checked = true;
+    const r = document.querySelector('[name=origin][value="' + info.origin + '"]');
+    if (r) r.checked = true;
   }
 }
 
@@ -360,17 +432,22 @@ function onTreeStatusChange() {
     hint.style.color = '#555';
     hint.style.border = '1px solid #ccc';
     hint.textContent = '📋 死亡缺株：量測（D段）與樹穴（E段）將自動略過，直接跳至特殊資訊（F段）。';
-    // 若目前已在 D 或 E 段，立刻跳到 F
     if (DEAD_SKIP_STEPS.has(currentStep)) goStep(5);
-    // 否則更新步驟列樣式（讓 D/E 顯示為略過）
+    else updateStepBar();
+  } else if (val === '已移除') {
+    hint.style.display = 'block';
+    hint.style.background = '#fce8e8';
+    hint.style.color = '#c00';
+    hint.style.border = '1px solid #f87171';
+    hint.textContent = '🚧 已移除：量測（D段）與樹穴（E段）將自動略過。備註欄位必填（請說明移除原因）。';
+    if (DEAD_SKIP_STEPS.has(currentStep)) goStep(5);
     else updateStepBar();
   } else {
     hint.style.display = 'none';
-    updateStepBar(); // 恢復正常步驟列
+    updateStepBar();
   }
 }
 
-/** 只重繪步驟列，不切換步驟 */
 function updateStepBar() {
   const dead = isDeadTree();
   document.querySelectorAll('#step-bar span').forEach(sp => {
@@ -388,7 +465,6 @@ function calcCircumference() {
     .map(id => parseFloat(document.getElementById(id).value) || 0)
     .filter(v => v > 0);
   if (!vals.length) { document.getElementById('circumference').value = ''; return; }
-  // 叢生多株：DBH = sqrt(DBH1²+DBH2²+...)
   const effective = vals.length === 1
     ? vals[0]
     : Math.sqrt(vals.reduce((s, v) => s + v*v, 0));
@@ -408,24 +484,21 @@ function buildPhotoSlots() {
   }
 
   const dirs = PHOTO_DIRS[dir] || ['east', 'north'];
-  hint.textContent = `拍攝方向：${dirs.map(d => DIR_LABEL[d]).join('、')}（台北市附件四規範）`;
+  hint.textContent = '拍攝方向：' + dirs.map(d => DIR_LABEL[d]).join('、') + '（台北市附件四規範）';
 
   dirs.forEach(d => {
     const slot = document.createElement('div');
     slot.className = 'photo-slot';
     slot.dataset.direction = d;
-    slot.innerHTML = `
-      <div class="slot-dir">${DIR_ICON[d]} ${DIR_LABEL[d]}</div>
-      <div class="slot-hint">點此拍照或選取圖片</div>
-      <img alt="${DIR_LABEL[d]}" id="thumb-${d}">
-      <button class="del-btn" data-dir="${d}" onclick="removePhoto(event,'${d}')">✕</button>
-      <input type="file" accept="image/*" capture="environment" data-dir="${d}" onchange="onPhotoChange(event,'${d}')">
-    `;
-    // restore existing photo preview
+    slot.innerHTML =
+      '<div class="slot-dir">' + DIR_ICON[d] + ' ' + DIR_LABEL[d] + '</div>' +
+      '<div class="slot-hint">點此拍照或選取圖片</div>' +
+      '<img alt="' + DIR_LABEL[d] + '" id="thumb-' + d + '">' +
+      '<button class="del-btn" data-dir="' + d + '" onclick="removePhoto(event,\'' + d + '\')">✕</button>' +
+      '<input type="file" accept="image/*" capture="environment" data-dir="' + d + '" onchange="onPhotoChange(event,\'' + d + '\')">';
     if (photoFiles[d]) {
       slot.classList.add('has-photo');
-      const thumb = slot.querySelector('img');
-      thumb.src = URL.createObjectURL(photoFiles[d]);
+      slot.querySelector('img').src = URL.createObjectURL(photoFiles[d]);
     }
     wrap.appendChild(slot);
   });
@@ -437,8 +510,7 @@ function onPhotoChange(event, dir) {
   photoFiles[dir] = file;
   const slot = event.target.closest('.photo-slot');
   slot.classList.add('has-photo');
-  const thumb = document.getElementById(`thumb-${dir}`);
-  thumb.src = URL.createObjectURL(file);
+  document.getElementById('thumb-' + dir).src = URL.createObjectURL(file);
   slot.querySelector('.slot-hint').textContent = file.name;
 }
 
@@ -448,14 +520,14 @@ function removePhoto(event, dir) {
   delete photoFiles[dir];
   const slot = event.target.closest('.photo-slot');
   slot.classList.remove('has-photo');
-  document.getElementById(`thumb-${dir}`).src = '';
+  document.getElementById('thumb-' + dir).src = '';
   slot.querySelector('.slot-hint').textContent = '點此拍照或選取圖片';
   slot.querySelector('input[type=file]').value = '';
 }
 
 // ── collect form data ─────────────────────────────────────────────────────────
 function radio(name) {
-  const el = document.querySelector(`[name=${name}]:checked`);
+  const el = document.querySelector('[name=' + name + ']:checked');
   return el ? el.value : null;
 }
 function num(id) {
@@ -467,13 +539,20 @@ function txt(id) {
 }
 
 function collectFormData(status) {
+  const tagAnomalyCb = document.getElementById('tag-anomaly-cb');
+  const tagAnomaly = tagAnomalyCb ? (tagAnomalyCb.checked ? 1 : 0) : 0;
+  const tagAnomalyNote = tagAnomaly ? txt('tag-anomaly-note') : null;
+
+  const treeCode = isNewTree ? tempTreeCode
+    : (treeData ? treeData.registry_code : txt('code-input'));
+
   return {
     survey_id: surveyId || undefined,
-    tree_registry_code: treeData ? treeData.registry_code : txt('code-input'),
+    tree_registry_code: treeCode,
     survey_date: txt('survey-date'),
     status,
 
-    code_status: parseInt(radio('code_status') ?? '0'),
+    code_status: isNewTree ? 4 : parseInt(radio('code_status') ?? '0'),
     tree_status: radio('tree_status'),
     species_name: txt('species-name'),
     species_code: num('species-code'),
@@ -486,6 +565,7 @@ function collectFormData(status) {
     gps_instrument_lng: num('gps-instr-lng'),
     twd97_x: num('twd97-x'),
     twd97_y: num('twd97-y'),
+    gps_source: radio('gps_source') || '手機GPS',
 
     ht_dbh: num('ht-dbh') || 130,
     dbh1: num('dbh1'), dbh2: num('dbh2'), dbh3: num('dbh3'),
@@ -514,6 +594,13 @@ function collectFormData(status) {
     is_street_tree: radio('is_street_tree') || 'S',
     park_name: txt('park-name'),
     protected_tree: parseInt(radio('protected_tree') ?? '0'),
+
+    tag_anomaly: tagAnomaly,
+    tag_anomaly_note: tagAnomalyNote,
+
+    is_new_tree: isNewTree ? 1 : 0,
+    temp_tree_code: isNewTree ? tempTreeCode : null,
+
     notes: txt('notes'),
   };
 }
@@ -538,7 +625,12 @@ async function submitSurvey(status) {
     errEl.textContent = '⚠️ 危木必須填寫備註（步驟F），請說明危害情形。';
     errEl.style.display = 'block'; return;
   }
-  if (status === 'submitted' && data.tree_status !== '死亡缺株' && !data.dbh1) {
+  if (status === 'submitted' && data.tree_status === '已移除' && !data.notes) {
+    errEl.textContent = '🚧 已移除必須填寫備註（步驟F），請說明移除原因。';
+    errEl.style.display = 'block'; return;
+  }
+  const skipDbh = data.tree_status === '死亡缺株' || data.tree_status === '已移除';
+  if (status === 'submitted' && !skipDbh && !data.dbh1) {
     errEl.textContent = '送出前請填寫 DBH1（步驟D）。';
     errEl.style.display = 'block'; return;
   }
@@ -550,21 +642,20 @@ async function submitSurvey(status) {
   submitBtn.textContent = '送出中…';
 
   try {
-    const res = await Auth.authFetch(`${SURVEY_API}/submit`, {
+    const res = await Auth.authFetch(SURVEY_API + '/submit', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    if (!res) return; // 401 handled by authFetch
+    if (!res) return;
 
     const json = await res.json();
     if (!res.ok) {
-      errEl.textContent = json.error || `送出失敗（${res.status}）`;
+      errEl.textContent = json.error || ('送出失敗（' + res.status + '）');
       errEl.style.display = 'block'; return;
     }
 
     surveyId = json.survey_id;
 
-    // upload photos
     const dirs = Object.keys(photoFiles);
     let photoErrors = [];
     for (const dir of dirs) {
@@ -576,7 +667,7 @@ async function submitSurvey(status) {
       showToast('普查送出成功 🎉');
       showSuccessSummary(json.survey_id, data, Object.keys(photoFiles).length, photoErrors);
     } else {
-      infoEl.textContent = '💾 草稿已儲存（#' + surveyId + '）' + (photoErrors.length ? `（照片上傳失敗：${photoErrors.join('、')}）` : '');
+      infoEl.textContent = '💾 草稿已儲存（#' + surveyId + '）' + (photoErrors.length ? '（照片上傳失敗：' + photoErrors.join('、') + '）' : '');
       infoEl.style.display = 'block';
     }
 
@@ -596,10 +687,8 @@ async function uploadPhoto(id, dir, file) {
     form.append('photo', file);
     form.append('direction', dir);
     form.append('angle_label', DIR_LABEL[dir]);
-    const res = await Auth.authFetch(`${SURVEY_API}/${id}/photos`, {
+    const res = await Auth.authFetch(SURVEY_API + '/' + id + '/photos', {
       method: 'POST',
-      // 不傳 Content-Type，讓 authFetch 偵測到 FormData 後自動刪除，
-      // 瀏覽器才能正確填入 multipart/form-data 的 boundary。
       body: form,
     });
     return res && res.ok;
@@ -611,99 +700,92 @@ function showSuccessSummary(sid, data, photoCount, photoErrors) {
   const step = document.querySelector('[data-step="6"]');
   if (!step) return;
 
-  const treeLabel = treeData
-    ? `${treeData.species_name || '（未知樹種）'}　${treeData.registry_code}`
-    : data.tree_registry_code;
+  const treeLabel = isNewTree
+    ? ('🌱 新補植（' + tempTreeCode + '）')
+    : (treeData
+        ? ((treeData.species_name || '（未知樹種）') + '　' + treeData.registry_code)
+        : data.tree_registry_code);
 
   const location = treeData
     ? [treeData.district, treeData.managing_unit].filter(Boolean).join('　')
-    : '—';
+    : (isNewTree ? '新補植（待審核建檔）' : '—');
 
+  const skipDbh = data.tree_status === '死亡缺株' || data.tree_status === '已移除';
   const dbhDisplay = data.dbh1
-    ? `${data.dbh1} cm${data.dbh2 ? ` / ${data.dbh2}` : ''}${data.dbh3 ? ` / ${data.dbh3}` : ''}`
-    : '—（死亡缺株）';
+    ? (data.dbh1 + ' cm' + (data.dbh2 ? ' / ' + data.dbh2 : '') + (data.dbh3 ? ' / ' + data.dbh3 : ''))
+    : (skipDbh ? '—（' + data.tree_status + '）' : '—');
 
   const photoNote = photoErrors.length
-    ? `<span style="color:#c00;">⚠️ 照片上傳失敗：${photoErrors.join('、')}</span>`
-    : `✅ 照片 ${photoCount} 張`;
+    ? '<span style="color:#c00;">⚠️ 照片上傳失敗：' + photoErrors.join('、') + '</span>'
+    : '✅ 照片 ' + photoCount + ' 張';
 
-  step.innerHTML = `
-    <div class="card" style="text-align:center;padding:28px 20px;">
-      <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#1a5c2a;margin-bottom:4px;">普查已成功送出</div>
-      <div style="font-size:0.82rem;color:#888;margin-bottom:20px;">普查編號 #${sid}</div>
-    </div>
+  const tagRow = data.tag_anomaly
+    ? '<tr><td style="padding:7px 4px;color:#c00;">⚠️ 樹牌</td>' +
+      '<td style="padding:7px 4px;color:#c00;">異常：' + (data.tag_anomaly_note || '（未說明）') + '</td></tr>'
+    : '';
 
-    <div class="card">
-      <div class="card-title">📋 本次普查摘要</div>
-      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
-        <tbody>
-          <tr><td style="padding:7px 4px;color:#888;width:90px;">樹木</td>
-              <td style="padding:7px 4px;font-weight:600;">${treeLabel}</td></tr>
-          <tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">位置</td>
-              <td style="padding:7px 4px;">${location}</td></tr>
-          <tr><td style="padding:7px 4px;color:#888;">普查日期</td>
-              <td style="padding:7px 4px;">${data.survey_date || '—'}</td></tr>
-          <tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">生長狀況</td>
-              <td style="padding:7px 4px;">${data.tree_status || '—'}</td></tr>
-          <tr><td style="padding:7px 4px;color:#888;">樹種</td>
-              <td style="padding:7px 4px;">${data.species_name || '—'}</td></tr>
-          <tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">DBH</td>
-              <td style="padding:7px 4px;">${dbhDisplay}</td></tr>
-          <tr><td style="padding:7px 4px;color:#888;">照片</td>
-              <td style="padding:7px 4px;">${photoNote}</td></tr>
-        </tbody>
-      </table>
-    </div>
+  step.innerHTML =
+    '<div class="card" style="text-align:center;padding:28px 20px;">' +
+      '<div style="font-size:3rem;margin-bottom:12px;">🎉</div>' +
+      '<div style="font-size:1.1rem;font-weight:700;color:#1a5c2a;margin-bottom:4px;">普查已成功送出</div>' +
+      '<div style="font-size:0.82rem;color:#888;margin-bottom:20px;">普查編號 #' + sid + '</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-title">📋 本次普查摘要</div>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:0.88rem;"><tbody>' +
+        '<tr><td style="padding:7px 4px;color:#888;width:90px;">樹木</td><td style="padding:7px 4px;font-weight:600;">' + treeLabel + '</td></tr>' +
+        '<tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">位置</td><td style="padding:7px 4px;">' + location + '</td></tr>' +
+        '<tr><td style="padding:7px 4px;color:#888;">普查日期</td><td style="padding:7px 4px;">' + (data.survey_date || '—') + '</td></tr>' +
+        '<tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">生長狀況</td><td style="padding:7px 4px;">' + (data.tree_status || '—') + '</td></tr>' +
+        '<tr><td style="padding:7px 4px;color:#888;">樹種</td><td style="padding:7px 4px;">' + (data.species_name || '—') + '</td></tr>' +
+        '<tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">DBH</td><td style="padding:7px 4px;">' + dbhDisplay + '</td></tr>' +
+        '<tr><td style="padding:7px 4px;color:#888;">GPS來源</td><td style="padding:7px 4px;">' + (data.gps_source || '—') + '</td></tr>' +
+        '<tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">照片</td><td style="padding:7px 4px;">' + photoNote + '</td></tr>' +
+        tagRow +
+      '</tbody></table>' +
+    '</div>' +
+    '<div class="card" style="display:flex;flex-direction:column;gap:10px;">' +
+      '<button class="btn-next" onclick="resetSurvey()" style="width:100%;padding:14px;">🌳 繼續普查下一棵</button>' +
+      '<a href="/survey-list.html" style="display:block;text-align:center;padding:13px;font-size:0.95rem;font-weight:600;color:#1a5c2a;border:1.5px solid #1a5c2a;border-radius:10px;text-decoration:none;">📋 查看所有普查紀錄</a>' +
+      '<a href="/" style="display:block;text-align:center;padding:11px;font-size:0.88rem;color:#888;text-decoration:none;">← 回到地圖</a>' +
+    '</div>';
 
-    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
-      <button class="btn-next" onclick="resetSurvey()" style="width:100%;padding:14px;">
-        🌳 繼續普查下一棵
-      </button>
-      <a href="/survey-list.html" style="display:block;text-align:center;padding:13px;font-size:0.95rem;
-         font-weight:600;color:#1a5c2a;border:1.5px solid #1a5c2a;border-radius:10px;
-         text-decoration:none;">
-        📋 查看所有普查紀錄
-      </a>
-      <a href="/" style="display:block;text-align:center;padding:11px;font-size:0.88rem;
-         color:#888;text-decoration:none;">
-        ← 回到地圖
-      </a>
-    </div>
-  `;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── 重置普查（繼續下一棵）────────────────────────────────────────────────────
 function resetSurvey() {
-  // 清除所有 state
   treeData = null;
   surveyId = null;
   photoFiles = {};
+  isNewTree = false;
+  tempTreeCode = null;
 
-  // 清除表單輸入
-  document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => {
-    el.value = '';
-  });
+  document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => { el.value = ''; });
   document.querySelectorAll('input[type=radio]').forEach(el => { el.checked = false; });
+  document.querySelectorAll('input[type=checkbox]').forEach(el => { el.checked = false; });
   document.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
 
-  // 重設預設值
   document.getElementById('survey-date').value = new Date().toISOString().slice(0, 10);
   document.getElementById('ht-dbh').value = '130';
   document.querySelector('[name=is_street_tree][value="S"]').checked = true;
   document.querySelector('[name=pit_fence][value="0"]').checked = true;
   document.querySelector('[name=pit_pole][value="0"]').checked = true;
   document.querySelector('[name=protected_tree][value="0"]').checked = true;
+  const gpsSrcRadio = document.querySelector('[name=gps_source][value="手機GPS"]');
+  if (gpsSrcRadio) gpsSrcRadio.checked = true;
 
-  // 還原 G 段原始 HTML 並重新綁定事件
+  const noteRow = document.getElementById('tag-anomaly-note-row');
+  if (noteRow) noteRow.style.display = 'none';
+  const rs3Hint = document.getElementById('rs3-hint');
+  if (rs3Hint) rs3Hint.style.display = 'none';
+
   const stepG = document.querySelector('[data-step="6"]');
   stepG.innerHTML = stepGOriginalHTML;
   document.getElementById('road-direction').addEventListener('change', buildPhotoSlots);
   document.getElementById('submit-btn').addEventListener('click', () => submitSurvey('submitted'));
   document.getElementById('draft-btn').addEventListener('click', () => submitSurvey('draft'));
 
-  // 隱藏步驟A的殘留狀態
   document.getElementById('tree-found-card').hidden = true;
   document.getElementById('step-a-error').style.display = 'none';
   document.getElementById('tree-status-hint').style.display = 'none';
@@ -716,7 +798,8 @@ function resetSurvey() {
 }
 
 // ── toast ─────────────────────────────────────────────────────────────────────
-function showToast(msg, dur = 2800) {
+function showToast(msg, dur) {
+  if (!dur) dur = 2800;
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');

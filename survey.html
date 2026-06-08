@@ -281,8 +281,18 @@
             <label><input type="radio" name="tree_status" value="不良"> 不良</label>
             <label><input type="radio" name="tree_status" value="危木"> ⚠️ 危木</label>
             <label><input type="radio" name="tree_status" value="死亡缺株"> 死亡缺株</label>
+            <label><input type="radio" name="tree_status" value="已移除"> 🚧 已移除</label>
           </div>
           <div id="tree-status-hint" style="display:none;margin-top:6px;padding:8px 12px;border-radius:8px;font-size:0.82rem;"></div>
+        </div>
+        <div class="frow" style="border-top:1px solid #eee;padding-top:12px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+            <input type="checkbox" id="tag-anomaly-cb" style="width:18px;height:18px;accent-color:#c00;">
+            <span>⚠️ 樹牌異常（標牌遺失、QR無法辨識、樹與牌不符）</span>
+          </label>
+          <div id="tag-anomaly-note-row" style="display:none;margin-top:8px;">
+            <input type="text" id="tag-anomaly-note" placeholder="說明異常情況，例如：樹牌遺失、QR碼損毀…" style="width:100%;padding:9px 12px;font-size:0.9rem;border:1.5px solid #f59e0b;border-radius:8px;outline:none;box-sizing:border-box;">
+          </div>
         </div>
         <div class="frow-grid">
           <div class="frow" style="margin-bottom:0;">
@@ -323,11 +333,28 @@
     <div data-step="2">
       <div class="card">
         <div class="card-title">C. GPS 驗證</div>
+
+        <div class="frow">
+          <label>GPS 座標來源</label>
+          <div class="radio-group" id="gps-source-group">
+            <label><input type="radio" name="gps_source" value="手機GPS" checked> 📱 手機 GPS</label>
+            <label><input type="radio" name="gps_source" value="RS3儀器"> 📡 RS3 儀器</label>
+            <label><input type="radio" name="gps_source" value="沿用資料庫"> 🗃️ 沿用資料庫</label>
+            <label><input type="radio" name="gps_source" value="手動輸入"> ✏️ 手動輸入</label>
+          </div>
+        </div>
+        <div id="rs3-hint" style="display:none;background:#e8f5e9;border:1px solid #4caf50;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#1a5c2a;margin-bottom:10px;">
+          📡 <strong>RS3 操作流程</strong>：RS3 開機確認 Fixed 狀態 → 手機開「開發人員選項」→「允許類比位置」→ 選 Mock GPS 應用程式連線 RS3 → 點下方「重新定位」，精度應顯示 ✅ &lt;1m
+        </div>
+
         <div class="seg-label">手機 GPS（自動擷取）</div>
         <div class="frow">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
             <span id="gps-badge" class="gps-badge">&#9203; 等待定位…</span>
-            <button id="gps-refresh-btn" style="padding:6px 12px;font-size:0.8rem;background:#1a5c2a;color:#fff;border:none;border-radius:8px;cursor:pointer;">重新定位</button>
+            <div style="display:flex;gap:6px;">
+              <button id="gps-db-btn" style="display:none;padding:6px 12px;font-size:0.8rem;background:#f59e0b;color:#fff;border:none;border-radius:8px;cursor:pointer;">🗃️ 沿用DB</button>
+              <button id="gps-refresh-btn" style="padding:6px 12px;font-size:0.8rem;background:#1a5c2a;color:#fff;border:none;border-radius:8px;cursor:pointer;">重新定位</button>
+            </div>
           </div>
           <div class="frow-grid">
             <div class="frow" style="margin-bottom:0;">
@@ -341,7 +368,8 @@
           </div>
         </div>
         <div id="gps-dist-hint" style="display:none;margin-bottom:8px;"></div>
-        <div class="seg-label">儀器 GPS（正式值，手動輸入）</div>
+
+        <div class="seg-label">RS3 儀器輸入（正式值，次米級精度）</div>
         <div class="frow-grid">
           <div class="frow" style="margin-bottom:0;">
             <label>緯度（儀器）</label>
@@ -352,7 +380,7 @@
             <input type="number" id="gps-instr-lng" placeholder="121.5319" step="0.000001">
           </div>
         </div>
-        <div style="font-size:0.75rem;color:#888;margin-top:6px;">台北市規範：次米級（誤差 &lt;1m），手機 GPS 僅供核對</div>
+        <div style="font-size:0.75rem;color:#888;margin-top:6px;">台北市規範：次米級（誤差 &lt;1m）；手機 GPS 誤差 3–15m 僅供核對</div>
         <div class="frow-grid" style="margin-top:12px;">
           <div class="frow" style="margin-bottom:0;">
             <label>TWD97 X（選填）</label>
@@ -538,7 +566,7 @@
   <script src="js/config.js"></script>
   <script src="js/auth.js?v=20260608"></script>
   <script src="js/species.js?v=20260608"></script>
-  <script src="js/survey.js?v=20260608"></script>
+  <script src="js/survey.js?v=20260608b"></script>
 
 </body>
 </html>
