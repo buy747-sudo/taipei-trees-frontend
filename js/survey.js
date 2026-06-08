@@ -234,7 +234,11 @@ function scanQRFrame(video) {
     stopQR();
     const raw = code.data.trim();
     // extract registry_code from URL or raw string
-    const match = raw.match(/(?:code=|\/tree\/)([A-Za-z0-9]+)/);
+    // 支援格式：
+    //   政府樹牌 QR：http://trees.gov.taipei/show/?treeid=SY0420041044
+    //   本站 QR：    https://taipei-trees.org/tree.html?id=JS0750021125
+    //   舊格式：     ...?code=JS0750021125 或 .../tree/JS0750021125
+    const match = raw.match(/(?:treeid=|[?&]id=|code=|\/tree\/)([A-Za-z0-9]+)/);
     const extracted = match ? match[1] : raw;
     document.getElementById('code-input').value = extracted;
     lookupTree(extracted);
