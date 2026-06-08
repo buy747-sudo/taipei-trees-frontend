@@ -77,12 +77,14 @@ async function doLookup() {
   btn.disabled = true;
 
   try {
+    // 使用評估專用端點（不限 tree_category，公開 API 只有 street/protected）
     const res = await Auth.authFetch(
-      `${API_BASE}/tree/${encodeURIComponent(code)}`
+      `${RISK_API}/tree/${encodeURIComponent(code)}`
     );
     if (!res) return;
     if (!res.ok) {
-      showError('lookup-error', `找不到樹籍資料：${code}`);
+      const msg = (await res.json().catch(() => ({}))).error || `找不到樹籍資料：${code}`;
+      showError('lookup-error', msg);
       return;
     }
     const data = await res.json();
