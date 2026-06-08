@@ -192,6 +192,69 @@
     .env-option-desc  { font-size: 0.78rem; color: #666; margin-top: 3px; }
     .env-option-ex    { font-size: 0.72rem; color: #999; margin-top: 2px; }
 
+    /* ── 拍照對齊提示 overlay ───────────────────── */
+    .photo-guide-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-guide-box {
+      background: #fff; border-radius: 18px; padding: 24px 20px 20px;
+      max-width: 340px; width: 90%; text-align: center;
+    }
+    .photo-guide-title { font-size: 1rem; font-weight: 800; color: #1a5c2a; margin-bottom: 4px; }
+    .photo-guide-subject { font-size: 0.85rem; color: #555; margin-bottom: 14px; }
+    /* 視覺框：模擬手機取景器 */
+    .photo-guide-frame {
+      position: relative; width: 200px; height: 150px; margin: 0 auto 14px;
+      border: 2px solid #ccc; border-radius: 4px; background: #f5f5f5;
+    }
+    /* 四個角落 L 型導引 */
+    .photo-guide-frame::before,
+    .photo-guide-frame::after {
+      content: ''; position: absolute;
+      width: 28px; height: 28px;
+      border-color: #1a5c2a; border-style: solid;
+    }
+    .photo-guide-frame::before {
+      top: 8px; left: 8px;
+      border-width: 3px 0 0 3px; border-radius: 2px 0 0 2px;
+    }
+    .photo-guide-frame::after {
+      bottom: 8px; right: 8px;
+      border-width: 0 3px 3px 0; border-radius: 0 2px 2px 0;
+    }
+    .photo-guide-cross-h, .photo-guide-cross-v {
+      position: absolute; background: rgba(26,92,42,0.35);
+    }
+    .photo-guide-cross-h { top: 50%; left: 20%; width: 60%; height: 1px; }
+    .photo-guide-cross-v { left: 50%; top: 20%; height: 60%; width: 1px; }
+    .photo-guide-label-tl, .photo-guide-label-br {
+      position: absolute; font-size: 10px; color: #888;
+      border-color: #1a5c2a; border-style: solid;
+    }
+    .photo-guide-label-tl { top: 8px; right: 8px; border-width: 3px 3px 0 0; width: 28px; height: 28px; border-radius: 0 2px 0 0; }
+    .photo-guide-label-br { bottom: 8px; left: 8px; border-width: 0 0 3px 3px; width: 28px; height: 28px; border-radius: 0 0 2px 0; }
+    .photo-guide-tree-icon {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -55%);
+      font-size: 2.2rem; opacity: 0.25;
+    }
+    .photo-guide-tip {
+      font-size: 0.88rem; color: #333; line-height: 1.65;
+      margin-bottom: 16px;
+    }
+    .photo-guide-tip strong { color: #1a5c2a; }
+    .photo-guide-actions { display: flex; gap: 10px; }
+    .photo-guide-shoot {
+      flex: 1; padding: 12px 0; border: none; border-radius: 10px;
+      background: #1a5c2a; color: #fff; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    }
+    .photo-guide-cancel {
+      padding: 12px 16px; border: 1.5px solid #ccc; border-radius: 10px;
+      background: #fff; color: #888; font-size: 0.9rem; cursor: pointer;
+    }
+
     /* ── 照片上傳 ────────────────────────────────── */
     .photo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
     @media (max-width: 480px) {
@@ -453,6 +516,29 @@
     </div>
 
   </div><!-- .risk-body -->
+
+  <!-- 拍照對齊提示 overlay -->
+  <div id="photo-guide-overlay" class="photo-guide-overlay" hidden>
+    <div class="photo-guide-box">
+      <div class="photo-guide-title">📸 拍照提示</div>
+      <div class="photo-guide-subject" id="photo-guide-subject">全貌</div>
+      <div class="photo-guide-frame">
+        <span class="photo-guide-tree-icon">🌳</span>
+        <div class="photo-guide-cross-h"></div>
+        <div class="photo-guide-cross-v"></div>
+        <div class="photo-guide-label-tl"></div>
+        <div class="photo-guide-label-br"></div>
+      </div>
+      <div class="photo-guide-tip">
+        請將<strong>樹木主體置於畫面正中間</strong><br>
+        對齊四個角落框線，橫拍直拍皆可
+      </div>
+      <div class="photo-guide-actions">
+        <button class="photo-guide-shoot" id="photo-guide-shoot">📷 開始拍照</button>
+        <button class="photo-guide-cancel" id="photo-guide-cancel">取消</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <script src="js/config.js"></script>

@@ -593,6 +593,27 @@ function buildPhotoGrid(angleLabels) {
 
 function openPhotoUpload(angle) {
   _activeSlot = angle;
+  const label = (_formData && _formData.angle_labels || {})[angle] || `角度 ${angle}`;
+  const overlay  = document.getElementById('photo-guide-overlay');
+  const subjectEl = document.getElementById('photo-guide-subject');
+  if (subjectEl) subjectEl.textContent = `拍攝部位：${label}`;
+
+  if (overlay) {
+    overlay.hidden = false;
+    document.getElementById('photo-guide-shoot').onclick = () => {
+      overlay.hidden = true;
+      _triggerPhotoInput();
+    };
+    document.getElementById('photo-guide-cancel').onclick = () => {
+      overlay.hidden = true;
+      _activeSlot = null;
+    };
+  } else {
+    _triggerPhotoInput();
+  }
+}
+
+function _triggerPhotoInput() {
   const input = document.getElementById('photo-file-input');
   input.value = '';
   input.onchange = () => handlePhotoFile(input.files[0]);
