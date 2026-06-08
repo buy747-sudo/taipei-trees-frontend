@@ -298,14 +298,48 @@
     <div data-step="1">
       <div class="card">
         <div class="card-title">B. 樹籍確認</div>
-        <div class="frow">
-          <label>編碼狀態 <span class="req">*</span></label>
-          <div class="radio-group" id="code-status-group">
-            <label><input type="radio" name="code_status" value="0"> 0 正常</label>
-            <label><input type="radio" name="code_status" value="1"> 1 失蹤</label>
-            <label><input type="radio" name="code_status" value="2"> 2 死亡</label>
-            <label><input type="radio" name="code_status" value="3"> 3 移植</label>
-            <label><input type="radio" name="code_status" value="4"> 4 新植</label>
+        <div class="frow" id="code-status-row">
+          <label>樹牌狀態（編碼狀態）<span class="req">*</span><button class="info-btn" type="button" onclick="openCodeStatusHelp()" aria-label="說明">ⓘ</button></label>
+          <div id="code-status-group" style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+            <label class="cs-opt cs-found" style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #d0d0d0;cursor:pointer;background:#fafafa;font-weight:400;">
+              <input type="radio" name="code_status" value="0" style="margin-top:3px;accent-color:#1a5c2a;flex-shrink:0;">
+              <span><strong style="color:#1a5c2a;">0</strong> — 有名牌，點位/編碼/樹種/QR code 與系統<strong style="color:#1a5c2a;">完全相符</strong> ✅</span>
+            </label>
+            <label class="cs-opt cs-found" style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #d0d0d0;cursor:pointer;background:#fafafa;font-weight:400;">
+              <input type="radio" name="code_status" value="1" style="margin-top:3px;accent-color:#c00;flex-shrink:0;">
+              <span><strong style="color:#c00;">1</strong> — 有名牌，但編碼/樹種/QR code 與系統<strong style="color:#c00;">不符</strong> ⚠️</span>
+            </label>
+            <label class="cs-opt cs-found" style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #d0d0d0;cursor:pointer;background:#fafafa;font-weight:400;">
+              <input type="radio" name="code_status" value="2" style="margin-top:3px;accent-color:#c00;flex-shrink:0;">
+              <span><strong style="color:#c00;">2</strong> — 無名牌，系統有此位點，位置準確（<strong style="color:#c00;">需補牌</strong>）⚠️</span>
+            </label>
+            <label class="cs-opt cs-new" style="display:none;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #90caf9;cursor:pointer;background:#e3f2fd;font-weight:400;">
+              <input type="radio" name="code_status" value="3" style="margin-top:3px;accent-color:#1565c0;flex-shrink:0;">
+              <span><strong style="color:#1565c0;">3</strong> — 無名牌，系統<strong style="color:#1565c0;">無此位點</strong>（已建立臨時編碼）🔵</span>
+            </label>
+            <label class="cs-opt cs-found cs-new cs-removed" style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #d0d0d0;cursor:pointer;background:#fafafa;font-weight:400;">
+              <input type="radio" name="code_status" value="4" style="margin-top:3px;accent-color:#888;flex-shrink:0;">
+              <span><strong style="color:#555;">4</strong> — 其他（請說明）</span>
+            </label>
+            <label class="cs-opt cs-removed" style="display:none;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #fca5a5;cursor:pointer;background:#fef2f2;font-weight:400;">
+              <input type="radio" name="code_status" value="5" style="margin-top:3px;accent-color:#c00;flex-shrink:0;">
+              <span><strong style="color:#c00;">5</strong> — 現場已無樹木，僅剩樹穴 🔴</span>
+            </label>
+            <label class="cs-opt cs-removed" style="display:none;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #fca5a5;cursor:pointer;background:#fef2f2;font-weight:400;">
+              <input type="radio" name="code_status" value="6" style="margin-top:3px;accent-color:#c00;flex-shrink:0;">
+              <span><strong style="color:#c00;">6</strong> — 現場樹穴已被填平 🔴</span>
+            </label>
+            <label class="cs-opt cs-found" style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #d0d0d0;cursor:pointer;background:#fafafa;font-weight:400;">
+              <input type="radio" name="code_status" value="7" style="margin-top:3px;accent-color:#c00;flex-shrink:0;">
+              <span><strong style="color:#c00;">7</strong> — 無名牌，系統有此位點，但<strong style="color:#c00;">位置有偏差</strong> ⚠️</span>
+            </label>
+            <label class="cs-opt cs-found" style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;border:1.5px solid #d0d0d0;cursor:pointer;background:#fafafa;font-weight:400;">
+              <input type="radio" name="code_status" value="8" style="margin-top:3px;accent-color:#c00;flex-shrink:0;">
+              <span><strong style="color:#c00;">8</strong> — 有名牌，但<strong style="color:#c00;">名牌位置與系統不符</strong> ⚠️</span>
+            </label>
+          </div>
+          <div id="code-status-note-row" style="display:none;margin-top:8px;">
+            <input type="text" id="code-status-note" placeholder="說明狀況（例：樹牌資料錯誤、位置偏差約10m、QR碼損毀）…" style="width:100%;padding:9px 12px;font-size:0.9rem;border:1.5px solid #f59e0b;border-radius:8px;outline:none;box-sizing:border-box;">
           </div>
         </div>
         <div class="frow">
@@ -319,15 +353,7 @@
           </div>
           <div id="tree-status-hint" style="display:none;margin-top:6px;padding:8px 12px;border-radius:8px;font-size:0.82rem;"></div>
         </div>
-        <div class="frow" style="border-top:1px solid #eee;padding-top:12px;margin-top:4px;">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
-            <input type="checkbox" id="tag-anomaly-cb" style="width:18px;height:18px;accent-color:#c00;">
-            <span>⚠️ 樹牌異常（標牌遺失、QR無法辨識、樹與牌不符）</span>
-          </label>
-          <div id="tag-anomaly-note-row" style="display:none;margin-top:8px;">
-            <input type="text" id="tag-anomaly-note" placeholder="說明異常情況，例如：樹牌遺失、QR碼損毀…" style="width:100%;padding:9px 12px;font-size:0.9rem;border:1.5px solid #f59e0b;border-radius:8px;outline:none;box-sizing:border-box;">
-          </div>
-        </div>
+
         <div class="frow-grid">
           <div class="frow" style="margin-bottom:0;">
             <label>樹種名稱</label>
@@ -600,7 +626,7 @@
   <script src="js/config.js"></script>
   <script src="js/auth.js?v=20260608"></script>
   <script src="js/species.js?v=20260608"></script>
-  <script src="js/survey.js?v=20260608b"></script>
+  <script src="js/survey.js?v=20260608c"></script>
 
 
   <!-- 欄位說明 Modal -->

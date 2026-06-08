@@ -107,9 +107,9 @@ function bindEvents() {
     r.addEventListener('change', onTreeStatusChange);
   });
 
-  // tag_anomaly checkbox toggle
-  document.getElementById('tag-anomaly-cb').addEventListener('change', e => {
-    document.getElementById('tag-anomaly-note-row').style.display = e.target.checked ? 'block' : 'none';
+  // code_status 變更 → 顯示說明欄
+  document.querySelectorAll('[name=code_status]').forEach(r => {
+    r.addEventListener('change', onCodeStatusChange);
   });
 
   // is_street_tree toggle park-name
@@ -214,6 +214,10 @@ async function lookupTree(code) {
       const originRadio = document.querySelector('[name=origin][value="' + treeData.origin + '"]');
       if (originRadio) originRadio.checked = true;
     }
+    // 預設樹牌狀態 0（正常），更新可見選項
+    const cs0 = document.querySelector('[name=code_status][value="0"]');
+    if (cs0) { cs0.checked = true; onCodeStatusChange(); }
+    updateCodeStatusOptions();
   } catch (e) {
     errEl.textContent = '網路錯誤，請稍後再試。';
     errEl.style.display = 'block';
@@ -248,6 +252,11 @@ function startNewTree() {
   document.getElementById('tree-found-card').hidden = false;
   showTreeInfo(null);
   document.getElementById('code-input').value = tempTreeCode;
+
+  // 115年規範：新補植 = 編碼狀態 3（無牌，系統無此位點）
+  updateCodeStatusOptions();
+  const cs3 = document.querySelector('[name=code_status][value="3"]');
+  if (cs3) { cs3.checked = true; onCodeStatusChange(); }
 
   showToast('已建立暫時編碼 ' + tempTreeCode);
 }
@@ -417,6 +426,50 @@ function onSpeciesChange() {
 }
 
 // ── tree_status 聯動 ──────────────────────────────────────────────────────────
+function onCodeStatusChange() {
+  const val = parseInt(radio('code_status') ?? '0');
+  const noteRow = document.getElementById('code-status-note-row');
+  if (noteRow) noteRow.style.display = (val !== 0) ? 'block' : 'none';
+}
+
+function openCodeStatusHelp() {
+  const lines = [
+    '0 — 有名牌，所有資訊與系統完全相符（正常）',
+    '1 — 有名牌，但編碼/樹種/QR code 與系統不符',
+    '2 — 無名牌，但系統有此位點且位置準確（需補牌）',
+    '3 — 無名牌，系統無此位點（新補植，已建立臨時編碼）',
+    '4 — 其他（請在說明欄說明）',
+    '5 — 系統有此位點，但現場已無樹木，僅剩樹穴',
+    '6 — 系統有此位點，但現場樹穴已被填平',
+    '7 — 無名牌，系統有此位點，但位置存在偏差',
+    '8 — 有名牌，但名牌位置與系統不符',
+  ];
+  alert('【115年規範 編碼狀態定義】
+
+' + lines.join('
+'));
+}
+
+function updateCodeStatusOptions() {
+  const isNew  = isNewTree;
+  const isDead = isDeadTree();
+  document.querySelectorAll('.cs-found').forEach(el => {
+    el.style.display = (isNew && !el.classList.contains('cs-new') && !el.classList.contains('cs-removed')) ? 'none' : null;
+  });
+  document.querySelectorAll('.cs-new').forEach(el => {
+    el.style.display = isNew ? 'flex' : 'none';
+  });
+  document.querySelectorAll('.cs-removed').forEach(el => {
+    if (!el.classList.contains('cs-found') && !el.classList.contains('cs-new')) {
+      el.style.display = isDead ? 'flex' : 'none';
+    }
+  });
+  // 選項4（cs-found cs-new cs-removed）永遠顯示
+  document.querySelectorAll('.cs-found.cs-new.cs-removed').forEach(el => {
+    el.style.display = 'flex';
+  });
+}
+
 function onTreeStatusChange() {
   const val = radio('tree_status');
   const hint = document.getElementById('tree-status-hint');
@@ -446,6 +499,7 @@ function onTreeStatusChange() {
     hint.style.display = 'none';
     updateStepBar();
   }
+  updateCodeStatusOptions();
 }
 
 function updateStepBar() {
@@ -539,9 +593,9 @@ function txt(id) {
 }
 
 function collectFormData(status) {
-  const tagAnomalyCb = document.getElementById('tag-anomaly-cb');
-  const tagAnomaly = tagAnomalyCb ? (tagAnomalyCb.checked ? 1 : 0) : 0;
-  const tagAnomalyNote = tagAnomaly ? txt('tag-anomaly-note') : null;
+  const codeStatus = isNewTree ? 3 : parseInt(radio('code_status') ?? '0');
+  const tagAnomaly = (codeStatus !== 0) ? 1 : 0;
+  const tagAnomalyNote = tagAnomaly ? (txt('code-status-note') || null) : null;
 
   const treeCode = isNewTree ? tempTreeCode
     : (treeData ? treeData.registry_code : txt('code-input'));
@@ -552,7 +606,7 @@ function collectFormData(status) {
     survey_date: txt('survey-date'),
     status,
 
-    code_status: isNewTree ? 4 : parseInt(radio('code_status') ?? '0'),
+    code_status: codeStatus,
     tree_status: radio('tree_status'),
     species_name: txt('species-name'),
     species_code: num('species-code'),
@@ -719,10 +773,12 @@ function showSuccessSummary(sid, data, photoCount, photoErrors) {
     ? '<span style="color:#c00;">⚠️ 照片上傳失敗：' + photoErrors.join('、') + '</span>'
     : '✅ 照片 ' + photoCount + ' 張';
 
+  const csLabel = ['✅正常','⚠️資料不符','⚠️無牌需補','🔵臨時編碼','其他','🔴無樹僅穴','🔴樹穴填平','⚠️無牌位偏','⚠️有牌位偏'][data.code_status] || '';
   const tagRow = data.tag_anomaly
-    ? '<tr><td style="padding:7px 4px;color:#c00;">⚠️ 樹牌</td>' +
-      '<td style="padding:7px 4px;color:#c00;">異常：' + (data.tag_anomaly_note || '（未說明）') + '</td></tr>'
-    : '';
+    ? '<tr><td style="padding:7px 4px;color:#c00;">⚠️ 樹牌狀態</td>' +
+      '<td style="padding:7px 4px;color:#c00;">' + data.code_status + ' ' + csLabel +
+      (data.tag_anomaly_note ? '（' + data.tag_anomaly_note + '）' : '') + '</td></tr>'
+    : '<tr><td style="padding:7px 4px;color:#1a5c2a;">✅ 樹牌狀態</td><td style="padding:7px 4px;">0 正常</td></tr>';
 
   step.innerHTML =
     '<div class="card" style="text-align:center;padding:28px 20px;">' +
@@ -775,8 +831,11 @@ function resetSurvey() {
   const gpsSrcRadio = document.querySelector('[name=gps_source][value="手機GPS"]');
   if (gpsSrcRadio) gpsSrcRadio.checked = true;
 
-  const noteRow = document.getElementById('tag-anomaly-note-row');
+  const noteRow = document.getElementById('code-status-note-row');
   if (noteRow) noteRow.style.display = 'none';
+  const cs0 = document.querySelector('[name=code_status][value="0"]');
+  if (cs0) cs0.checked = true;
+  updateCodeStatusOptions();
   const rs3Hint = document.getElementById('rs3-hint');
   if (rs3Hint) rs3Hint.style.display = 'none';
 
