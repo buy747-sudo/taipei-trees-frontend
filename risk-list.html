@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>評估紀錄管理｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f0f4f1; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
+
+    .rl-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .rl-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .rl-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+    .rl-header .huser { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+
+    .rl-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+    /* ── 統計摘要 ── */
+    .summary-bar {
+      display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .summary-card {
+      flex: 1; min-width: 90px; background: #fff; border-radius: 12px;
+      padding: 12px 14px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .summary-card .num { font-size: 1.5rem; font-weight: 700; color: #1a5c2a; }
+    .summary-card .lbl { font-size: 0.72rem; color: #888; margin-top: 2px; }
+
+    /* ── 篩選 ── */
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .filter-chip {
+      padding: 7px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      border: 1.5px solid #d0d0d0; background: #fff; color: #555; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+
+    /* ── 批次操作列 ── */
+    .batch-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border-radius: 12px; padding: 10px 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .batch-bar label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; user-select: none;
+    }
+    .batch-bar label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    .batch-count { font-size: 0.82rem; color: #888; flex: 1; }
+    .btn-delete-batch {
+      padding: 8px 16px; font-size: 0.85rem; font-weight: 700;
+      background: #dc2626; color: #fff; border: none; border-radius: 8px;
+      cursor: pointer; transition: background 0.15s; display: none;
+    }
+    .btn-delete-batch:hover { background: #b91c1c; }
+    .btn-delete-batch.show { display: inline-block; }
+
+    /* ── 評估卡片 ── */
+    .assess-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 14px 16px; margin-bottom: 10px;
+      display: flex; align-items: flex-start; gap: 12px;
+      transition: box-shadow 0.15s;
+    }
+    .assess-card.selected { outline: 2px solid #1a5c2a; box-shadow: 0 4px 16px rgba(26,92,42,0.15); }
+
+    .ac-check { padding-top: 2px; flex-shrink: 0; }
+    .ac-check input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+    .ac-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 1px; }
+    .ac-body { flex: 1; min-width: 0; }
+    .ac-title {
+      font-size: 0.95rem; font-weight: 700; color: #1a5c2a;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ac-sub { font-size: 0.78rem; color: #666; margin-top: 3px; line-height: 1.5; }
+    .ac-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+
+    .grade-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 800;
+      min-width: 28px; text-align: center;
+    }
+    .grade-A { background: #fee2e2; color: #7f1d1d; }
+    .grade-B { background: #ffedd5; color: #7c2d12; }
+    .grade-C { background: #fef9c3; color: #713f12; }
+    .grade-D { background: #dcfce7; color: #14532d; }
+    .grade-  { background: #f3f4f6; color: #6b7280; }
+
+    .status-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+    }
+    .status-submitted { background: #e8f5e9; color: #1a5c2a; }
+    .status-draft     { background: #fff8e1; color: #92400e; }
+
+    .ac-date { font-size: 0.72rem; color: #aaa; }
+    .ac-link {
+      font-size: 0.75rem; color: #1a5c2a; text-decoration: none; font-weight: 600;
+    }
+    .ac-link:hover { text-decoration: underline; }
+
+    /* ── 空白狀態 ── */
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: #888;
+    }
+    .empty-state .ei { font-size: 2.8rem; margin-bottom: 10px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── 載入更多 ── */
+    .load-more {
+      width: 100%; padding: 11px; font-size: 0.9rem; font-weight: 600;
+      background: #fff; color: #1a5c2a; border: 1.5px solid #1a5c2a;
+      border-radius: 10px; cursor: pointer; margin-top: 4px; display: none;
+    }
+    .load-more:hover { background: #e8f5e9; }
+
+    #loading { text-align: center; padding: 20px; color: #888; font-size: 0.88rem; }
+
+    /* ── 刪除確認 modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-overlay[hidden] { display: none !important; }
+    .modal-box {
+      background: #fff; border-radius: 16px; padding: 24px 20px;
+      max-width: 340px; width: 90%; text-align: center;
+    }
+    .modal-box h2 { font-size: 1.05rem; font-weight: 800; color: #dc2626; margin-bottom: 8px; }
+    .modal-box p  { font-size: 0.88rem; color: #555; margin-bottom: 20px; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 10px; }
+    .btn-cancel-modal {
+      flex: 1; padding: 11px; border: 1.5px solid #ccc; border-radius: 10px;
+      background: #fff; color: #555; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-confirm-delete {
+      flex: 1; padding: 11px; border: none; border-radius: 10px;
+      background: #dc2626; color: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-confirm-delete:disabled { background: #aaa; cursor: not-allowed; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header class="rl-header">
+    <a href="/">← 地圖</a>
+    <h1>⚠️ 評估紀錄管理</h1>
+    <span class="huser" id="huser"></span>
+  </header>
+
+  <div class="rl-body" id="main-body">
+
+    <!-- 統計摘要 -->
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="num" id="sum-total">—</div>
+        <div class="lbl">總筆數</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-submitted">—</div>
+        <div class="lbl">已送出</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-draft">—</div>
+        <div class="lbl">草稿</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-grade-a" style="color:#dc2626;">—</div>
+        <div class="lbl">A 級危害</div>
+      </div>
+    </div>
+
+    <!-- 篩選 -->
+    <div class="filter-bar">
+      <button class="filter-chip active" data-status="">全部</button>
+      <button class="filter-chip" data-status="submitted">✅ 已送出</button>
+      <button class="filter-chip" data-status="draft">💾 草稿</button>
+    </div>
+
+    <!-- 批次操作列 -->
+    <div class="batch-bar">
+      <label>
+        <input type="checkbox" id="select-all-cb">
+        全選
+      </label>
+      <span class="batch-count" id="batch-count">已選 0 筆</span>
+      <button class="btn-delete-batch" id="delete-batch-btn">🗑 刪除選取</button>
+    </div>
+
+    <!-- 清單 -->
+    <div id="loading">載入中…</div>
+    <div id="assess-list"></div>
+    <button class="load-more" id="load-more-btn">載入更多</button>
+
+  </div>
+
+  <!-- 刪除確認 modal -->
+  <div class="modal-overlay" id="delete-modal" hidden>
+    <div class="modal-box">
+      <h2>🗑 確認刪除</h2>
+      <p id="modal-msg">確定刪除選取的評估紀錄？<br>此操作<strong>無法復原</strong>。</p>
+      <div class="modal-actions">
+        <button class="btn-cancel-modal" id="modal-cancel">取消</button>
+        <button class="btn-confirm-delete" id="modal-confirm">確認刪除</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const RISK_API = API_BASE.replace('/public', '') + '/api/assessment';
+
+    let currentStatus = '';
+    let offset = 0;
+    const LIMIT = 30;
+    let totalCount = 0;
+    let selectedIds = new Set();
+
+    // ── auth guard（限 platform_admin）────────────────────────────────────────
+    (function init() {
+      if (!Auth.isLoggedIn()) {
+        window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname);
+        return;
+      }
+      const user = Auth.getUser();
+      const role = user?.role || '';
+      if (role !== 'platform_admin') {
+        document.getElementById('main-body').innerHTML =
+          '<div style="padding:30px;color:#c00;font-weight:700;text-align:center;">' +
+          '🔒 此頁面僅限管理者帳號存取。</div>';
+        return;
+      }
+      document.getElementById('huser').textContent = user.display_name || user.username || '';
+      bindFilters();
+      bindBatchUI();
+      loadSummary();
+      loadAssessments(true);
+    })();
+
+    // ── 統計摘要 ─────────────────────────────────────────────────────────────
+    async function loadSummary() {
+      try {
+        const [allRes, subRes, draftRes] = await Promise.all([
+          Auth.authFetch(`${RISK_API}/list?limit=1&offset=0`),
+          Auth.authFetch(`${RISK_API}/list?limit=1&offset=0&status=submitted`),
+          Auth.authFetch(`${RISK_API}/list?limit=1&offset=0&status=draft`),
+        ]);
+        if (!allRes) return;
+        const [a, s, d] = await Promise.all([allRes.json(), subRes?.json(), draftRes?.json()]);
+        document.getElementById('sum-total').textContent     = a.total ?? '—';
+        document.getElementById('sum-submitted').textContent = s?.total ?? '—';
+        document.getElementById('sum-draft').textContent     = d?.total ?? '—';
+        document.getElementById('sum-grade-a').textContent   = a.grade_a_count ?? '—';
+      } catch { /* 靜默失敗 */ }
+    }
+
+    // ── 篩選 chips ────────────────────────────────────────────────────────────
+    function bindFilters() {
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentStatus = btn.dataset.status;
+          offset = 0;
+          selectedIds.clear();
+          updateBatchUI();
+          loadAssessments(true);
+        });
+      });
+    }
+
+    // ── 批次操作 ─────────────────────────────────────────────────────────────
+    function bindBatchUI() {
+      document.getElementById('select-all-cb').addEventListener('change', e => {
+        const checked = e.target.checked;
+        document.querySelectorAll('.ac-check input[type="checkbox"]').forEach(cb => {
+          cb.checked = checked;
+          const id = parseInt(cb.dataset.id);
+          if (checked) selectedIds.add(id); else selectedIds.delete(id);
+          cb.closest('.assess-card').classList.toggle('selected', checked);
+        });
+        updateBatchUI();
+      });
+
+      document.getElementById('delete-batch-btn').addEventListener('click', () => {
+        if (selectedIds.size === 0) return;
+        document.getElementById('modal-msg').innerHTML =
+          `確定要刪除 <strong>${selectedIds.size} 筆</strong>評估紀錄？<br>此操作<strong>無法復原</strong>。`;
+        document.getElementById('delete-modal').hidden = false;
+      });
+
+      document.getElementById('modal-cancel').addEventListener('click', () => {
+        document.getElementById('delete-modal').hidden = true;
+      });
+
+      document.getElementById('modal-confirm').addEventListener('click', executeBatchDelete);
+    }
+
+    function updateBatchUI() {
+      const count = selectedIds.size;
+      document.getElementById('batch-count').textContent = `已選 ${count} 筆`;
+      const btn = document.getElementById('delete-batch-btn');
+      btn.classList.toggle('show', count > 0);
+
+      // 更新全選 checkbox 狀態
+      const allCbs = document.querySelectorAll('.ac-check input[type="checkbox"]');
+      const selectAllCb = document.getElementById('select-all-cb');
+      if (allCbs.length === 0) {
+        selectAllCb.checked = false;
+        selectAllCb.indeterminate = false;
+      } else if (count === 0) {
+        selectAllCb.checked = false;
+        selectAllCb.indeterminate = false;
+      } else if (count === allCbs.length) {
+        selectAllCb.checked = true;
+        selectAllCb.indeterminate = false;
+      } else {
+        selectAllCb.checked = false;
+        selectAllCb.indeterminate = true;
+      }
+    }
+
+    // ── 批次刪除 ─────────────────────────────────────────────────────────────
+    async function executeBatchDelete() {
+      const confirmBtn = document.getElementById('modal-confirm');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = '刪除中…';
+
+      const ids = [...selectedIds];
+      let failCount = 0;
+
+      await Promise.allSettled(ids.map(async id => {
+        try {
+          const res = await Auth.authFetch(`${RISK_API}/${id}`, { method: 'DELETE' });
+          if (!res || !res.ok) failCount++;
+          else selectedIds.delete(id);
+        } catch { failCount++; }
+      }));
+
+      document.getElementById('delete-modal').hidden = true;
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = '確認刪除';
+
+      if (failCount > 0) {
+        alert(`${ids.length - failCount} 筆刪除成功，${failCount} 筆失敗（可能無權限或已不存在）。`);
+      }
+
+      // 重新整理清單與摘要
+      selectedIds.clear();
+      updateBatchUI();
+      document.getElementById('select-all-cb').checked = false;
+      loadSummary();
+      loadAssessments(true);
+    }
+
+    // ── 載入清單 ─────────────────────────────────────────────────────────────
+    async function loadAssessments(reset = false) {
+      const loadingEl = document.getElementById('loading');
+      const listEl    = document.getElementById('assess-list');
+      const moreBtn   = document.getElementById('load-more-btn');
+
+      if (reset) {
+        listEl.innerHTML = '';
+        offset = 0;
+        loadingEl.style.display = 'block';
+        moreBtn.style.display = 'none';
+      }
+
+      const params = new URLSearchParams({ limit: LIMIT, offset });
+      if (currentStatus) params.set('status', currentStatus);
+
+      try {
+        const res = await Auth.authFetch(`${RISK_API}/list?${params}`);
+        loadingEl.style.display = 'none';
+        if (!res) return;
+        const data = await res.json();
+        if (!res.ok) {
+          listEl.innerHTML = `<p style="color:#c00;padding:16px;">載入失敗：${data.error || res.status}</p>`;
+          return;
+        }
+
+        totalCount = data.total;
+        const items = data.assessments || data.items || [];
+        offset += items.length;
+
+        if (reset && items.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <div class="ei">🌳</div>
+              <p>目前沒有評估紀錄。</p>
+            </div>`;
+          return;
+        }
+
+        items.forEach(a => listEl.appendChild(buildCard(a)));
+        moreBtn.style.display = offset < totalCount ? 'block' : 'none';
+      } catch (e) {
+        loadingEl.style.display = 'none';
+        listEl.innerHTML += `<p style="color:#c00;padding:16px;">網路錯誤：${e.message}</p>`;
+      }
+    }
+
+    // ── 建立卡片 DOM ─────────────────────────────────────────────────────────
+    function buildCard(a) {
+      const grade   = a.risk_grade || a.grade || '';
+      const isDraft = a.status === 'draft';
+      const icon    = isDraft ? '💾' : '⚠️';
+      const date    = a.assessment_date || a.created_at?.slice(0, 10) || '—';
+      const species = a.species_name || a.tree_species || '（未知樹種）';
+      const code    = a.tree_registry_code || a.tree_code || '—';
+      const assessor = a.assessor_name || a.username || '';
+
+      const card = document.createElement('div');
+      card.className = 'assess-card';
+      card.dataset.id = a.id;
+      card.innerHTML = `
+        <div class="ac-check">
+          <input type="checkbox" data-id="${a.id}">
+        </div>
+        <div class="ac-icon">${icon}</div>
+        <div class="ac-body">
+          <div class="ac-title">${species}　${code}</div>
+          <div class="ac-sub">
+            評估日期：${date}${assessor ? '　評估員：' + assessor : ''}<br>
+            ID：${a.id}
+          </div>
+        </div>
+        <div class="ac-right">
+          <span class="grade-badge grade-${grade}">${grade || '—'}</span>
+          <span class="status-badge status-${a.status || 'draft'}">${isDraft ? '草稿' : '已送出'}</span>
+          <span class="ac-date">${a.updated_at?.slice(0, 10) || ''}</span>
+          ${a.id ? `<a class="ac-link" href="/risk-report.html?id=${a.id}" target="_blank">查看 →</a>` : ''}
+        </div>
+      `;
+
+      card.querySelector('input[type="checkbox"]').addEventListener('change', e => {
+        const id = parseInt(e.target.dataset.id);
+        if (e.target.checked) selectedIds.add(id); else selectedIds.delete(id);
+        card.classList.toggle('selected', e.target.checked);
+
+        // 若剛選，清除全選 checkbox 的 indeterminate
+        document.getElementById('select-all-cb').checked = false;
+        updateBatchUI();
+      });
+
+      return card;
+    }
+
+    document.getElementById('load-more-btn').addEventListener('click', () => loadAssessments(false));
+  </script>
+
+</body>
+</html>
