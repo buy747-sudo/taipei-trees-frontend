@@ -1,6 +1,6 @@
 # PROJECT_MEMORY — taipei-trees.org 台北市樹木查詢平台
 
-> 最後整理：2026-06-07  
+> 最後整理：2026-06-08  
 > 來源：repo 內 Markdown、`~/.claude/projects/-Users-nash911-taipei-trees-frontend/memory/`、`.gstack` checkpoints、相關 Claude JSONL 聊天記錄、`~/MASTER_PLAN.md`、`~/API_CONTRACT.md`。  
 > 注意：原 AGENTS/CLAUDE 文件曾記錄 MarkerCluster；目前程式碼現況是 `L.layerGroup` 逐點顯示，不再使用 MarkerCluster 群集。
 
@@ -123,6 +123,27 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
   - A 級重大危害 7 項全部逐一列出（含未觸發）
   - 自動換頁、每頁頁首與頁碼、最後一頁含評估人員簽名欄
   - 對應後端 `/public/assessment/<id>` 回傳的 `items_detail`、`grade_a_detail`、`assessor_name`、`env_risk_label` 新欄位
+
+- **2026-06-08 更新**：PDF 輸出完整修復（`risk-report.html` `exportReportPDF()`），解決多項 layout 問題：
+  - **日期格式修正**：`created_at` 可能為 `"2026/06/08 15:44:39"` 或 ISO 格式，統一用 `.substring(0,10)` 取前 10 字元，不再顯示全時間戳。
+  - **Section 標籤不再溢位**：移除舊版 8mm 窄欄 flushSection 設計，改為全寬深綠色 section header row（一、樹冠狀況 / 二、樹幹狀況 / 三、根部狀況 / 四、棲地環境）。
+  - **`habitat` key 修正**：`forms_data.py` items 19-22 使用 `"section": "habitat"`（不是 `"env"`），`SECTION_LABELS_MAP` 已同時保留 `env` 與 `habitat` key 以相容新舊資料。
+  - **"undefined" 文字消除**：移除 flushSection() 後不再有 undefined 插入問題。
+  - **行高常數化**：引入 `TLH=5.2`、`ALH=5.0`、`AGAP=1.5`、`TGAP=1.0`、`PAD_TOP=2.5`、`PAD_BOT=3.0`，`needH` 計算與實際繪製完全對齊，消除文字重疊。
+  - **健康等級 ☑ 修正**：`a.health_level` 可能為 null，加入 fallback：若 `abs(health_score) > 45` 或 `critical_count >= 3` 則顯示「差」，以此類推。
+  - **"B 級 B 級" 重複消除**：`grade_info.label` 已含「B 級」，改用 `grade_info.label` 直接顯示，不再拼接 `${grade} 級`。
+  - **A 級危害欄位字體放大**：Grade A 區塊字體從 8pt 升至 9pt，行距從 6.5mm 升至 8.5mm，觸發項目標紅並加「◀ 已觸發」右對齊標記。
+  - **矩陣軸標籤**：移除 `{angle:90}` 旋轉（造成 CJK 亂碼），改為橫排說明文字。
+  - **樹木狀態欄**：PDF 基本資料列新增「狀態」欄，顯示行道樹 / 受保護樹木 / 除役/未分類，除役以橙色顯示。
+
+- **2026-06-08 更新**：`js/risk.js` `doLookup()` 改用 `RISK_API`（`/api/assessment/tree/<code>`）查樹籍，不再使用公開 API：
+  - 公開 API 只回傳 `tree_category IN ('street', 'protected')`，除役樹（category=NULL）查不到。
+  - 評估用端點無 category 過濾，並自動嘗試補 `-001` 後綴（QR Code 通常只含主編號，如 `WS0860091018`，DB 存的是 `WS0860091018-001`）。
+  - `showTreeInfo()` 新增除役/未分類狀態顯示：⭐ 受保護樹木 / 🟢 行道樹 / ⚠️ 除役/未分類。
+
+- **2026-06-08 更新**：`risk.html` 新增除役警告橫幅 `#tree-retired-warn`：
+  - 黃底警示：「此樹木已被機關標記為除役/未分類，不在公開查詢範圍內，仍可進行評估並記錄，但請確認樹籍編號無誤。」
+  - 對 street/protected 自動 `hidden`；category=NULL 時顯示。
 
 ### 測試與部署
 
