@@ -90,11 +90,16 @@ async function doLookup() {
 
 function parseTreeCode(raw) {
   if (!raw) return null;
-  if (raw.includes('geopkl.gov.taipei')) {
+  // 任何 URL 格式：優先嘗試解析 treeid / id / code 參數
+  // 支援：trees.gov.taipei, geopkl.gov.taipei, taipei-trees.org 等
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
     try {
       const url = new URL(raw);
-      return url.searchParams.get('treeid') || null;
-    } catch { return null; }
+      const code = url.searchParams.get('treeid')
+                || url.searchParams.get('id')
+                || url.searchParams.get('code');
+      if (code) return code.toUpperCase();
+    } catch { /* 非合法 URL，繼續往下 */ }
   }
   return raw.toUpperCase();
 }
