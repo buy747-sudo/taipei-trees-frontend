@@ -274,12 +274,14 @@
           </div>
         </div>
         <div class="frow">
-          <label>樹木狀況 <span class="req">*</span></label>
-          <div class="radio-group">
-            <label><input type="radio" name="tree_status" value="P"> P 現存</label>
-            <label><input type="radio" name="tree_status" value="I"> I 疑似問題</label>
-            <label><input type="radio" name="tree_status" value="U"> U 受損</label>
+          <label>生長狀況 <span class="req">*</span></label>
+          <div class="radio-group" id="tree-status-group">
+            <label><input type="radio" name="tree_status" value="良好"> 良好</label>
+            <label><input type="radio" name="tree_status" value="不良"> 不良</label>
+            <label><input type="radio" name="tree_status" value="危木"> ⚠️ 危木</label>
+            <label><input type="radio" name="tree_status" value="死亡缺株"> 死亡缺株</label>
           </div>
+          <div id="tree-status-hint" style="display:none;margin-top:6px;padding:8px 12px;border-radius:8px;font-size:0.82rem;"></div>
         </div>
         <div class="frow-grid">
           <div class="frow" style="margin-bottom:0;">

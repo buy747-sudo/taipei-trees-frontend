@@ -90,6 +90,11 @@ function bindEvents() {
     document.getElementById('circ-1m').value = v ? (v * Math.PI).toFixed(1) : '';
   });
 
+  // tree_status 聯動：危木 → 備註必填提示；死亡缺株 → 跳段提示
+  document.querySelectorAll('[name=tree_status]').forEach(r => {
+    r.addEventListener('change', onTreeStatusChange);
+  });
+
   // is_street_tree toggle park-name
   document.querySelectorAll('[name=is_street_tree]').forEach(r => {
     r.addEventListener('change', () => {
@@ -293,6 +298,27 @@ function onSpeciesChange() {
   }
 }
 
+// ── tree_status 聯動 ──────────────────────────────────────────────────────────
+function onTreeStatusChange() {
+  const val = radio('tree_status');
+  const hint = document.getElementById('tree-status-hint');
+  if (val === '危木') {
+    hint.style.display = 'block';
+    hint.style.background = '#fff3cd';
+    hint.style.color = '#92400e';
+    hint.style.border = '1px solid #f59e0b';
+    hint.textContent = '⚠️ 危木：步驟 F 的備註欄位必填，請詳細描述危害情形。';
+  } else if (val === '死亡缺株') {
+    hint.style.display = 'block';
+    hint.style.background = '#f5f5f5';
+    hint.style.color = '#555';
+    hint.style.border = '1px solid #ccc';
+    hint.textContent = '📋 死亡缺株：量測（D段）、樹穴（E段）與照片（G段）可免填，直接跳至特殊資訊（F段）後送出。';
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
 // ── DBH auto-calc ─────────────────────────────────────────────────────────────
 function calcCircumference() {
   const vals = ['dbh1','dbh2','dbh3','dbh4','dbh5','dbh6']
@@ -445,7 +471,11 @@ async function submitSurvey(status) {
     errEl.textContent = '請填寫普查日期。';
     errEl.style.display = 'block'; return;
   }
-  if (status === 'submitted' && !data.dbh1) {
+  if (status === 'submitted' && data.tree_status === '危木' && !data.notes) {
+    errEl.textContent = '⚠️ 危木必須填寫備註（步驟F），請說明危害情形。';
+    errEl.style.display = 'block'; return;
+  }
+  if (status === 'submitted' && data.tree_status !== '死亡缺株' && !data.dbh1) {
     errEl.textContent = '送出前請填寫 DBH1（步驟D）。';
     errEl.style.display = 'block'; return;
   }
