@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>普查紀錄｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f0f4f1; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
+
+    .sl-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .sl-header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .sl-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+    .sl-header .huser { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+
+    .sl-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .filter-chip {
+      padding: 7px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      border: 1.5px solid #d0d0d0; background: #fff; color: #555; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+
+    .summary-bar {
+      display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .summary-card {
+      flex: 1; min-width: 100px; background: #fff; border-radius: 12px;
+      padding: 12px 14px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .summary-card .num { font-size: 1.6rem; font-weight: 700; color: #1a5c2a; }
+    .summary-card .lbl { font-size: 0.72rem; color: #888; margin-top: 2px; }
+
+    .survey-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 14px 16px; margin-bottom: 10px;
+      display: flex; align-items: flex-start; gap: 12px;
+      cursor: pointer; transition: box-shadow 0.15s;
+      text-decoration: none; color: inherit;
+    }
+    .survey-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+    .sc-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
+    .sc-body { flex: 1; min-width: 0; }
+    .sc-title {
+      font-size: 0.95rem; font-weight: 700; color: #1a5c2a;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sc-sub { font-size: 0.78rem; color: #666; margin-top: 3px; }
+    .sc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+
+    .status-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+    }
+    .status-submitted { background: #e8f5e9; color: #1a5c2a; }
+    .status-draft     { background: #fff8e1; color: #92400e; }
+
+    .sc-date { font-size: 0.72rem; color: #aaa; }
+
+    .new-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 12px;
+      cursor: pointer; margin-bottom: 14px; text-decoration: none;
+      transition: background 0.15s;
+    }
+    .new-btn:hover { background: #14491f; }
+
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: #888;
+    }
+    .empty-state .ei { font-size: 2.8rem; margin-bottom: 10px; }
+    .empty-state p { font-size: 0.9rem; margin-bottom: 16px; }
+
+    .load-more {
+      width: 100%; padding: 11px; font-size: 0.9rem; font-weight: 600;
+      background: #fff; color: #1a5c2a; border: 1.5px solid #1a5c2a;
+      border-radius: 10px; cursor: pointer; margin-top: 4px;
+      display: none;
+    }
+    .load-more:hover { background: #e8f5e9; }
+
+    #loading { text-align: center; padding: 20px; color: #888; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+
+  <header class="sl-header">
+    <a href="/">← 地圖</a>
+    <h1>📋 普查紀錄</h1>
+    <span class="huser" id="huser"></span>
+  </header>
+
+  <div class="sl-body">
+
+    <a href="/survey.html" class="new-btn">＋ 開始新普查</a>
+
+    <!-- 統計摘要 -->
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="num" id="sum-total">—</div>
+        <div class="lbl">總筆數</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-submitted">—</div>
+        <div class="lbl">已送出</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-draft">—</div>
+        <div class="lbl">草稿</div>
+      </div>
+    </div>
+
+    <!-- 篩選 -->
+    <div class="filter-bar">
+      <button class="filter-chip active" data-status="">全部</button>
+      <button class="filter-chip" data-status="submitted">✅ 已送出</button>
+      <button class="filter-chip" data-status="draft">💾 草稿</button>
+    </div>
+
+    <!-- 清單 -->
+    <div id="loading">載入中…</div>
+    <div id="survey-list"></div>
+    <button class="load-more" id="load-more-btn">載入更多</button>
+
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const SURVEY_API = API_BASE.replace('/public', '') + '/api/survey';
+
+    let currentStatus = '';
+    let offset = 0;
+    const LIMIT = 20;
+    let totalCount = 0;
+    let allSummary = { total: 0, submitted: 0, draft: 0 };
+
+    // ── auth guard ────────────────────────────────────────────────────────────
+    (function init() {
+      if (!Auth.isLoggedIn()) {
+        window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname);
+        return;
+      }
+      const user = Auth.getUser();
+      const role = user?.role || '';
+      if (!['platform_admin','contractor_admin','inspector','surveyor'].includes(role)) {
+        document.querySelector('.sl-body').innerHTML =
+          '<div style="padding:20px;color:#c00;font-weight:700;">您的帳號沒有普查權限。</div>';
+        return;
+      }
+      document.getElementById('huser').textContent = user.display_name || user.username || '';
+      bindFilters();
+      loadSummary();
+      loadSurveys(true);
+    })();
+
+    // ── 統計摘要（先各抓一次 count）──────────────────────────────────────────
+    async function loadSummary() {
+      try {
+        const [allRes, subRes, draftRes] = await Promise.all([
+          Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0`),
+          Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0&status=submitted`),
+          Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0&status=draft`),
+        ]);
+        if (!allRes || !subRes || !draftRes) return;
+        const [a, s, d] = await Promise.all([allRes.json(), subRes.json(), draftRes.json()]);
+        document.getElementById('sum-total').textContent     = a.total ?? '—';
+        document.getElementById('sum-submitted').textContent = s.total ?? '—';
+        document.getElementById('sum-draft').textContent     = d.total ?? '—';
+      } catch { /* 靜默失敗，不影響清單 */ }
+    }
+
+    // ── 篩選 chips ────────────────────────────────────────────────────────────
+    function bindFilters() {
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentStatus = btn.dataset.status;
+          offset = 0;
+          loadSurveys(true);
+        });
+      });
+    }
+
+    // ── 載入清單 ──────────────────────────────────────────────────────────────
+    async function loadSurveys(reset = false) {
+      const loadingEl = document.getElementById('loading');
+      const listEl    = document.getElementById('survey-list');
+      const moreBtn   = document.getElementById('load-more-btn');
+
+      if (reset) {
+        listEl.innerHTML = '';
+        offset = 0;
+        loadingEl.style.display = 'block';
+        moreBtn.style.display = 'none';
+      }
+
+      const params = new URLSearchParams({ limit: LIMIT, offset });
+      if (currentStatus) params.set('status', currentStatus);
+
+      try {
+        const res = await Auth.authFetch(`${SURVEY_API}/list?${params}`);
+        loadingEl.style.display = 'none';
+        if (!res) return;
+        const data = await res.json();
+        if (!res.ok) { listEl.innerHTML = `<p style="color:#c00;">載入失敗：${data.error}</p>`; return; }
+
+        totalCount = data.total;
+        offset += data.surveys.length;
+
+        if (reset && data.surveys.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <div class="ei">🌳</div>
+              <p>${currentStatus === 'draft' ? '目前沒有草稿。' : currentStatus === 'submitted' ? '尚無已送出的普查。' : '尚無普查紀錄，點上方按鈕開始第一筆！'}</p>
+            </div>`;
+          return;
+        }
+
+        data.surveys.forEach(s => listEl.appendChild(buildCard(s)));
+
+        moreBtn.style.display = offset < totalCount ? 'block' : 'none';
+      } catch (e) {
+        loadingEl.style.display = 'none';
+        listEl.innerHTML += `<p style="color:#c00;">網路錯誤：${e.message}</p>`;
+      }
+    }
+
+    // ── 建立卡片 DOM ──────────────────────────────────────────────────────────
+    function buildCard(s) {
+      const isDraft = s.status === 'draft';
+      const icon    = isDraft ? '💾' : '✅';
+      const date    = s.survey_date || s.updated_at?.slice(0, 10) || '—';
+      const species = s.species_name || '（未知樹種）';
+      const href    = isDraft
+        ? `/survey.html?code=${encodeURIComponent(s.tree_registry_code)}`
+        : `/tree.html?id=${encodeURIComponent(s.tree_registry_code)}`;
+
+      const card = document.createElement('a');
+      card.className = 'survey-card';
+      card.href = href;
+      card.innerHTML = `
+        <div class="sc-icon">${icon}</div>
+        <div class="sc-body">
+          <div class="sc-title">${species}　${s.tree_registry_code}</div>
+          <div class="sc-sub">普查日期：${date}${s.surveyor_name ? '　普查員：' + s.surveyor_name : ''}</div>
+        </div>
+        <div class="sc-right">
+          <span class="status-badge status-${s.status}">${isDraft ? '草稿' : '已送出'}</span>
+          <span class="sc-date">#${s.id}</span>
+        </div>
+      `;
+      return card;
+    }
+
+    document.getElementById('load-more-btn').addEventListener('click', () => loadSurveys(false));
+  </script>
+
+</body>
+</html>

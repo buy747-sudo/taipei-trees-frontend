@@ -601,9 +601,13 @@ function showSuccessSummary(sid, data, photoCount, photoErrors) {
       <button class="btn-next" onclick="resetSurvey()" style="width:100%;padding:14px;">
         🌳 繼續普查下一棵
       </button>
-      <a href="/" style="display:block;text-align:center;padding:13px;font-size:0.95rem;
+      <a href="/survey-list.html" style="display:block;text-align:center;padding:13px;font-size:0.95rem;
          font-weight:600;color:#1a5c2a;border:1.5px solid #1a5c2a;border-radius:10px;
          text-decoration:none;">
+        📋 查看所有普查紀錄
+      </a>
+      <a href="/" style="display:block;text-align:center;padding:11px;font-size:0.88rem;
+         color:#888;text-decoration:none;">
         ← 回到地圖
       </a>
     </div>

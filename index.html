@@ -216,10 +216,12 @@
         // 角色權限：surveyor 只有普查；inspector 以上才有評估
         const surveyBtn = ['surveyor','inspector','contractor_admin','platform_admin'].includes(role)
           ? `<a href="/survey.html" id="auth-survey-btn">📝 普查</a>` : '';
+        const listBtn   = ['surveyor','inspector','contractor_admin','platform_admin'].includes(role)
+          ? `<a href="/survey-list.html" id="auth-list-btn">📋 紀錄</a>` : '';
         const riskBtn   = ['inspector','contractor_admin','platform_admin'].includes(role)
-          ? `<a href="/risk.html" id="auth-risk-btn">📋 評估</a>` : '';
+          ? `<a href="/risk.html" id="auth-risk-btn">⚠️ 評估</a>` : '';
         area.innerHTML =
-          surveyBtn + riskBtn +
+          surveyBtn + listBtn + riskBtn +
           `<span id="auth-user">${label}</span>` +
           `<button id="auth-logout-btn">登出</button>`;
         document.getElementById('auth-logout-btn').addEventListener('click', () => {
