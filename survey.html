@@ -94,6 +94,40 @@
     .dbh-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .dbh-row .frow { margin-bottom: 0; }
 
+    /* ⓘ 欄位說明按鈕 */
+    .info-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 17px; height: 17px; border-radius: 50%;
+      background: #e3f2fd; color: #1565c0; border: 1.5px solid #90caf9;
+      font-size: 0.65rem; font-weight: 700; cursor: pointer;
+      vertical-align: middle; margin-left: 5px; line-height: 1;
+      flex-shrink: 0; padding: 0; font-style: normal; text-decoration: none;
+    }
+    .info-btn:hover { background: #1565c0; color: #fff; border-color: #1565c0; }
+
+    /* 欄位說明 Modal */
+    #field-info-modal {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.52); align-items: center; justify-content: center; padding: 16px;
+    }
+    #field-info-modal.open { display: flex; }
+    #field-info-box {
+      background: #fff; border-radius: 16px; max-width: 480px; width: 100%;
+      padding: 22px 20px 20px; position: relative; max-height: 82vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    #field-info-close {
+      position: absolute; top: 12px; right: 12px;
+      background: #f0f0f0; border: none; border-radius: 50%;
+      width: 28px; height: 28px; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center; color: #555;
+    }
+    #field-info-close:hover { background: #e0e0e0; }
+    #field-info-title { font-size: 1rem; font-weight: 700; color: #1a5c2a; margin-bottom: 14px; padding-right: 32px; }
+    #field-info-body .info-section { margin-bottom: 12px; font-size: 0.88rem; line-height: 1.7; color: #333; }
+    #field-info-body .info-section strong { color: #1565c0; display: block; margin-bottom: 3px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    #field-info-source { margin-top: 14px; font-size: 0.75rem; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+
     .photo-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
     .photo-slot {
       border: 2px dashed #c8e6c9; border-radius: 12px;
@@ -404,42 +438,42 @@
         <div class="card-title">D. 量測資料</div>
         <div class="seg-label">胸徑 DBH（地面上 130cm，站樹木正南側面北量，至小數第一位）</div>
         <div class="frow">
-          <label>量測高度（cm，預設 130）</label>
+          <label>量測高度（cm，預設 130）<button class="info-btn" type="button" data-field="ht-dbh" aria-label="說明">ⓘ</button></label>
           <input type="number" id="ht-dbh" value="130" min="50" max="200" step="1">
         </div>
         <div class="dbh-row">
-          <div class="frow"><label>DBH1（cm）<span class="req">*</span></label><input type="number" id="dbh1" placeholder="42.5" step="0.1" min="0"></div>
-          <div class="frow"><label>DBH2（cm）</label><input type="number" id="dbh2" placeholder="分枝" step="0.1" min="0"></div>
-          <div class="frow"><label>DBH3（cm）</label><input type="number" id="dbh3" step="0.1" min="0"></div>
-          <div class="frow"><label>DBH4（cm）</label><input type="number" id="dbh4" step="0.1" min="0"></div>
-          <div class="frow"><label>DBH5（cm）</label><input type="number" id="dbh5" step="0.1" min="0"></div>
-          <div class="frow"><label>DBH6（cm）</label><input type="number" id="dbh6" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH1（cm）<span class="req">*</span><button class="info-btn" type="button" data-field="dbh1" aria-label="說明">ⓘ</button></label><input type="number" id="dbh1" placeholder="42.5" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH2（cm）<button class="info-btn" type="button" data-field="dbh2" aria-label="說明">ⓘ</button></label><input type="number" id="dbh2" placeholder="分枝" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH3（cm）<button class="info-btn" type="button" data-field="dbh2" aria-label="說明">ⓘ</button></label><input type="number" id="dbh3" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH4（cm）<button class="info-btn" type="button" data-field="dbh2" aria-label="說明">ⓘ</button></label><input type="number" id="dbh4" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH5（cm）<button class="info-btn" type="button" data-field="dbh2" aria-label="說明">ⓘ</button></label><input type="number" id="dbh5" step="0.1" min="0"></div>
+          <div class="frow"><label>DBH6（cm）<button class="info-btn" type="button" data-field="dbh2" aria-label="說明">ⓘ</button></label><input type="number" id="dbh6" step="0.1" min="0"></div>
         </div>
         <div class="frow-grid">
           <div class="frow" style="margin-bottom:0;">
-            <label>樹胸圍（cm，自動）</label>
+            <label>樹胸圍（cm，自動）<button class="info-btn" type="button" data-field="circumference" aria-label="說明">ⓘ</button></label>
             <input type="number" id="circumference" placeholder="自動計算" step="0.1" readonly>
           </div>
           <div class="frow" style="margin-bottom:0;">
-            <label>1m 高直徑（cm）</label>
+            <label>1m 高直徑（cm）<button class="info-btn" type="button" data-field="dbh-1m" aria-label="說明">ⓘ</button></label>
             <input type="number" id="dbh-1m" placeholder="" step="0.1" min="0">
           </div>
         </div>
         <div class="frow" style="margin-top:10px;">
-          <label>1m 高胸圍（cm，自動）</label>
+          <label>1m 高胸圍（cm，自動）<button class="info-btn" type="button" data-field="circ-1m" aria-label="說明">ⓘ</button></label>
           <input type="number" id="circ-1m" placeholder="自動計算" step="0.1" readonly>
         </div>
         <div class="seg-label">樹體量測</div>
         <div class="frow-grid">
-          <div class="frow" style="margin-bottom:0;"><label>樹高（m）</label><input type="number" id="height-m" placeholder="8.0" step="0.1" min="0"></div>
-          <div class="frow" style="margin-bottom:0;"><label>冠層高度（m）</label><input type="number" id="live-top" placeholder="7.5" step="0.1" min="0"></div>
-          <div class="frow" style="margin-bottom:0;"><label>枝下高（m）</label><input type="number" id="crown-base" placeholder="2.5" step="0.1" min="0"></div>
-          <div class="frow" style="margin-bottom:0;"><label>東西冠幅（m）</label><input type="number" id="crown-ew" placeholder="6.0" step="0.1" min="0"></div>
-          <div class="frow" style="margin-bottom:0;"><label>南北冠幅（m）</label><input type="number" id="crown-ns" placeholder="5.5" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>樹高（m）<button class="info-btn" type="button" data-field="height-m" aria-label="說明">ⓘ</button></label><input type="number" id="height-m" placeholder="8.0" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>冠層高度（m）<button class="info-btn" type="button" data-field="live-top" aria-label="說明">ⓘ</button></label><input type="number" id="live-top" placeholder="7.5" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>枝下高（m）<button class="info-btn" type="button" data-field="crown-base" aria-label="說明">ⓘ</button></label><input type="number" id="crown-base" placeholder="2.5" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>東西冠幅（m）<button class="info-btn" type="button" data-field="crown-ew" aria-label="說明">ⓘ</button></label><input type="number" id="crown-ew" placeholder="6.0" step="0.1" min="0"></div>
+          <div class="frow" style="margin-bottom:0;"><label>南北冠幅（m）<button class="info-btn" type="button" data-field="crown-ns" aria-label="說明">ⓘ</button></label><input type="number" id="crown-ns" placeholder="5.5" step="0.1" min="0"></div>
         </div>
         <div class="frow-grid" style="margin-top:10px;">
-          <div class="frow" style="margin-bottom:0;"><label>梢枯率（%）</label><input type="number" id="dieback" placeholder="5" step="1" min="0" max="100"></div>
-          <div class="frow" style="margin-bottom:0;"><label>冠層缺失率（%）</label><input type="number" id="canopy-missing" placeholder="10" step="1" min="0" max="100"></div>
+          <div class="frow" style="margin-bottom:0;"><label>梢枯率（%）<button class="info-btn" type="button" data-field="dieback" aria-label="說明">ⓘ</button></label><input type="number" id="dieback" placeholder="5" step="1" min="0" max="100"></div>
+          <div class="frow" style="margin-bottom:0;"><label>冠層缺失率（%）<button class="info-btn" type="button" data-field="canopy-missing" aria-label="說明">ⓘ</button></label><input type="number" id="canopy-missing" placeholder="10" step="1" min="0" max="100"></div>
         </div>
         <div class="nav-row">
           <button class="btn-prev" data-go="2">← 返回</button>
@@ -568,5 +602,153 @@
   <script src="js/species.js?v=20260608"></script>
   <script src="js/survey.js?v=20260608b"></script>
 
+
+  <!-- 欄位說明 Modal -->
+  <div id="field-info-modal" role="dialog" aria-modal="true" aria-labelledby="field-info-title">
+    <div id="field-info-box">
+      <button id="field-info-close" aria-label="關閉">✕</button>
+      <div id="field-info-title"></div>
+      <div id="field-info-body"></div>
+      <div id="field-info-source">資料來源：115年度行道樹調查暨安全健檢追蹤委託專業服務案需求說明書、115年度行道樹調查規範（附件二）</div>
+    </div>
+  </div>
+
+  <script>
+  /* ── Step D 欄位說明資料庫（依 115 年規範） ── */
+  const FIELD_INFO = {
+    'ht-dbh': {
+      title: '量測高度（胸高直徑量測位置）',
+      sections: [
+        { label: '定義', text: '進行胸高直徑（DBH）量測的樹幹高度位置，以公分（cm）記錄。' },
+        { label: '標準（115年規範）', text: '標準量測高度為距地面 <strong>130 公分（1.3 公尺）</strong>。若樹木根頸有隆起、瘤腫、傷口、分枝等情形，須在異常部位上方選取正常樹幹進行量測，並記錄實際高度。' },
+        { label: '量測方式', text: '以捲尺自地面最低點量至量測位置，記錄整數（cm）。傾斜地面以上坡側地面為基準。' }
+      ]
+    },
+    'dbh1': {
+      title: 'DBH1 — 主幹胸高直徑（cm）',
+      sections: [
+        { label: '定義', text: 'DBH（Diameter at Breast Height）為樹幹在胸高（130cm）處的直徑，是樹木最基本的量測指標。DBH1 為第一（最粗）主幹的胸高直徑。' },
+        { label: '標準（115年規範）', text: '單幹樹木填寫 DBH1 即可。多幹樹木（分叉點低於量測高度）須逐幹量測，依徑由大至小填入 DBH1～DBH6。<br>量測精確至 <strong>小數點後第一位（cm）</strong>。' },
+        { label: '量測方式', text: '站於樹木正南側面向北，以輪尺（游標卡尺）夾量，取東西向與南北向兩次測值之平均；或以圍尺量胸圍後換算：DBH = 胸圍 ÷ 3.14159。' }
+      ]
+    },
+    'dbh2': {
+      title: 'DBH2～DBH6 — 多幹胸高直徑（cm）',
+      sections: [
+        { label: '定義', text: '多幹樹木第 2 至第 6 幹的胸高直徑。適用於分叉點低於量測高度（130cm）的多主幹樹木。' },
+        { label: '標準（115年規範）', text: '單幹樹木無需填寫，留空即可。多幹依徑由大至小排序，量測精確至小數點後第一位（cm）。系統自動依各幹直徑加總計算合計 DBH 與胸圍。' },
+        { label: '量測方式', text: '各幹獨立量測，方法同 DBH1。不足 6 幹者留空。' }
+      ]
+    },
+    'circumference': {
+      title: '樹胸圍（cm，自動計算）',
+      sections: [
+        { label: '定義', text: '樹幹在胸高處的周長（CBH，Circumference at Breast Height），為樹木規格的常用指標。' },
+        { label: '計算方式', text: '系統依 DBH1 自動計算：<strong>胸圍 = DBH1 × π（3.14159）</strong>。多幹以主幹（DBH1）計算，無需手動填寫。' },
+        { label: '說明', text: '如使用圍尺直接量測可得更精確胸圍值，反算 DBH = 胸圍 ÷ π 後填入。' }
+      ]
+    },
+    'dbh-1m': {
+      title: '1m 高直徑（米高直徑，cm）',
+      sections: [
+        { label: '定義', text: '樹幹在距地面 <strong>100 公分（1 公尺）</strong> 高處的直徑，稱為「米高直徑」。' },
+        { label: '標準（115年規範）', text: '115 年調查規範要求同時記錄胸高直徑與米高直徑。特別適用於樹幹 130cm 以下有異常、或幼樹（DBH < 5cm）的情況。精確至小數點後第一位（cm）。' },
+        { label: '量測方式', text: '同 DBH 量測方式，於地上 100cm 處使用輪尺量測，取兩垂直方向平均值。' }
+      ]
+    },
+    'circ-1m': {
+      title: '1m 高胸圍（cm，自動計算）',
+      sections: [
+        { label: '定義', text: '樹幹在 1 公尺高處的周長，由系統依米高直徑自動計算。' },
+        { label: '計算方式', text: '系統自動計算：<strong>1m 高胸圍 = 米高直徑（dbh-1m）× π（3.14159）</strong>。填入 1m 高直徑後即自動更新。' }
+      ]
+    },
+    'height-m': {
+      title: '樹高（m）',
+      sections: [
+        { label: '定義', text: '從地面基部到樹冠最高活枝頂端的垂直高度（公尺）。不包含枯枝、枯頂。' },
+        { label: '標準（115年規範）', text: '量測最高活立枝頂端的垂直高度，精確至 <strong>小數點後第一位（m）</strong>。遇特殊地形以樹木基部所在地面為基準。' },
+        { label: '量測方式', text: '使用雷射測距儀或測高儀（clinometer），以三角測量法計算：樹高 = 距離 × tan（仰角）。亦可使用測高 App 輔助估算。' }
+      ]
+    },
+    'live-top': {
+      title: '冠層高度（m）',
+      sections: [
+        { label: '定義', text: '活樹冠最高點（最高活枝頂端）距地面的垂直高度（公尺），即活冠的最高邊界。' },
+        { label: '標準（115年規範）', text: '以最高活枝頂端為量測目標，排除枯枝。精確至小數點後第一位（m）。通常等於或略小於樹高。' },
+        { label: '量測方式', text: '同樹高量測，對準最高活枝尖端量測垂直高度。可與樹高同時量測。' }
+      ]
+    },
+    'crown-base': {
+      title: '枝下高（m）',
+      sections: [
+        { label: '定義', text: '從地面到活樹冠最低活枝基部的垂直高度（公尺），即「活冠基高」，代表無枝幹的樹幹淨高。' },
+        { label: '標準（115年規範）', text: '以最低活枝基部距地面的垂直距離為準，枯枝不計入。精確至小數點後第一位（m）。此值關係行人通行淨高，行道樹通常須 ≥ 2.5m（人行道）或 ≥ 4.5m（車道）。' },
+        { label: '量測方式', text: '目測估算或以量竿量測最低活枝基部高度。' }
+      ]
+    },
+    'crown-ew': {
+      title: '東西冠幅（m）',
+      sections: [
+        { label: '定義', text: '樹冠在東西方向的最大水平延伸寬度（公尺）。' },
+        { label: '標準（115年規範）', text: '取樹冠東側最遠點到西側最遠點的水平距離（地面投影），精確至小數點後第一位（m）。以冠幅水平投影為準，不受樹幹傾斜影響。' },
+        { label: '量測方式', text: '以捲尺在地面沿東西方向量測冠幅投影的最大寬度，或目測估算。與南北冠幅合計可算平均冠幅：（E-W + N-S）÷ 2。' }
+      ]
+    },
+    'crown-ns': {
+      title: '南北冠幅（m）',
+      sections: [
+        { label: '定義', text: '樹冠在南北方向的最大水平延伸寬度（公尺）。' },
+        { label: '標準（115年規範）', text: '取樹冠南側最遠點到北側最遠點的水平距離（地面投影），精確至小數點後第一位（m）。' },
+        { label: '量測方式', text: '同東西冠幅量測方式，方向改為南北。' }
+      ]
+    },
+    'dieback': {
+      title: '梢枯率（%）',
+      sections: [
+        { label: '定義', text: '樹冠頂梢枯死的比例（%）。枯死細枝、枯梢占整體冠層的估計百分比，反映樹木生理衰退程度。' },
+        { label: '標準（115年規範）', text: '目視評估整體冠層中已枯死的枝梢（頂梢乾枯、無葉、無皮）比例。<strong>以 5% 為基本單位</strong>記錄整數值（0、5、10⋯100%）。梢枯率 > 25% 為高風險警示指標之一。' },
+        { label: '量測方式', text: '從樹木四周仰視整體冠層，估算枯梢面積占全冠的百分比。參考：0% 完全健康；5-10% 輕微衰退；25-50% 嚴重衰退；>50% 瀕死。' }
+      ]
+    },
+    'canopy-missing': {
+      title: '冠層缺失率（%）',
+      sections: [
+        { label: '定義', text: '樹冠相對於該樹種正常完整冠型「應有」的缺失面積比例（%），反映因病蟲害、修剪不當、枝條斷裂、人為破壞等導致的冠型缺損程度。' },
+        { label: '標準（115年規範）', text: '比較實際冠型與預期完整冠型之差異，估算缺失百分比。<strong>以 5% 為基本單位</strong>記錄整數值（%）。與梢枯率共同反映樹木健康狀態。' },
+        { label: '量測方式', text: '從樹木四周觀察冠層空缺，評估與健康完整冠型相比的缺失比例。例如：冠幅正常應 6m 但一側缺枝，缺失約 20%。' }
+      ]
+    }
+  };
+
+  function openFieldInfo(field) {
+    const info = FIELD_INFO[field];
+    if (!info) return;
+    const body = info.sections.map(s =>
+      '<div class="info-section"><strong>' + s.label + '</strong>' + s.text + '</div>'
+    ).join('');
+    document.getElementById('field-info-title').textContent = info.title;
+    document.getElementById('field-info-body').innerHTML = body;
+    document.getElementById('field-info-modal').classList.add('open');
+    document.getElementById('field-info-box').scrollTop = 0;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('field-info-modal');
+    document.getElementById('field-info-close').addEventListener('click', function () {
+      modal.classList.remove('open');
+    });
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) modal.classList.remove('open');
+    });
+    document.querySelectorAll('.info-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openFieldInfo(btn.dataset.field);
+      });
+    });
+  });
+  </script>
 </body>
 </html>
