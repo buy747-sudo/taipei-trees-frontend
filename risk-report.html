@@ -489,31 +489,41 @@ async function exportReportPDF() {
     drawItemsHeader();
 
     const SECTION_LABELS_MAP = {
-      crown: '一、樹冠狀況',
-      trunk: '二、樹幹狀況',
-      root:  '三、根部狀況',
-      env:   '四、棲地環境',
+      crown:   '一、樹冠狀況',
+      trunk:   '二、樹幹狀況',
+      root:    '三、根部狀況',
+      env:     '四、棲地環境',  // 舊資料相容
+      habitat: '四、棲地環境',  // forms_data.py 實際 key
     };
     let curSection = '';
 
+    // 行高常數（計算 needH 與繪製必須一致）
+    const TLH = 5.2;   // title line height
+    const ALH = 5.0;   // answer line height
+    const AGAP = 1.5;  // gap after each answer block
+    const TGAP = 1.0;  // gap after title block
+    const PAD_TOP = 2.5; // top inner padding
+    const PAD_BOT = 3.0; // bottom inner padding
+
     items_detail.forEach(q => {
-      // 計算每題所需高度
+      // ── 計算每題所需高度（必須與繪製邏輯完全一致）──
       sf(8, 'bold');
       const qLines = doc.splitTextToSize(`${q.no}. ${q.title}`, IW - 5);
-      let needH = qLines.length * 4.8 + 2;
+      let needH = PAD_TOP + qLines.length * TLH + TGAP;
       q.answers.forEach(ans => {
         sf(7.5, 'normal');
         const sn = typeof ans.score === 'number' ? ans.score : 0;
         const aStr = `☑ ${ans.label}${sn !== 0 ? ` (${ans.score})` : ''}${ans.is_cf ? ' ★關鍵因子' : ''}`;
         const aLines = doc.splitTextToSize(aStr, IW - 9);
-        needH += aLines.length * 4.5;
+        needH += aLines.length * ALH + AGAP;
       });
-      needH = Math.max(needH + 3, 12);
+      needH += PAD_BOT;
+      needH = Math.max(needH, 14);
 
       const isNewSec = q.section !== curSection;
 
-      // 換頁（一次判斷涵蓋分區標題 + 題目高度，避免分區標題與題目跨頁）
-      const spaceNeeded = (isNewSec ? 7 : 0) + needH;
+      // 換頁（一次判斷涵蓋分區標題 + 題目高度，避免標題與題目跨頁）
+      const spaceNeeded = (isNewSec ? 7.5 : 0) + needH;
       if (y + spaceNeeded > 283) {
         newPage();
         drawItemsHeader();
@@ -525,11 +535,11 @@ async function exportReportPDF() {
                          String(q.section_label || q.section || '');
         doc.setFillColor(30, 80, 45);
         doc.setDrawColor(30, 80, 45); doc.setLineWidth(0.3);
-        doc.rect(M, y, CW, 7, 'FD');
+        doc.rect(M, y, CW, 7.5, 'FD');
         sf(8.5, 'bold', [255, 255, 255]);
-        doc.text(secLabel, M + 4, y + 5);
+        doc.text(secLabel, M + 4, y + 5.2);
         sf(8, 'normal');
-        y += 7;
+        y += 7.5;
         curSection = q.section;
       }
 
@@ -547,11 +557,11 @@ async function exportReportPDF() {
             tc: totalScore < 0 ? [160, 0, 0] : [60, 60, 60]});
 
       // 題目標題
-      let iy = rowTop + 1.5;
+      let iy = rowTop + PAD_TOP;
       sf(8, 'bold');
       const qLines2 = doc.splitTextToSize(`${q.no}. ${q.title}`, IW - 5);
-      qLines2.forEach(l => { doc.text(l, M + 3, iy + 3.5); iy += 4.8; });
-      iy += 0.5;
+      qLines2.forEach(l => { doc.text(l, M + 3, iy + 3.5); iy += TLH; });
+      iy += TGAP;
 
       // 答案列
       q.answers.forEach(ans => {
@@ -561,8 +571,8 @@ async function exportReportPDF() {
         const aStr = `☑ ${ans.label}${scorePart}${cfMark}`;
         sf(7.5, 'normal', ans.is_cf ? [160, 40, 0] : (sn < 0 ? [40, 40, 40] : [100, 100, 100]));
         const aLines = doc.splitTextToSize(aStr, IW - 9);
-        aLines.forEach(l => { doc.text(l, M + 6, iy + 3.5); iy += 4.5; });
-        iy += 1;
+        aLines.forEach(l => { doc.text(l, M + 6, iy + 3.5); iy += ALH; });
+        iy += AGAP;
       });
       sf(8, 'normal');
 
@@ -594,21 +604,21 @@ async function exportReportPDF() {
     y += 8;
     const scoreDisplay = typeof healthScore === 'number' ? `${healthScore} 分` : healthScore;
     const cfDisplay = typeof criticalCount === 'number' ? `${criticalCount} 個` : criticalCount;
-    cell(M,          y, totalW, 9, scoreDisplay, {sz:11, align:'center', bold:true, tc:[0,60,0]});
-    cell(M+totalW+4, y, totalW, 9, cfDisplay,    {sz:11, align:'center', bold:true, tc: critCount_n>=3?[180,0,0]:[0,60,0]});
-    y += 11;
+    cell(M,          y, totalW, 10, scoreDisplay, {sz:11, align:'center', bold:true, tc:[0,60,0]});
+    cell(M+totalW+4, y, totalW, 10, cfDisplay,    {sz:11, align:'center', bold:true, tc: critCount_n>=3?[180,0,0]:[0,60,0]});
+    y += 13;  // 10mm 儲存格 + 3mm 間距
 
-    // 好/普通/差
+    // 好/普通/差（行距加大，避免與上方數字擠在一起）
     ['好','普通','差'].forEach(lvl => {
       const selected = healthLevel === lvl;
       sf(8.5, selected?'bold':'normal', selected?[26,92,42]:[80,80,80]);
       doc.text(`${selected?'☑':'□'} ${lvl}`, M+4, y);
       const desc = {好:'總扣分≦30分',普通:'30分＜總扣分≦45分',差:'總扣分＞45分或關鍵因子≧3個'}[lvl]||'';
       sf(7.5,'normal',[100,100,100]);
-      doc.text(`：${desc}`, M+16, y);
-      y += 6;
+      doc.text(`：${desc}`, M+18, y);
+      y += 8;  // 6 → 8，行距加大
     });
-    y += 4;
+    y += 5;
 
     // ── 環境公共安全風險度 ──
     chk(30);
@@ -670,11 +680,11 @@ async function exportReportPDF() {
     doc.text('縱軸：樹木健康度　／　橫軸：環境公共安全風險度', M, y + 4);
     y += 8;
 
-    // 評估結果標示
+    // 評估結果標示（grade_info.label 已包含 "B 級"，不重複加 grade）
     sf(9.5,'bold', gradeColor);
-    doc.text(`本次評估結果：${grade} 級  ${grade_info.label||''}`, M, y);
+    doc.text(`本次評估結果：${grade_info.label || (grade + ' 級')}`, M, y);
     sf(8,'normal',[60,60,60]);
-    doc.text(grade_info.desc||'', M+80, y);
+    doc.text(grade_info.desc||'', M+60, y);
     y += 8;
 
     // ── 評估後建議處理方式 ──
