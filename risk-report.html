@@ -305,14 +305,21 @@ async function exportReportPDF() {
     const assessorName  = a.assessor_name || '—';
     const envRiskLabel  = a.env_risk_label || a.env_risk || '—';
     const envRisk       = a.env_risk || 'mid';  // low / mid / high
-    const healthLevel   = a.health_level || '—'; // 好/普通/差
+    // healthLevel：優先用 API 欄位；若非 好/普通/差 則由分數與關鍵因子數反推
+    const healthLevelRaw = a.health_level || '';
+    const healthScore_n  = typeof a.health_score   === 'number' ? a.health_score   : 0;
+    const critCount_n    = typeof a.critical_count === 'number' ? a.critical_count : 0;
+    const healthLevel = ['好','普通','差'].includes(healthLevelRaw) ? healthLevelRaw :
+      (critCount_n >= 3 || Math.abs(healthScore_n) > 45) ? '差' :
+      Math.abs(healthScore_n) > 30 ? '普通' : '好';
     const hits          = a.grade_a_hits || [];
 
     const GRADE_COLOR = { A:[139,0,0], B:[211,47,47], C:[230,81,0], D:[56,142,60] };
     const gradeColor  = GRADE_COLOR[grade] || GRADE_COLOR.D;
 
     const now       = new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
-    const createdAt = (a.created_at || '').split('T')[0].replace(/-/g,'/') || now;
+    // created_at 可能是 "2026/06/08 15:44:39" 或 "2026-06-08T15:44:39"，取前 10 個字元
+    const createdAt = String(a.created_at || '').substring(0, 10).replace(/-/g, '/') || now;
 
     const PHOTO_BASE = new URL(API_BASE).origin;
     const F   = PDF_CJK_FONT_NAME;
@@ -470,108 +477,97 @@ async function exportReportPDF() {
     // ════════════════════════════════════════════════════
     newPage();
 
-    // 表頭
-    const QW = 8, SW = 12;  // 項目欄寬、分數欄寬
-    const AW = CW - QW - SW;
+    // 表頭（二欄：評估項目 + 分數）
+    const SW = 14;   // 分數欄寬
+    const IW = CW - SW;  // 評估項目欄寬
     const TBG = [235,245,235];
-    cell(M,      y, QW, 7, '項目', {bold:true, bg:TBG, sz:7, align:'center'});
-    cell(M+QW,   y, AW, 7, '扣分樣態標準（☑ 為選取結果）', {bold:true, bg:TBG, sz:7.5});
-    cell(M+QW+AW,y, SW, 7, '分數',  {bold:true, bg:TBG, sz:7, align:'center'});
-    y += 7;
-
-    const SECTION_NUM = {'crown':'一','trunk':'二','root':'三','env':'四'};
-    const SECTION_NAME= {'crown':'樹冠狀況','trunk':'樹幹狀況','root':'根部狀況','env':'棲地環境'};
-    let curSection = '';
-    let secRowStart = y;
-    let secItems   = [];
-
-    function flushSection() {
-      // 補畫項目欄（合併儲存格效果）
-      if (!curSection || !secItems.length) return;
-      const label = `${SECTION_NUM[curSection]||''}\n、\n${(SECTION_NAME[curSection]||'').split('').join('\n')}`;
-      const secH = secItems.reduce((s,r) => s+r, 0);
-      doc.setDrawColor(140,140,140); doc.setLineWidth(0.25);
-      doc.rect(M, secRowStart, QW, secH);
-      sf(7.5,'bold',[26,92,42]);
-      // 垂直置中文字
-      const sLabel = `${SECTION_NUM[curSection]}、${SECTION_NAME[curSection]||''}`;
-      const lines = sLabel.split('、');
-      let ty = secRowStart + secH/2 - lines.length*3;
-      lines.forEach(l => {
-        doc.text(l, M+QW/2, ty, {align:'center'});
-        ty += 6;
-      });
+    function drawItemsHeader() {
+      cell(M,    y, IW, 7, '評估項目（☑ 為選取結果）', {bold:true, bg:TBG, sz:8});
+      cell(M+IW, y, SW, 7, '分數', {bold:true, bg:TBG, sz:8, align:'center'});
+      y += 7;
     }
+    drawItemsHeader();
+
+    const SECTION_LABELS_MAP = {
+      crown: '一、樹冠狀況',
+      trunk: '二、樹幹狀況',
+      root:  '三、根部狀況',
+      env:   '四、棲地環境',
+    };
+    let curSection = '';
 
     items_detail.forEach(q => {
       // 計算每題所需高度
-      sf(8,'bold');
-      const qLines = doc.splitTextToSize(`${q.no}. ${q.title}`, AW-4);
-      let needH = qLines.length * 4.6 + 2;
+      sf(8, 'bold');
+      const qLines = doc.splitTextToSize(`${q.no}. ${q.title}`, IW - 5);
+      let needH = qLines.length * 4.8 + 2;
       q.answers.forEach(ans => {
-        sf(8,'normal');
-        const aLines = doc.splitTextToSize(`☑ ${ans.label}${ans.score!==0?` (${ans.score})`:''} ${ans.is_cf?'★關鍵因子':''}`, AW-8);
-        needH += aLines.length * 4.5 + 1;
+        sf(7.5, 'normal');
+        const sn = typeof ans.score === 'number' ? ans.score : 0;
+        const aStr = `☑ ${ans.label}${sn !== 0 ? ` (${ans.score})` : ''}${ans.is_cf ? ' ★關鍵因子' : ''}`;
+        const aLines = doc.splitTextToSize(aStr, IW - 9);
+        needH += aLines.length * 4.5;
       });
-      needH = Math.max(needH, 10);
+      needH = Math.max(needH + 3, 12);
 
-      // 換頁
-      if (y + needH > 283) {
-        flushSection();
-        secItems = [];
-        secRowStart = y;  // will be updated after newPage
+      const isNewSec = q.section !== curSection;
+
+      // 換頁（一次判斷涵蓋分區標題 + 題目高度，避免分區標題與題目跨頁）
+      const spaceNeeded = (isNewSec ? 7 : 0) + needH;
+      if (y + spaceNeeded > 283) {
         newPage();
-        // re-draw table header
-        cell(M,      y, QW, 7, '項目', {bold:true, bg:TBG, sz:7, align:'center'});
-        cell(M+QW,   y, AW, 7, '扣分樣態標準（☑ 為選取結果）', {bold:true, bg:TBG, sz:7.5});
-        cell(M+QW+AW,y, SW, 7, '分數',  {bold:true, bg:TBG, sz:7, align:'center'});
-        y += 7;
-        secRowStart = y;
-        secItems = [];
-        curSection = q.section;  // same section continues
+        drawItemsHeader();
       }
 
-      // 新分區
-      if (q.section !== curSection) {
-        flushSection();
-        secItems = [];
-        secRowStart = y;
+      // 新分區：全寬分區標題列
+      if (isNewSec) {
+        const secLabel = SECTION_LABELS_MAP[q.section] ||
+                         String(q.section_label || q.section || '');
+        doc.setFillColor(30, 80, 45);
+        doc.setDrawColor(30, 80, 45); doc.setLineWidth(0.3);
+        doc.rect(M, y, CW, 7, 'FD');
+        sf(8.5, 'bold', [255, 255, 255]);
+        doc.text(secLabel, M + 4, y + 5);
+        sf(8, 'normal');
+        y += 7;
         curSection = q.section;
       }
 
       // 繪製題目列
       const rowTop = y;
-      // 答案內容欄（不加左邊項目欄，由 flushSection 補）
-      doc.setDrawColor(140,140,140); doc.setLineWidth(0.25);
-      // 右側分數欄
-      const totalScore = q.answers.reduce((s,ans)=>s+(ans.score||0),0);
-      cell(M+QW+AW, rowTop, SW, needH,
-           totalScore !== 0 ? String(totalScore) : '0',
-           {sz:8, align:'center', tc: totalScore<0?[180,0,0]:[60,60,60]});
+      doc.setDrawColor(140, 140, 140); doc.setLineWidth(0.25);
+      doc.rect(M, rowTop, IW, needH);
 
-      // 中間答案欄（題目+答案）
-      doc.rect(M+QW, rowTop, AW, needH); // outer border
+      // 分數欄
+      const totalScore = q.answers.reduce((s, ans) => {
+        return s + (typeof ans.score === 'number' ? ans.score : 0);
+      }, 0);
+      cell(M + IW, rowTop, SW, needH, String(totalScore),
+           {sz: 9, align: 'center', bold: totalScore < 0,
+            tc: totalScore < 0 ? [160, 0, 0] : [60, 60, 60]});
+
+      // 題目標題
       let iy = rowTop + 1.5;
-      sf(8,'bold');
-      const qLines2 = doc.splitTextToSize(`${q.no}. ${q.title}`, AW-4);
-      qLines2.forEach(l => { doc.text(l, M+QW+2, iy+3.2); iy += 4.6; });
+      sf(8, 'bold');
+      const qLines2 = doc.splitTextToSize(`${q.no}. ${q.title}`, IW - 5);
+      qLines2.forEach(l => { doc.text(l, M + 3, iy + 3.5); iy += 4.8; });
       iy += 0.5;
 
+      // 答案列
       q.answers.forEach(ans => {
-        const cfMark = ans.is_cf ? '  ★關鍵因子' : '';
-        const scorePart = ans.score !== 0 ? ` (${ans.score})` : '';
+        const sn = typeof ans.score === 'number' ? ans.score : 0;
+        const scorePart = sn !== 0 ? ` (${ans.score})` : '';
+        const cfMark    = ans.is_cf ? ' ★關鍵因子' : '';
         const aStr = `☑ ${ans.label}${scorePart}${cfMark}`;
-        sf(8, 'normal', ans.is_cf ? [160,40,0] : (ans.score<0 ? [40,40,40] : [80,80,80]));
-        const aLines = doc.splitTextToSize(aStr, AW-8);
-        aLines.forEach(l => { doc.text(l, M+QW+5, iy+3.2); iy += 4.5; });
+        sf(7.5, 'normal', ans.is_cf ? [160, 40, 0] : (sn < 0 ? [40, 40, 40] : [100, 100, 100]));
+        const aLines = doc.splitTextToSize(aStr, IW - 9);
+        aLines.forEach(l => { doc.text(l, M + 6, iy + 3.5); iy += 4.5; });
         iy += 1;
       });
-      sf(8,'normal');
+      sf(8, 'normal');
 
-      secItems.push(needH);
       y += needH;
     });
-    flushSection();
     y += 4;
 
     // ── 五、其他有關樹木生長狀態註記事項 ──
@@ -599,7 +595,7 @@ async function exportReportPDF() {
     const scoreDisplay = typeof healthScore === 'number' ? `${healthScore} 分` : healthScore;
     const cfDisplay = typeof criticalCount === 'number' ? `${criticalCount} 個` : criticalCount;
     cell(M,          y, totalW, 9, scoreDisplay, {sz:11, align:'center', bold:true, tc:[0,60,0]});
-    cell(M+totalW+4, y, totalW, 9, cfDisplay,    {sz:11, align:'center', bold:true, tc: criticalCount>=3?[180,0,0]:[0,60,0]});
+    cell(M+totalW+4, y, totalW, 9, cfDisplay,    {sz:11, align:'center', bold:true, tc: critCount_n>=3?[180,0,0]:[0,60,0]});
     y += 11;
 
     // 好/普通/差
@@ -653,8 +649,6 @@ async function exportReportPDF() {
     const matCW = CW/4;
     const matH  = 7;
     const matColors = { 'A級':[139,0,0],'B級':[211,47,47],'C級':[230,81,0],'D級':[56,142,60] };
-    const matRH     = ['',healthLevel,'',''];
-
     matGrade.forEach((row, ri) => {
       row.forEach((cell_v, ci) => {
         const isGrade = ri>0 && ci>0;
@@ -671,10 +665,9 @@ async function exportReportPDF() {
       });
       y += matH;
     });
-    // 標注欄頭
-    sf(7,'normal',[100,100,100]);
-    doc.text('↑ 樹木健康度', M-0.5, y-matH*4/2, {angle:90});
-    doc.text('→ 環境公共安全風險度', M+CW/2, y+4, {align:'center'});
+    // 矩陣說明（不使用旋轉，改為水平標注）
+    sf(7, 'normal', [100, 100, 100]);
+    doc.text('縱軸：樹木健康度　／　橫軸：環境公共安全風險度', M, y + 4);
     y += 8;
 
     // 評估結果標示
