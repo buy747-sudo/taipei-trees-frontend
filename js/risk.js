@@ -118,9 +118,14 @@ function showTreeInfo(tree) {
   document.getElementById('tree-species-title').textContent =
     `🌳 ${tree.species_name || '未知樹種'}`;
 
+  const cat = tree.tree_category;
+  const catLabel = cat === 'protected' ? '⭐ 受保護樹木'
+                 : cat === 'street'    ? '🟢 行道樹'
+                 :                      '⚠️ 除役 / 未分類';
+
   const rows = [
     ['樹籍編號', tree.registry_code],
-    ['類型',     tree.tree_category === 'protected' ? '⭐ 受保護樹木' : '🟢 行道樹'],
+    ['類型',     catLabel],
     ['行政區',   tree.district],
     ['位置',     tree.managing_unit],
     ['樹高',     tree.height_m != null ? `${tree.height_m} m` : '—'],
@@ -129,6 +134,12 @@ function showTreeInfo(tree) {
 
   document.getElementById('tree-info-table').innerHTML =
     rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+  // 除役/未分類警告
+  const warn = document.getElementById('tree-retired-warn');
+  if (warn) {
+    warn.hidden = !!(cat === 'street' || cat === 'protected');
+  }
 
   showStep('tree-info');
 }

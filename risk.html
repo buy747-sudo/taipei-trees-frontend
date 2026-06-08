@@ -422,6 +422,12 @@
 
     <!-- ── Step 2：樹木資訊確認 ──────────────────────── -->
     <div id="step-tree-info" hidden>
+      <div id="tree-retired-warn" hidden
+           style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;
+                  padding:10px 14px;margin-bottom:12px;font-size:0.88rem;color:#7a5c00;">
+        ⚠️ 此樹木已被機關標記為<strong>除役 / 未分類</strong>，不在公開查詢範圍內。<br>
+        仍可進行評估並記錄，但請確認樹籍編號無誤。
+      </div>
       <div class="card">
         <div class="card-title" id="tree-species-title">—</div>
         <table class="tree-info-table" id="tree-info-table"></table>
@@ -544,7 +550,7 @@
   <script src="js/config.js"></script>
   <script src="js/auth.js?v=20260608"></script>
   <script src="js/pdf-font.js"></script>
-  <script src="js/risk.js?v=20260608b"></script>
+  <script src="js/risk.js?v=20260608c"></script>
 
 </body>
 </html>

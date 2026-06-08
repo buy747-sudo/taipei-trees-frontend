@@ -409,11 +409,18 @@ async function exportReportPDF() {
     cell(ox+LW+126,y, CW-LW-126, RH, tree.registry_code||'—', {sz:8});
     y += RH;
 
-    // row 3: 樹種 | 地點
+    // row 3: 樹種 | 狀態 | 地點
+    const catLabel = tree.tree_category === 'protected' ? '受保護樹木'
+                   : tree.tree_category === 'street'    ? '行道樹'
+                   :                                      '除役/未分類';
+    const catColor = (tree.tree_category === 'street' || tree.tree_category === 'protected')
+                   ? [0,0,0] : [160,60,0];
     cell(ox,       y, LW,   RH, '樹種',     {bold:true, bg:[235,245,235], sz:7.5});
-    cell(ox+LW,    y, 54,   RH, tree.species_name||'—', {sz:8});
-    cell(ox+LW+54, y, 18,   RH, '地點',     {bold:true, bg:[235,245,235], sz:7.5});
-    cell(ox+LW+72, y, CW-LW-72, RH, `${tree.district||''}${tree.managing_unit ? ' '+tree.managing_unit : ''}` || '—', {sz:8});
+    cell(ox+LW,    y, 38,   RH, tree.species_name||'—', {sz:8});
+    cell(ox+LW+38, y, 16,   RH, '狀態',     {bold:true, bg:[235,245,235], sz:7});
+    cell(ox+LW+54, y, 30,   RH, catLabel,   {sz:7.5, tc: catColor, bold: catColor[0]>0});
+    cell(ox+LW+84, y, 18,   RH, '地點',     {bold:true, bg:[235,245,235], sz:7.5});
+    cell(ox+LW+102,y, CW-LW-102, RH, `${tree.district||''}${tree.managing_unit ? ' '+tree.managing_unit : ''}` || '—', {sz:8});
     y += RH;
 
     // row 4: 經緯度
