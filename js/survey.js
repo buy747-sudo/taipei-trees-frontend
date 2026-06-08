@@ -114,15 +114,43 @@ function bindEvents() {
   document.getElementById('draft-btn').addEventListener('click', () => submitSurvey('draft'));
 }
 
+// ── 死亡缺株跳段邏輯 ──────────────────────────────────────────────────────────
+const DEAD_SKIP_STEPS = new Set([3, 4]); // D量測、E樹穴
+
+function isDeadTree() {
+  return radio('tree_status') === '死亡缺株';
+}
+
+/** 取得實際應跳轉的步驟（死亡缺株時略過 D/E）*/
+function resolveStep(target) {
+  if (!isDeadTree()) return target;
+  if (!DEAD_SKIP_STEPS.has(target)) return target;
+  // 前進：找下一個非略過步驟
+  if (target > currentStep) {
+    let n = target + 1;
+    while (DEAD_SKIP_STEPS.has(n) && n <= 6) n++;
+    return Math.min(n, 6);
+  }
+  // 後退：找上一個非略過步驟
+  let n = target - 1;
+  while (DEAD_SKIP_STEPS.has(n) && n >= 0) n--;
+  return Math.max(n, 0);
+}
+
 // ── step navigation ──────────────────────────────────────────────────────────
-function goStep(n) {
+function goStep(raw) {
+  const n = resolveStep(raw);
+
   document.querySelectorAll('[data-step]').forEach(el => el.classList.remove('active'));
   document.querySelector(`[data-step="${n}"]`).classList.add('active');
 
+  const dead = isDeadTree();
   document.querySelectorAll('#step-bar span').forEach(sp => {
     const s = parseInt(sp.dataset.s);
-    sp.classList.toggle('active', s === n);
-    sp.classList.toggle('done', s < n);
+    sp.classList.remove('active', 'done', 'skipped');
+    if (s === n)                          sp.classList.add('active');
+    else if (dead && DEAD_SKIP_STEPS.has(s)) sp.classList.add('skipped');
+    else if (s < n)                       sp.classList.add('done');
   });
 
   currentStep = n;
@@ -317,10 +345,27 @@ function onTreeStatusChange() {
     hint.style.background = '#f5f5f5';
     hint.style.color = '#555';
     hint.style.border = '1px solid #ccc';
-    hint.textContent = '📋 死亡缺株：量測（D段）、樹穴（E段）與照片（G段）可免填，直接跳至特殊資訊（F段）後送出。';
+    hint.textContent = '📋 死亡缺株：量測（D段）與樹穴（E段）將自動略過，直接跳至特殊資訊（F段）。';
+    // 若目前已在 D 或 E 段，立刻跳到 F
+    if (DEAD_SKIP_STEPS.has(currentStep)) goStep(5);
+    // 否則更新步驟列樣式（讓 D/E 顯示為略過）
+    else updateStepBar();
   } else {
     hint.style.display = 'none';
+    updateStepBar(); // 恢復正常步驟列
   }
+}
+
+/** 只重繪步驟列，不切換步驟 */
+function updateStepBar() {
+  const dead = isDeadTree();
+  document.querySelectorAll('#step-bar span').forEach(sp => {
+    const s = parseInt(sp.dataset.s);
+    sp.classList.remove('active', 'done', 'skipped');
+    if (s === currentStep)                sp.classList.add('active');
+    else if (dead && DEAD_SKIP_STEPS.has(s)) sp.classList.add('skipped');
+    else if (s < currentStep)             sp.classList.add('done');
+  });
 }
 
 // ── DBH auto-calc ─────────────────────────────────────────────────────────────
