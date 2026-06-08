@@ -23,6 +23,7 @@ let currentStep = 0;
 let treeData = null;        // from /public/tree/<code>
 let surveyId = null;        // set after first draft save
 let photoFiles = {};        // direction -> File
+let stepGOriginalHTML = ''; // G 段原始 HTML，用於重置
 
 // ── init ─────────────────────────────────────────────────────────────────────
 (function init() {
@@ -38,6 +39,9 @@ let photoFiles = {};        // direction -> File
     return;
   }
   document.getElementById('huser').textContent = user.display_name || user.username || '';
+
+  // 儲存 G 段原始 HTML，供重置時還原
+  stepGOriginalHTML = document.querySelector('[data-step="6"]').innerHTML;
 
   // pre-fill today's date
   document.getElementById('survey-date').value = new Date().toISOString().slice(0, 10);
@@ -510,12 +514,10 @@ async function submitSurvey(status) {
     }
 
     if (status === 'submitted') {
-      infoEl.textContent = '✅ 普查已送出！' + (photoErrors.length ? `（照片上傳失敗：${photoErrors.join('、')}）` : '');
-      infoEl.style.display = 'block';
-      showToast(status === 'submitted' ? '普查送出成功 🎉' : '草稿已儲存');
-      setTimeout(() => window.location.href = '/', 2500);
+      showToast('普查送出成功 🎉');
+      showSuccessSummary(json.survey_id, data, Object.keys(photoFiles).length, photoErrors);
     } else {
-      infoEl.textContent = '💾 草稿已儲存（survey_id: ' + surveyId + '）' + (photoErrors.length ? `（照片上傳失敗：${photoErrors.join('、')}）` : '');
+      infoEl.textContent = '💾 草稿已儲存（#' + surveyId + '）' + (photoErrors.length ? `（照片上傳失敗：${photoErrors.join('、')}）` : '');
       infoEl.style.display = 'block';
     }
 
@@ -543,6 +545,111 @@ async function uploadPhoto(id, dir, file) {
     });
     return res && res.ok;
   } catch { return false; }
+}
+
+// ── 送出成功摘要 ──────────────────────────────────────────────────────────────
+function showSuccessSummary(sid, data, photoCount, photoErrors) {
+  const step = document.querySelector('[data-step="6"]');
+  if (!step) return;
+
+  const treeLabel = treeData
+    ? `${treeData.species_name || '（未知樹種）'}　${treeData.registry_code}`
+    : data.tree_registry_code;
+
+  const location = treeData
+    ? [treeData.district, treeData.managing_unit].filter(Boolean).join('　')
+    : '—';
+
+  const dbhDisplay = data.dbh1
+    ? `${data.dbh1} cm${data.dbh2 ? ` / ${data.dbh2}` : ''}${data.dbh3 ? ` / ${data.dbh3}` : ''}`
+    : '—（死亡缺株）';
+
+  const photoNote = photoErrors.length
+    ? `<span style="color:#c00;">⚠️ 照片上傳失敗：${photoErrors.join('、')}</span>`
+    : `✅ 照片 ${photoCount} 張`;
+
+  step.innerHTML = `
+    <div class="card" style="text-align:center;padding:28px 20px;">
+      <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#1a5c2a;margin-bottom:4px;">普查已成功送出</div>
+      <div style="font-size:0.82rem;color:#888;margin-bottom:20px;">普查編號 #${sid}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 本次普查摘要</div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+        <tbody>
+          <tr><td style="padding:7px 4px;color:#888;width:90px;">樹木</td>
+              <td style="padding:7px 4px;font-weight:600;">${treeLabel}</td></tr>
+          <tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">位置</td>
+              <td style="padding:7px 4px;">${location}</td></tr>
+          <tr><td style="padding:7px 4px;color:#888;">普查日期</td>
+              <td style="padding:7px 4px;">${data.survey_date || '—'}</td></tr>
+          <tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">生長狀況</td>
+              <td style="padding:7px 4px;">${data.tree_status || '—'}</td></tr>
+          <tr><td style="padding:7px 4px;color:#888;">樹種</td>
+              <td style="padding:7px 4px;">${data.species_name || '—'}</td></tr>
+          <tr style="background:#f9f9f9;"><td style="padding:7px 4px;color:#888;">DBH</td>
+              <td style="padding:7px 4px;">${dbhDisplay}</td></tr>
+          <tr><td style="padding:7px 4px;color:#888;">照片</td>
+              <td style="padding:7px 4px;">${photoNote}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn-next" onclick="resetSurvey()" style="width:100%;padding:14px;">
+        🌳 繼續普查下一棵
+      </button>
+      <a href="/" style="display:block;text-align:center;padding:13px;font-size:0.95rem;
+         font-weight:600;color:#1a5c2a;border:1.5px solid #1a5c2a;border-radius:10px;
+         text-decoration:none;">
+        ← 回到地圖
+      </a>
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── 重置普查（繼續下一棵）────────────────────────────────────────────────────
+function resetSurvey() {
+  // 清除所有 state
+  treeData = null;
+  surveyId = null;
+  photoFiles = {};
+
+  // 清除表單輸入
+  document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => {
+    el.value = '';
+  });
+  document.querySelectorAll('input[type=radio]').forEach(el => { el.checked = false; });
+  document.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+
+  // 重設預設值
+  document.getElementById('survey-date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('ht-dbh').value = '130';
+  document.querySelector('[name=is_street_tree][value="S"]').checked = true;
+  document.querySelector('[name=pit_fence][value="0"]').checked = true;
+  document.querySelector('[name=pit_pole][value="0"]').checked = true;
+  document.querySelector('[name=protected_tree][value="0"]').checked = true;
+
+  // 還原 G 段原始 HTML 並重新綁定事件
+  const stepG = document.querySelector('[data-step="6"]');
+  stepG.innerHTML = stepGOriginalHTML;
+  document.getElementById('road-direction').addEventListener('change', buildPhotoSlots);
+  document.getElementById('submit-btn').addEventListener('click', () => submitSurvey('submitted'));
+  document.getElementById('draft-btn').addEventListener('click', () => submitSurvey('draft'));
+
+  // 隱藏步驟A的殘留狀態
+  document.getElementById('tree-found-card').hidden = true;
+  document.getElementById('step-a-error').style.display = 'none';
+  document.getElementById('tree-status-hint').style.display = 'none';
+  document.getElementById('code-input').value = '';
+  document.getElementById('park-name-row').hidden = true;
+  document.getElementById('gps-dist-hint').style.display = 'none';
+
+  goStep(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── toast ─────────────────────────────────────────────────────────────────────
