@@ -180,9 +180,19 @@ async function lookupTree(code) {
     treeData = data.tree;
     showTreeInfo(treeData);
     document.getElementById('tree-found-card').hidden = false;
-    // pre-fill species
+    // pre-fill species name → 觸發 onSpeciesChange 自動帶入樹種編碼與原生/外來
     if (treeData.species_name) {
       document.getElementById('species-name').value = treeData.species_name;
+      onSpeciesChange();
+    }
+    // 若 API 直接回傳樹種編碼，優先使用（比 species.js 查表更準確）
+    if (treeData.species_code) {
+      document.getElementById('species-code').value = treeData.species_code;
+    }
+    // 若 API 直接回傳原生/外來，優先使用
+    if (treeData.origin) {
+      const originRadio = document.querySelector(`[name=origin][value="${treeData.origin}"]`);
+      if (originRadio) originRadio.checked = true;
     }
   } catch (e) {
     errEl.textContent = '網路錯誤，請稍後再試。';
