@@ -699,9 +699,13 @@ async function submitSurvey(status) {
     });
     if (!res) return;
 
-    const json = await res.json();
+    // iOS Safari 對非 JSON 回應（如 Flask 500 HTML 頁）呼叫 res.json() 時
+    // 會拋出 SyntaxError: "The string did not match the expected pattern"
+    // 用 try/catch 包住，確保使用者看到清楚的錯誤訊息而非神秘 DOMException
+    let json = {};
+    try { json = await res.json(); } catch { /* 非 JSON 回應，忽略解析錯誤 */ }
     if (!res.ok) {
-      errEl.textContent = json.error || ('送出失敗（' + res.status + '）');
+      errEl.textContent = json.error || ('伺服器錯誤（HTTP ' + res.status + '），請稍後重試。');
       errEl.style.display = 'block'; return;
     }
 

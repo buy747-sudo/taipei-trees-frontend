@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="theme-color" content="#1a5c2a">
-  <title>評估紀錄管理｜台北市樹木查詢</title>
+  <title>評估紀錄｜台北市樹木查詢</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     body { background: #f0f4f1; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
@@ -24,15 +24,17 @@
 
     /* ── 統計摘要 ── */
     .summary-bar {
-      display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+      display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
     }
     .summary-card {
-      flex: 1; min-width: 90px; background: #fff; border-radius: 12px;
-      padding: 12px 14px; text-align: center;
+      flex: 1; min-width: 76px; background: #fff; border-radius: 12px;
+      padding: 10px 12px; text-align: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .summary-card .num { font-size: 1.5rem; font-weight: 700; color: #1a5c2a; }
-    .summary-card .lbl { font-size: 0.72rem; color: #888; margin-top: 2px; }
+    .summary-card .num { font-size: 1.4rem; font-weight: 700; color: #1a5c2a; }
+    .summary-card .num.danger { color: #dc2626; }
+    .summary-card .num.warn   { color: #d97706; }
+    .summary-card .lbl { font-size: 0.68rem; color: #888; margin-top: 2px; }
 
     /* ── 篩選 ── */
     .filter-bar {
@@ -43,9 +45,10 @@
       border: 1.5px solid #d0d0d0; background: #fff; color: #555; cursor: pointer;
       transition: all 0.15s;
     }
-    .filter-chip.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+    .filter-chip.active     { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+    .filter-chip.anomaly-chip.active { background: #d97706; border-color: #d97706; color: #fff; }
 
-    /* ── 批次操作列 ── */
+    /* ── 批次操作列（僅 platform_admin）── */
     .batch-bar {
       display: flex; align-items: center; gap: 10px;
       background: #fff; border-radius: 12px; padding: 10px 14px;
@@ -64,7 +67,7 @@
       cursor: pointer; transition: background 0.15s; display: none;
     }
     .btn-delete-batch:hover { background: #b91c1c; }
-    .btn-delete-batch.show { display: inline-block; }
+    .btn-delete-batch.show  { display: inline-block; }
 
     /* ── 評估卡片 ── */
     .assess-card {
@@ -74,7 +77,9 @@
       display: flex; align-items: flex-start; gap: 12px;
       transition: box-shadow 0.15s;
     }
-    .assess-card.selected { outline: 2px solid #1a5c2a; box-shadow: 0 4px 16px rgba(26,92,42,0.15); }
+    .assess-card.selected   { outline: 2px solid #1a5c2a; }
+    .assess-card.has-anomaly { border-left: 3px solid #d97706; }
+    .assess-card.is-resolved { border-left: 3px solid #16a34a; }
 
     .ac-check { padding-top: 2px; flex-shrink: 0; }
     .ac-check input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
@@ -103,6 +108,19 @@
     }
     .status-submitted { background: #e8f5e9; color: #1a5c2a; }
     .status-draft     { background: #fff8e1; color: #92400e; }
+
+    .anomaly-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+      background: #fef3c7; color: #92400e; cursor: pointer;
+      border: 1px solid #fcd34d;
+    }
+    .anomaly-badge:hover { background: #fde68a; }
+    .resolved-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+      background: #f0fdf4; color: #15803d; cursor: pointer;
+      border: 1px solid #86efac;
+    }
+    .resolved-badge:hover { background: #dcfce7; }
 
     .ac-date { font-size: 0.72rem; color: #aaa; }
     .ac-link {
@@ -133,12 +151,62 @@
       z-index: 9999; display: flex; align-items: center; justify-content: center;
     }
     .modal-overlay[hidden] { display: none !important; }
-    .modal-box {
+    .modal-delete-box {
       background: #fff; border-radius: 16px; padding: 24px 20px;
       max-width: 340px; width: 90%; text-align: center;
     }
-    .modal-box h2 { font-size: 1.05rem; font-weight: 800; color: #dc2626; margin-bottom: 8px; }
-    .modal-box p  { font-size: 0.88rem; color: #555; margin-bottom: 20px; line-height: 1.6; }
+    .modal-delete-box h2 { font-size: 1.05rem; font-weight: 800; color: #dc2626; margin-bottom: 8px; }
+    .modal-delete-box p  { font-size: 0.88rem; color: #555; margin-bottom: 20px; line-height: 1.6; }
+
+    /* ── 處理備註 modal（底部 sheet）── */
+    .resolve-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 9998; display: flex; align-items: flex-end;
+    }
+    .resolve-overlay.hidden { display: none; }
+    .resolve-box {
+      background: #fff; width: 100%; max-width: 560px;
+      margin: 0 auto; border-radius: 20px 20px 0 0;
+      padding: 20px 20px 36px; max-height: 90vh; overflow-y: auto;
+    }
+    .resolve-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .resolve-sub   { font-size: 0.82rem; color: #666; margin-bottom: 10px; }
+    .grade-highlight {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 10px; font-weight: 700; font-size: 0.85rem;
+      margin-bottom: 14px;
+    }
+    .grade-highlight.A { background: #fee2e2; color: #7f1d1d; }
+    .grade-highlight.B { background: #ffedd5; color: #7c2d12; }
+    .resolve-resolved-info {
+      background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;
+      padding: 8px 12px; font-size: 0.82rem; color: #15803d; margin-bottom: 12px;
+    }
+    .resolve-label    { font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+    .resolve-textarea {
+      width: 100%; box-sizing: border-box;
+      padding: 10px 12px; border: 1.5px solid #d0d0d0; border-radius: 10px;
+      font-size: 0.92rem; font-family: inherit; resize: vertical; min-height: 90px;
+      outline: none;
+    }
+    .resolve-textarea:focus { border-color: #1a5c2a; }
+    .resolve-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn-resolve {
+      flex: 1; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer;
+    }
+    .btn-resolve:hover { background: #14491f; }
+    .btn-undo {
+      flex: 1; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      background: #f3f4f6; color: #374151; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; cursor: pointer;
+    }
+    .btn-close {
+      padding: 12px 18px; font-size: 0.95rem; font-weight: 600;
+      background: #f3f4f6; color: #374151; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; cursor: pointer;
+    }
     .modal-actions { display: flex; gap: 10px; }
     .btn-cancel-modal {
       flex: 1; padding: 11px; border: 1.5px solid #ccc; border-radius: 10px;
@@ -157,7 +225,7 @@
 
   <header class="rl-header">
     <a href="/">← 地圖</a>
-    <h1>⚠️ 評估紀錄管理</h1>
+    <h1>⚠️ 評估紀錄</h1>
     <span class="huser" id="huser"></span>
   </header>
 
@@ -178,20 +246,25 @@
         <div class="lbl">草稿</div>
       </div>
       <div class="summary-card">
-        <div class="num" id="sum-grade-a" style="color:#dc2626;">—</div>
+        <div class="num danger" id="sum-grade-a">—</div>
         <div class="lbl">A 級危害</div>
+      </div>
+      <div class="summary-card">
+        <div class="num warn" id="sum-review">—</div>
+        <div class="lbl">⚠️ 需注意</div>
       </div>
     </div>
 
     <!-- 篩選 -->
     <div class="filter-bar">
-      <button class="filter-chip active" data-status="">全部</button>
-      <button class="filter-chip" data-status="submitted">✅ 已送出</button>
-      <button class="filter-chip" data-status="draft">💾 草稿</button>
+      <button class="filter-chip active" data-filter="">全部</button>
+      <button class="filter-chip" data-filter="status:submitted">✅ 已送出</button>
+      <button class="filter-chip" data-filter="status:draft">💾 草稿</button>
+      <button class="filter-chip anomaly-chip" data-filter="anomaly:1">⚠️ 需注意</button>
     </div>
 
-    <!-- 批次操作列 -->
-    <div class="batch-bar">
+    <!-- 批次操作列（僅 platform_admin） -->
+    <div class="batch-bar" id="batch-bar" hidden>
       <label>
         <input type="checkbox" id="select-all-cb">
         全選
@@ -209,7 +282,7 @@
 
   <!-- 刪除確認 modal -->
   <div class="modal-overlay" id="delete-modal" hidden>
-    <div class="modal-box">
+    <div class="modal-delete-box">
       <h2>🗑 確認刪除</h2>
       <p id="modal-msg">確定刪除選取的評估紀錄？<br>此操作<strong>無法復原</strong>。</p>
       <div class="modal-actions">
@@ -219,34 +292,56 @@
     </div>
   </div>
 
+  <!-- 處理備註 modal -->
+  <div class="resolve-overlay hidden" id="resolve-modal">
+    <div class="resolve-box">
+      <div class="resolve-title" id="resolve-title">⚠️ 評估異常</div>
+      <div class="resolve-sub"   id="resolve-sub"></div>
+      <div id="resolve-grade-highlight"></div>
+      <div id="resolve-resolved-info" style="display:none"></div>
+      <div class="resolve-label">處理備註</div>
+      <textarea class="resolve-textarea" id="resolve-note" placeholder="說明處理方式或改正內容…"></textarea>
+      <div class="resolve-actions" id="resolve-actions"></div>
+    </div>
+  </div>
+
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
   <script>
     const RISK_API = API_BASE.replace('/public', '') + '/api/assessment';
 
-    let currentStatus = '';
+    let currentFilter = '';
     let offset = 0;
     const LIMIT = 30;
     let totalCount = 0;
     let selectedIds = new Set();
+    let currentRole = '';
+    let resolveTarget = null;
 
-    // ── auth guard（限 platform_admin）────────────────────────────────────────
+    const _MANAGE_ROLES = ['platform_admin', 'contractor_admin', 'inspector', 'surveyor'];
+
+    // ── auth guard ────────────────────────────────────────────────────────────
     (function init() {
       if (!Auth.isLoggedIn()) {
         window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname);
         return;
       }
       const user = Auth.getUser();
-      const role = user?.role || '';
-      if (role !== 'platform_admin') {
+      currentRole = user?.role || '';
+      if (!_MANAGE_ROLES.includes(currentRole)) {
         document.getElementById('main-body').innerHTML =
-          '<div style="padding:30px;color:#c00;font-weight:700;text-align:center;">' +
-          '🔒 此頁面僅限管理者帳號存取。</div>';
+          '<div style="padding:30px;color:#c00;font-weight:700;text-align:center;">🔒 您的帳號沒有評估權限。</div>';
         return;
       }
       document.getElementById('huser').textContent = user.display_name || user.username || '';
+
+      // 批次刪除僅限 platform_admin
+      if (currentRole === 'platform_admin') {
+        document.getElementById('batch-bar').hidden = false;
+        bindBatchUI();
+      }
+
       bindFilters();
-      bindBatchUI();
       loadSummary();
       loadAssessments(true);
     })();
@@ -265,6 +360,7 @@
         document.getElementById('sum-submitted').textContent = s?.total ?? '—';
         document.getElementById('sum-draft').textContent     = d?.total ?? '—';
         document.getElementById('sum-grade-a').textContent   = a.grade_a_count ?? '—';
+        document.getElementById('sum-review').textContent    = a.needs_review_count ?? '—';
       } catch { /* 靜默失敗 */ }
     }
 
@@ -274,16 +370,16 @@
         btn.addEventListener('click', () => {
           document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          currentStatus = btn.dataset.status;
+          currentFilter = btn.dataset.filter;
           offset = 0;
           selectedIds.clear();
-          updateBatchUI();
+          if (currentRole === 'platform_admin') updateBatchUI();
           loadAssessments(true);
         });
       });
     }
 
-    // ── 批次操作 ─────────────────────────────────────────────────────────────
+    // ── 批次操作 (platform_admin only) ────────────────────────────────────────
     function bindBatchUI() {
       document.getElementById('select-all-cb').addEventListener('change', e => {
         const checked = e.target.checked;
@@ -306,7 +402,6 @@
       document.getElementById('modal-cancel').addEventListener('click', () => {
         document.getElementById('delete-modal').hidden = true;
       });
-
       document.getElementById('modal-confirm').addEventListener('click', executeBatchDelete);
     }
 
@@ -316,50 +411,34 @@
       const btn = document.getElementById('delete-batch-btn');
       btn.classList.toggle('show', count > 0);
 
-      // 更新全選 checkbox 狀態
       const allCbs = document.querySelectorAll('.ac-check input[type="checkbox"]');
       const selectAllCb = document.getElementById('select-all-cb');
-      if (allCbs.length === 0) {
-        selectAllCb.checked = false;
-        selectAllCb.indeterminate = false;
-      } else if (count === 0) {
-        selectAllCb.checked = false;
-        selectAllCb.indeterminate = false;
+      if (allCbs.length === 0 || count === 0) {
+        selectAllCb.checked = false; selectAllCb.indeterminate = false;
       } else if (count === allCbs.length) {
-        selectAllCb.checked = true;
-        selectAllCb.indeterminate = false;
+        selectAllCb.checked = true; selectAllCb.indeterminate = false;
       } else {
-        selectAllCb.checked = false;
-        selectAllCb.indeterminate = true;
+        selectAllCb.checked = false; selectAllCb.indeterminate = true;
       }
     }
 
-    // ── 批次刪除 ─────────────────────────────────────────────────────────────
     async function executeBatchDelete() {
       const confirmBtn = document.getElementById('modal-confirm');
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = '刪除中…';
+      confirmBtn.disabled = true; confirmBtn.textContent = '刪除中…';
 
       const ids = [...selectedIds];
       let failCount = 0;
-
       await Promise.allSettled(ids.map(async id => {
         try {
           const res = await Auth.authFetch(`${RISK_API}/${id}`, { method: 'DELETE' });
-          if (!res || !res.ok) failCount++;
-          else selectedIds.delete(id);
+          if (!res || !res.ok) failCount++; else selectedIds.delete(id);
         } catch { failCount++; }
       }));
 
       document.getElementById('delete-modal').hidden = true;
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = '確認刪除';
+      confirmBtn.disabled = false; confirmBtn.textContent = '確認刪除';
+      if (failCount > 0) alert(`${ids.length - failCount} 筆刪除成功，${failCount} 筆失敗。`);
 
-      if (failCount > 0) {
-        alert(`${ids.length - failCount} 筆刪除成功，${failCount} 筆失敗（可能無權限或已不存在）。`);
-      }
-
-      // 重新整理清單與摘要
       selectedIds.clear();
       updateBatchUI();
       document.getElementById('select-all-cb').checked = false;
@@ -374,35 +453,33 @@
       const moreBtn   = document.getElementById('load-more-btn');
 
       if (reset) {
-        listEl.innerHTML = '';
-        offset = 0;
+        listEl.innerHTML = ''; offset = 0;
         loadingEl.style.display = 'block';
         moreBtn.style.display = 'none';
       }
 
       const params = new URLSearchParams({ limit: LIMIT, offset });
-      if (currentStatus) params.set('status', currentStatus);
+      if (currentFilter.startsWith('status:'))  params.set('status', currentFilter.split(':')[1]);
+      if (currentFilter === 'anomaly:1')         params.set('anomaly', '1');
 
       try {
         const res = await Auth.authFetch(`${RISK_API}/list?${params}`);
         loadingEl.style.display = 'none';
         if (!res) return;
         const data = await res.json();
-        if (!res.ok) {
-          listEl.innerHTML = `<p style="color:#c00;padding:16px;">載入失敗：${data.error || res.status}</p>`;
-          return;
-        }
+        if (!res.ok) { listEl.innerHTML = `<p style="color:#c00;padding:16px;">載入失敗：${data.error || res.status}</p>`; return; }
 
         totalCount = data.total;
-        const items = data.assessments || data.items || [];
+        const items = data.assessments || [];
         offset += items.length;
 
         if (reset && items.length === 0) {
-          listEl.innerHTML = `
-            <div class="empty-state">
-              <div class="ei">🌳</div>
-              <p>目前沒有評估紀錄。</p>
-            </div>`;
+          const msg = {
+            'status:draft':     '目前沒有草稿。',
+            'status:submitted': '尚無已送出的評估。',
+            'anomaly:1':        '目前沒有需要注意的評估。✅',
+          }[currentFilter] || '尚無評估紀錄。';
+          listEl.innerHTML = `<div class="empty-state"><div class="ei">🌳</div><p>${msg}</p></div>`;
           return;
         }
 
@@ -414,50 +491,158 @@
       }
     }
 
+    // ── 判斷是否為異常評估（A 或 B 級）────────────────────────────────────────
+    function isAnomaly(a) {
+      return a.is_grade_a === 1 || ['A', 'B'].includes(a.final_grade);
+    }
+
     // ── 建立卡片 DOM ─────────────────────────────────────────────────────────
     function buildCard(a) {
-      const grade   = a.risk_grade || a.grade || '';
+      const grade   = a.final_grade || '';
       const isDraft = a.status === 'draft';
+      const anomaly = isAnomaly(a);
+      const resolved = a.is_resolved === 1;
       const icon    = isDraft ? '💾' : '⚠️';
       const date    = a.assessment_date || a.created_at?.slice(0, 10) || '—';
       const species = a.species_name || a.tree_species || '（未知樹種）';
-      const code    = a.tree_registry_code || a.tree_code || '—';
-      const assessor = a.assessor_name || a.username || '';
+      const code    = a.tree_id || a.tree_registry_code || '—';
+      const showName = ['platform_admin', 'contractor_admin'].includes(currentRole);
+      const assessorName = a.assessor_name || '';
+
+      let anomalyBadgeHtml = '';
+      if (anomaly) {
+        anomalyBadgeHtml = resolved
+          ? `<span class="resolved-badge" data-id="${a.id}">✓ 已處理</span>`
+          : `<span class="anomaly-badge"  data-id="${a.id}">⚠️ 需注意</span>`;
+      }
 
       const card = document.createElement('div');
-      card.className = 'assess-card';
+      card.className = 'assess-card'
+        + (anomaly && !resolved ? ' has-anomaly' : '')
+        + (resolved ? ' is-resolved' : '');
       card.dataset.id = a.id;
+
       card.innerHTML = `
-        <div class="ac-check">
-          <input type="checkbox" data-id="${a.id}">
-        </div>
+        ${currentRole === 'platform_admin' ? `<div class="ac-check"><input type="checkbox" data-id="${a.id}"></div>` : ''}
         <div class="ac-icon">${icon}</div>
         <div class="ac-body">
           <div class="ac-title">${species}　${code}</div>
           <div class="ac-sub">
-            評估日期：${date}${assessor ? '　評估員：' + assessor : ''}<br>
-            ID：${a.id}
+            評估日期：${date}${showName && assessorName ? '　👤 ' + assessorName : ''}<br>
+            <span style="color:#aaa;font-size:0.72rem;">#${a.id}${a.district ? '　' + a.district : ''}</span>
           </div>
         </div>
         <div class="ac-right">
           <span class="grade-badge grade-${grade}">${grade || '—'}</span>
           <span class="status-badge status-${a.status || 'draft'}">${isDraft ? '草稿' : '已送出'}</span>
-          <span class="ac-date">${a.updated_at?.slice(0, 10) || ''}</span>
+          ${anomalyBadgeHtml}
           ${a.id ? `<a class="ac-link" href="/risk-report.html?id=${a.id}" target="_blank">查看 →</a>` : ''}
         </div>
       `;
 
-      card.querySelector('input[type="checkbox"]').addEventListener('change', e => {
-        const id = parseInt(e.target.dataset.id);
-        if (e.target.checked) selectedIds.add(id); else selectedIds.delete(id);
-        card.classList.toggle('selected', e.target.checked);
+      // 勾選（僅 platform_admin）
+      if (currentRole === 'platform_admin') {
+        card.querySelector('input[type="checkbox"]')?.addEventListener('change', e => {
+          const id = parseInt(e.target.dataset.id);
+          if (e.target.checked) selectedIds.add(id); else selectedIds.delete(id);
+          card.classList.toggle('selected', e.target.checked);
+          updateBatchUI();
+        });
+      }
 
-        // 若剛選，清除全選 checkbox 的 indeterminate
-        document.getElementById('select-all-cb').checked = false;
-        updateBatchUI();
+      // 點異常 badge → resolve modal
+      card.querySelectorAll('.anomaly-badge, .resolved-badge').forEach(badge => {
+        badge.addEventListener('click', e => { e.stopPropagation(); openResolveModal(a); });
       });
 
       return card;
+    }
+
+    // ── Resolve Modal ─────────────────────────────────────────────────────────
+    function openResolveModal(a) {
+      resolveTarget = a;
+      const resolved = a.is_resolved === 1;
+      const grade    = a.final_grade || '';
+
+      document.getElementById('resolve-title').textContent = resolved ? '✅ 已處理的評估' : '⚠️ 評估異常';
+      document.getElementById('resolve-sub').textContent   = `#${a.id}　${a.species_name || ''}　${a.tree_id || ''}`;
+
+      // 等級 highlight
+      const ghEl = document.getElementById('resolve-grade-highlight');
+      if (['A','B'].includes(grade)) {
+        ghEl.innerHTML = `<div class="grade-highlight ${grade}">${grade === 'A' ? '🔴 A 級重大危害' : '🟠 B 級危害'}</div>`;
+      } else {
+        ghEl.innerHTML = '';
+      }
+
+      // 已處理資訊
+      const infoEl = document.getElementById('resolve-resolved-info');
+      if (resolved) {
+        infoEl.style.display = 'block';
+        infoEl.className = 'resolve-resolved-info';
+        infoEl.innerHTML = `<strong>處理記錄</strong>：${a.resolution_note || '（無備註）'}<br>
+          <span style="font-size:0.75rem;color:#555;">由 ${a.resolved_by || '—'} 於 ${(a.resolved_at || '').slice(0,16)} 標記</span>`;
+      } else {
+        infoEl.style.display = 'none';
+      }
+
+      const noteEl = document.getElementById('resolve-note');
+      noteEl.value = resolved ? (a.resolution_note || '') : '';
+      noteEl.placeholder = resolved ? '更新處理備註…' : '說明處理方式或改正內容…';
+
+      const actionsEl = document.getElementById('resolve-actions');
+      if (resolved) {
+        actionsEl.innerHTML = `
+          <button class="btn-undo"    id="btn-undo">取消已處理</button>
+          <button class="btn-resolve" id="btn-confirm">更新備註</button>
+          <button class="btn-close"   id="btn-close">關閉</button>
+        `;
+        document.getElementById('btn-undo').addEventListener('click',    () => submitResolve(false));
+        document.getElementById('btn-confirm').addEventListener('click', () => submitResolve(true));
+      } else {
+        actionsEl.innerHTML = `
+          <button class="btn-resolve" id="btn-confirm">標記為已處理</button>
+          <button class="btn-close"   id="btn-close">取消</button>
+        `;
+        document.getElementById('btn-confirm').addEventListener('click', () => submitResolve(true));
+      }
+      document.getElementById('btn-close').addEventListener('click', closeResolveModal);
+
+      document.getElementById('resolve-modal').classList.remove('hidden');
+    }
+
+    function closeResolveModal() {
+      document.getElementById('resolve-modal').classList.add('hidden');
+      resolveTarget = null;
+    }
+
+    document.getElementById('resolve-modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('resolve-modal')) closeResolveModal();
+    });
+
+    async function submitResolve(isResolved) {
+      if (!resolveTarget) return;
+      const note = document.getElementById('resolve-note').value.trim();
+      const btn  = document.getElementById('btn-confirm');
+      btn.disabled = true; btn.textContent = '處理中…';
+
+      try {
+        const res = await Auth.authFetch(`${RISK_API}/${resolveTarget.id}/resolve`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_resolved: isResolved, resolution_note: note }),
+        });
+        if (!res) { btn.disabled = false; btn.textContent = '重試'; return; }
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || '操作失敗'); btn.disabled = false; btn.textContent = '重試'; return; }
+
+        closeResolveModal();
+        loadSummary();
+        loadAssessments(true);
+      } catch (e) {
+        alert('網路錯誤：' + e.message);
+        btn.disabled = false; btn.textContent = '重試';
+      }
     }
 
     document.getElementById('load-more-btn').addEventListener('click', () => loadAssessments(false));

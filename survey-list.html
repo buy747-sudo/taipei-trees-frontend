@@ -31,17 +31,19 @@
       transition: all 0.15s;
     }
     .filter-chip.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+    .filter-chip.anomaly-chip.active { background: #d97706; border-color: #d97706; color: #fff; }
 
     .summary-bar {
       display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
     }
     .summary-card {
-      flex: 1; min-width: 100px; background: #fff; border-radius: 12px;
+      flex: 1; min-width: 80px; background: #fff; border-radius: 12px;
       padding: 12px 14px; text-align: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .summary-card .num { font-size: 1.6rem; font-weight: 700; color: #1a5c2a; }
-    .summary-card .lbl { font-size: 0.72rem; color: #888; margin-top: 2px; }
+    .summary-card .num { font-size: 1.5rem; font-weight: 700; color: #1a5c2a; }
+    .summary-card .num.warn { color: #d97706; }
+    .summary-card .lbl { font-size: 0.68rem; color: #888; margin-top: 2px; }
 
     .survey-card {
       background: #fff; border-radius: 12px;
@@ -50,8 +52,11 @@
       display: flex; align-items: flex-start; gap: 12px;
       cursor: pointer; transition: box-shadow 0.15s;
       text-decoration: none; color: inherit;
+      position: relative;
     }
     .survey-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .survey-card.has-anomaly { border-left: 3px solid #d97706; }
+    .survey-card.is-resolved { border-left: 3px solid #16a34a; }
 
     .sc-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
     .sc-body { flex: 1; min-width: 0; }
@@ -67,6 +72,19 @@
     }
     .status-submitted { background: #e8f5e9; color: #1a5c2a; }
     .status-draft     { background: #fff8e1; color: #92400e; }
+
+    .anomaly-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+      background: #fef3c7; color: #92400e; cursor: pointer;
+      border: 1px solid #fcd34d;
+    }
+    .anomaly-badge:hover { background: #fde68a; }
+    .resolved-badge {
+      padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+      background: #f0fdf4; color: #15803d; cursor: pointer;
+      border: 1px solid #86efac;
+    }
+    .resolved-badge:hover { background: #dcfce7; }
 
     .sc-date { font-size: 0.72rem; color: #aaa; }
 
@@ -94,6 +112,57 @@
     .load-more:hover { background: #e8f5e9; }
 
     #loading { text-align: center; padding: 20px; color: #888; font-size: 0.88rem; }
+
+    /* ── Resolve Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 9999; display: flex; align-items: flex-end;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: #fff; width: 100%; max-width: 560px;
+      margin: 0 auto; border-radius: 20px 20px 0 0;
+      padding: 20px 20px 36px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .modal-sub { font-size: 0.82rem; color: #666; margin-bottom: 14px; }
+    .anomaly-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .anomaly-tag {
+      padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+      background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+    }
+    .modal-label { font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+    .modal-textarea {
+      width: 100%; box-sizing: border-box;
+      padding: 10px 12px; border: 1.5px solid #d0d0d0; border-radius: 10px;
+      font-size: 0.92rem; font-family: inherit; resize: vertical; min-height: 90px;
+      outline: none;
+    }
+    .modal-textarea:focus { border-color: #1a5c2a; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn-resolve {
+      flex: 1; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-resolve:hover { background: #14491f; }
+    .btn-undo {
+      flex: 1; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      background: #f3f4f6; color: #374151; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; cursor: pointer;
+    }
+    .btn-cancel {
+      padding: 12px 18px; font-size: 0.95rem; font-weight: 600;
+      background: #f3f4f6; color: #374151; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; cursor: pointer;
+    }
+
+    .resolution-note-display {
+      background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;
+      padding: 8px 12px; font-size: 0.82rem; color: #15803d; margin-bottom: 12px;
+    }
   </style>
 </head>
 <body>
@@ -122,13 +191,18 @@
         <div class="num" id="sum-draft">—</div>
         <div class="lbl">草稿</div>
       </div>
+      <div class="summary-card">
+        <div class="num warn" id="sum-anomaly">—</div>
+        <div class="lbl">⚠️ 需注意</div>
+      </div>
     </div>
 
     <!-- 篩選 -->
     <div class="filter-bar">
-      <button class="filter-chip active" data-status="">全部</button>
-      <button class="filter-chip" data-status="submitted">✅ 已送出</button>
-      <button class="filter-chip" data-status="draft">💾 草稿</button>
+      <button class="filter-chip active" data-filter="">全部</button>
+      <button class="filter-chip" data-filter="status:submitted">✅ 已送出</button>
+      <button class="filter-chip" data-filter="status:draft">💾 草稿</button>
+      <button class="filter-chip anomaly-chip" data-filter="anomaly:1">⚠️ 需注意</button>
     </div>
 
     <!-- 清單 -->
@@ -138,16 +212,30 @@
 
   </div>
 
+  <!-- 異常處理 Modal -->
+  <div class="modal-overlay hidden" id="resolve-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title">⚠️ 普查異常</div>
+      <div class="modal-sub" id="modal-sub"></div>
+      <div class="anomaly-tags" id="modal-anomaly-tags"></div>
+      <div id="modal-resolved-info" style="display:none"></div>
+      <div class="modal-label">處理備註</div>
+      <textarea class="modal-textarea" id="modal-note" placeholder="說明處理方式或改正內容…"></textarea>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
   <script>
     const SURVEY_API = API_BASE.replace('/public', '') + '/api/survey';
 
-    let currentStatus = '';
+    let currentFilter = '';   // '' | 'status:draft' | 'status:submitted' | 'anomaly:1'
     let offset = 0;
     const LIMIT = 20;
     let totalCount = 0;
-    let allSummary = { total: 0, submitted: 0, draft: 0 };
+    let currentRole = '';
+    let resolveTarget = null; // { id, isResolved, resolutionNote, resolvedBy, resolvedAt }
 
     // ── auth guard ────────────────────────────────────────────────────────────
     (function init() {
@@ -156,8 +244,8 @@
         return;
       }
       const user = Auth.getUser();
-      const role = user?.role || '';
-      if (!['platform_admin','contractor_admin','inspector','surveyor'].includes(role)) {
+      currentRole = user?.role || '';
+      if (!['platform_admin','contractor_admin','inspector','surveyor'].includes(currentRole)) {
         document.querySelector('.sl-body').innerHTML =
           '<div style="padding:20px;color:#c00;font-weight:700;">您的帳號沒有普查權限。</div>';
         return;
@@ -168,20 +256,22 @@
       loadSurveys(true);
     })();
 
-    // ── 統計摘要（先各抓一次 count）──────────────────────────────────────────
+    // ── 統計摘要 ──────────────────────────────────────────────────────────────
     async function loadSummary() {
       try {
-        const [allRes, subRes, draftRes] = await Promise.all([
+        const [allRes, subRes, draftRes, warnRes] = await Promise.all([
           Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0`),
           Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0&status=submitted`),
           Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0&status=draft`),
+          Auth.authFetch(`${SURVEY_API}/list?limit=1&offset=0&anomaly=1`),
         ]);
-        if (!allRes || !subRes || !draftRes) return;
-        const [a, s, d] = await Promise.all([allRes.json(), subRes.json(), draftRes.json()]);
+        if (!allRes || !subRes || !draftRes || !warnRes) return;
+        const [a, s, d, w] = await Promise.all([allRes.json(), subRes.json(), draftRes.json(), warnRes.json()]);
         document.getElementById('sum-total').textContent     = a.total ?? '—';
         document.getElementById('sum-submitted').textContent = s.total ?? '—';
         document.getElementById('sum-draft').textContent     = d.total ?? '—';
-      } catch { /* 靜默失敗，不影響清單 */ }
+        document.getElementById('sum-anomaly').textContent   = w.total ?? '—';
+      } catch { /* 靜默失敗 */ }
     }
 
     // ── 篩選 chips ────────────────────────────────────────────────────────────
@@ -190,7 +280,7 @@
         btn.addEventListener('click', () => {
           document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          currentStatus = btn.dataset.status;
+          currentFilter = btn.dataset.filter;
           offset = 0;
           loadSurveys(true);
         });
@@ -211,7 +301,8 @@
       }
 
       const params = new URLSearchParams({ limit: LIMIT, offset });
-      if (currentStatus) params.set('status', currentStatus);
+      if (currentFilter.startsWith('status:'))  params.set('status', currentFilter.split(':')[1]);
+      if (currentFilter === 'anomaly:1')         params.set('anomaly', '1');
 
       try {
         const res = await Auth.authFetch(`${SURVEY_API}/list?${params}`);
@@ -224,16 +315,16 @@
         offset += data.surveys.length;
 
         if (reset && data.surveys.length === 0) {
-          listEl.innerHTML = `
-            <div class="empty-state">
-              <div class="ei">🌳</div>
-              <p>${currentStatus === 'draft' ? '目前沒有草稿。' : currentStatus === 'submitted' ? '尚無已送出的普查。' : '尚無普查紀錄，點上方按鈕開始第一筆！'}</p>
-            </div>`;
+          const msg = {
+            'status:draft':     '目前沒有草稿。',
+            'status:submitted': '尚無已送出的普查。',
+            'anomaly:1':        '目前沒有需要注意的記錄。✅',
+          }[currentFilter] || '尚無普查紀錄，點上方按鈕開始第一筆！';
+          listEl.innerHTML = `<div class="empty-state"><div class="ei">🌳</div><p>${msg}</p></div>`;
           return;
         }
 
         data.surveys.forEach(s => listEl.appendChild(buildCard(s)));
-
         moreBtn.style.display = offset < totalCount ? 'block' : 'none';
       } catch (e) {
         loadingEl.style.display = 'none';
@@ -241,31 +332,161 @@
       }
     }
 
+    // ── 判斷是否為異常 ────────────────────────────────────────────────────────
+    function isAnomaly(s) {
+      return s.tag_anomaly === 1 || ![0, 3, 4, null].includes(s.code_status) || s.tree_status === '已移除';
+    }
+
+    function anomalyLabels(s) {
+      const tags = [];
+      if (s.tag_anomaly === 1)                                 tags.push('樹牌異常');
+      if (![0, 3, 4, null].includes(s.code_status)) {
+        const labels = {1:'資料不符', 2:'無名牌（需補牌）', 5:'現場無樹', 6:'樹穴填平', 7:'位置偏差', 8:'有名牌位置不符'};
+        tags.push(labels[s.code_status] || `樹牌代碼 ${s.code_status}`);
+      }
+      if (s.tree_status === '已移除')                          tags.push('樹木已移除');
+      return tags;
+    }
+
     // ── 建立卡片 DOM ──────────────────────────────────────────────────────────
     function buildCard(s) {
-      const isDraft = s.status === 'draft';
-      const icon    = isDraft ? '💾' : '✅';
-      const date    = s.survey_date || s.updated_at?.slice(0, 10) || '—';
-      const species = s.species_name || '（未知樹種）';
-      const href    = isDraft
+      const isDraft   = s.status === 'draft';
+      const anomaly   = isAnomaly(s);
+      const resolved  = s.is_resolved === 1;
+      const icon      = isDraft ? '💾' : '✅';
+      const date      = s.survey_date || s.updated_at?.slice(0, 10) || '—';
+      const species   = s.species_name || '（未知樹種）';
+      const showName  = ['platform_admin', 'contractor_admin'].includes(currentRole);
+
+      // 點卡片導向：草稿→繼續編輯，已送出→樹木詳情
+      const href = isDraft
         ? `/survey.html?code=${encodeURIComponent(s.tree_registry_code)}`
         : `/tree.html?id=${encodeURIComponent(s.tree_registry_code)}`;
 
       const card = document.createElement('a');
-      card.className = 'survey-card';
+      card.className = 'survey-card' + (anomaly && !resolved ? ' has-anomaly' : '') + (resolved ? ' is-resolved' : '');
       card.href = href;
+
+      const nameHtml = (showName && s.surveyor_name)
+        ? `　<span style="color:#888">👤 ${s.surveyor_name}</span>`
+        : '';
+
+      let anomalyBadgeHtml = '';
+      if (anomaly) {
+        if (resolved) {
+          anomalyBadgeHtml = `<span class="resolved-badge" data-id="${s.id}">✓ 已處理</span>`;
+        } else {
+          anomalyBadgeHtml = `<span class="anomaly-badge" data-id="${s.id}">⚠️ 需注意</span>`;
+        }
+      }
+
       card.innerHTML = `
         <div class="sc-icon">${icon}</div>
         <div class="sc-body">
           <div class="sc-title">${species}　${s.tree_registry_code}</div>
-          <div class="sc-sub">普查日期：${date}${s.surveyor_name ? '　普查員：' + s.surveyor_name : ''}</div>
+          <div class="sc-sub">普查日期：${date}${nameHtml}</div>
         </div>
         <div class="sc-right">
           <span class="status-badge status-${s.status}">${isDraft ? '草稿' : '已送出'}</span>
+          ${anomalyBadgeHtml}
           <span class="sc-date">#${s.id}</span>
         </div>
       `;
+
+      // 點異常 badge 開 modal（不觸發卡片連結）
+      card.querySelectorAll('.anomaly-badge, .resolved-badge').forEach(badge => {
+        badge.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          openResolveModal(s);
+        });
+      });
+
       return card;
+    }
+
+    // ── Resolve Modal ─────────────────────────────────────────────────────────
+    function openResolveModal(s) {
+      resolveTarget = s;
+      const resolved = s.is_resolved === 1;
+      const tags = anomalyLabels(s);
+
+      document.getElementById('modal-title').textContent = resolved ? '✅ 已處理的異常' : '⚠️ 普查異常';
+      document.getElementById('modal-sub').textContent   = `#${s.id}　${s.species_name || ''}　${s.tree_registry_code}`;
+
+      const tagsEl = document.getElementById('modal-anomaly-tags');
+      tagsEl.innerHTML = tags.map(t => `<span class="anomaly-tag">${t}</span>`).join('');
+
+      const infoEl = document.getElementById('modal-resolved-info');
+      if (resolved) {
+        infoEl.style.display = 'block';
+        infoEl.className = 'resolution-note-display';
+        infoEl.innerHTML = `<strong>處理記錄</strong>：${s.resolution_note || '（無備註）'}<br>
+          <span style="font-size:0.75rem;color:#555;">由 ${s.resolved_by || '—'} 於 ${(s.resolved_at || '').slice(0,16)} 標記</span>`;
+      } else {
+        infoEl.style.display = 'none';
+      }
+
+      const noteEl = document.getElementById('modal-note');
+      noteEl.value = resolved ? (s.resolution_note || '') : '';
+      noteEl.placeholder = resolved ? '更新處理備註…' : '說明處理方式或改正內容…';
+
+      const actionsEl = document.getElementById('modal-actions');
+      if (resolved) {
+        actionsEl.innerHTML = `
+          <button class="btn-undo" id="btn-undo">取消已處理</button>
+          <button class="btn-resolve" id="btn-confirm">更新備註</button>
+          <button class="btn-cancel" id="btn-cancel">關閉</button>
+        `;
+        document.getElementById('btn-undo').addEventListener('click', () => submitResolve(false));
+        document.getElementById('btn-confirm').addEventListener('click', () => submitResolve(true));
+      } else {
+        actionsEl.innerHTML = `
+          <button class="btn-resolve" id="btn-confirm">標記為已處理</button>
+          <button class="btn-cancel" id="btn-cancel">取消</button>
+        `;
+        document.getElementById('btn-confirm').addEventListener('click', () => submitResolve(true));
+      }
+      document.getElementById('btn-cancel').addEventListener('click', closeModal);
+
+      document.getElementById('resolve-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('resolve-modal').classList.add('hidden');
+      resolveTarget = null;
+    }
+
+    document.getElementById('resolve-modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('resolve-modal')) closeModal();
+    });
+
+    async function submitResolve(isResolved) {
+      if (!resolveTarget) return;
+      const note = document.getElementById('modal-note').value.trim();
+      const btn = document.getElementById('btn-confirm');
+      btn.disabled = true;
+      btn.textContent = '處理中…';
+
+      try {
+        const res = await Auth.authFetch(`${SURVEY_API}/${resolveTarget.id}/resolve`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_resolved: isResolved, resolution_note: note }),
+        });
+        if (!res) { btn.disabled = false; btn.textContent = isResolved ? '標記為已處理' : '取消已處理'; return; }
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || '操作失敗'); btn.disabled = false; btn.textContent = '重試'; return; }
+
+        closeModal();
+        // 重新整理清單和統計
+        loadSummary();
+        loadSurveys(true);
+      } catch (e) {
+        alert('網路錯誤：' + e.message);
+        btn.disabled = false;
+        btn.textContent = '重試';
+      }
     }
 
     document.getElementById('load-more-btn').addEventListener('click', () => loadSurveys(false));

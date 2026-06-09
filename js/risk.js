@@ -493,7 +493,8 @@ async function saveAndPreview(goToResult) {
       body: JSON.stringify(formData),
     });
     if (!res) return;
-    const data = await res.json();
+    let data = {};
+    try { data = await res.json(); } catch { /* 非 JSON 回應（iOS Safari SyntaxError 防護） */ }
     if (!res.ok) {
       showError('form-error', data.error || '儲存失敗');
       return;
@@ -581,7 +582,8 @@ async function doSubmit() {
       body: JSON.stringify({ password: pw }),
     });
     if (!res) return;
-    const data = await res.json();
+    let data = {};
+    try { data = await res.json(); } catch { /* 非 JSON 回應（iOS Safari SyntaxError 防護） */ }
     if (!res.ok) {
       showError('submit-error', data.error || '送出失敗');
       btn.disabled = false;

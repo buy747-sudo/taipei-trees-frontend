@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#1a5c2a">
+  <title>帳號管理｜台北市樹木查詢</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f0f4f1; min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
+
+    /* ── Header ── */
+    .adm-header {
+      background: #1a5c2a; color: #fff;
+      padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .adm-header a   { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+    .adm-header h1  { font-size: 1rem; font-weight: 700; flex: 1; }
+    .adm-header .huser { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+
+    /* ── Layout ── */
+    .adm-body { max-width: 760px; margin: 0 auto; padding: 16px; }
+
+    /* ── Section card ── */
+    .section-card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid #f0f0f0;
+    }
+    .section-head h2 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+    .section-body   { padding: 0; }
+
+    /* ── Add button ── */
+    .btn-add {
+      padding: 7px 16px; font-size: 0.82rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 8px;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+    }
+    .btn-add:hover { background: #14491f; }
+
+    /* ── Filter bar ── */
+    .filter-row {
+      display: flex; gap: 8px; padding: 12px 16px; flex-wrap: wrap;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .filter-chip {
+      padding: 5px 12px; border-radius: 16px; font-size: 0.78rem; font-weight: 600;
+      border: 1.5px solid #d0d0d0; background: #fff; color: #555; cursor: pointer;
+    }
+    .filter-chip.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; }
+
+    /* ── User row ── */
+    .user-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 18px; border-bottom: 1px solid #f5f5f5;
+      transition: background 0.1s;
+    }
+    .user-row:last-child { border-bottom: none; }
+    .user-row:hover      { background: #f9fafb; }
+    .user-row.inactive   { opacity: 0.5; }
+
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; flex-shrink: 0;
+      background: #e8f5e9; color: #1a5c2a;
+    }
+    .user-info   { flex: 1; min-width: 0; }
+    .user-name   { font-size: 0.92rem; font-weight: 700; color: #1a5c2a; }
+    .user-meta   { font-size: 0.75rem; color: #888; margin-top: 2px; }
+    .user-right  { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    /* ── Role badges ── */
+    .role-badge {
+      padding: 3px 10px; border-radius: 10px; font-size: 0.72rem; font-weight: 700;
+      white-space: nowrap;
+    }
+    .role-platform_admin   { background: #fee2e2; color: #7f1d1d; }
+    .role-contractor_admin { background: #dbeafe; color: #1e3a8a; }
+    .role-inspector        { background: #ffedd5; color: #7c2d12; }
+    .role-surveyor         { background: #dcfce7; color: #14532d; }
+    .role-gov_viewer       { background: #ede9fe; color: #4c1d95; }
+    .role-gov_editor       { background: #f3e8ff; color: #581c87; }
+
+    /* ── Action buttons ── */
+    .btn-icon {
+      padding: 6px 10px; border-radius: 8px; font-size: 0.78rem;
+      border: 1.5px solid #d0d0d0; background: #fff; cursor: pointer;
+      color: #555; transition: all 0.1s; white-space: nowrap;
+    }
+    .btn-icon:hover           { background: #f3f4f6; }
+    .btn-icon.btn-deactivate  { border-color: #fca5a5; color: #dc2626; }
+    .btn-icon.btn-deactivate:hover { background: #fee2e2; }
+    .btn-icon.btn-activate    { border-color: #86efac; color: #16a34a; }
+    .btn-icon.btn-activate:hover  { background: #dcfce7; }
+
+    /* ── Company rows ── */
+    .company-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 18px; border-bottom: 1px solid #f5f5f5;
+    }
+    .company-row:last-child { border-bottom: none; }
+    .company-icon  { font-size: 1.2rem; flex-shrink: 0; }
+    .company-info  { flex: 1; min-width: 0; }
+    .company-name  { font-size: 0.9rem; font-weight: 700; }
+    .company-meta  { font-size: 0.75rem; color: #888; margin-top: 1px; }
+    .company-count { font-size: 0.78rem; color: #888; flex-shrink: 0; }
+
+    /* ── Empty ── */
+    .empty-row { padding: 28px; text-align: center; color: #aaa; font-size: 0.88rem; }
+
+    /* ── Modal backdrop ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 9999; display: flex; align-items: flex-end;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: #fff; width: 100%; max-width: 560px;
+      margin: 0 auto; border-radius: 20px 20px 0 0;
+      padding: 22px 20px 36px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+
+    /* ── Form fields ── */
+    .form-group    { margin-bottom: 14px; }
+    .form-label    { font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 5px; display: block; }
+    .form-input, .form-select {
+      width: 100%; box-sizing: border-box;
+      padding: 10px 12px; border: 1.5px solid #d0d0d0; border-radius: 10px;
+      font-size: 0.92rem; font-family: inherit; outline: none;
+      background: #fff;
+    }
+    .form-input:focus, .form-select:focus { border-color: #1a5c2a; }
+    .form-hint { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .btn-primary {
+      flex: 1; padding: 12px; font-size: 0.95rem; font-weight: 700;
+      background: #1a5c2a; color: #fff; border: none; border-radius: 10px; cursor: pointer;
+    }
+    .btn-primary:hover    { background: #14491f; }
+    .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 12px 18px; font-size: 0.95rem; font-weight: 600;
+      background: #f3f4f6; color: #374151; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; cursor: pointer;
+    }
+    .form-error { font-size: 0.82rem; color: #dc2626; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<header class="adm-header">
+  <a href="/">← 地圖</a>
+  <h1>⚙️ 帳號管理</h1>
+  <span class="huser" id="huser"></span>
+</header>
+
+<div class="adm-body" id="main-body">
+
+  <!-- 公司列表 -->
+  <div class="section-card">
+    <div class="section-head">
+      <h2>🏢 公司列表</h2>
+      <button class="btn-add" id="btn-add-company">＋ 新增公司</button>
+    </div>
+    <div class="section-body" id="company-list"><div class="empty-row">載入中…</div></div>
+  </div>
+
+  <!-- 帳號列表 -->
+  <div class="section-card">
+    <div class="section-head">
+      <h2>👤 帳號列表</h2>
+      <button class="btn-add" id="btn-add-user">＋ 新增帳號</button>
+    </div>
+    <div class="filter-row" id="role-filter-bar">
+      <button class="filter-chip active" data-role="">全部</button>
+      <button class="filter-chip" data-role="platform_admin">平台管理員</button>
+      <button class="filter-chip" data-role="contractor_admin">廠商主管</button>
+      <button class="filter-chip" data-role="inspector">評估員</button>
+      <button class="filter-chip" data-role="surveyor">普查員</button>
+      <button class="filter-chip" data-role="gov_viewer">政府唯讀</button>
+      <button class="filter-chip" data-role="gov_editor">政府管理</button>
+    </div>
+    <div class="section-body" id="user-list"><div class="empty-row">載入中…</div></div>
+  </div>
+
+</div>
+
+<!-- ══ 新增 / 編輯帳號 Modal ══ -->
+<div class="modal-overlay hidden" id="user-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="user-modal-title">新增帳號</div>
+
+    <div class="form-group" id="fg-username">
+      <label class="form-label">帳號名稱 *</label>
+      <input class="form-input" id="f-username" type="text" placeholder="英數字，唯一" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">顯示名稱 *</label>
+      <input class="form-input" id="f-display-name" type="text" placeholder="例：王小明">
+    </div>
+    <div class="form-group" id="fg-password">
+      <label class="form-label">密碼 *</label>
+      <input class="form-input" id="f-password" type="password" placeholder="至少 8 個字元" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label">角色 *</label>
+      <select class="form-select" id="f-role">
+        <option value="">— 選擇角色 —</option>
+        <option value="contractor_admin">廠商主管（可看公司所有普查＆評估）</option>
+        <option value="inspector">評估員（風險評估）</option>
+        <option value="surveyor">普查員（行道樹普查）</option>
+        <option value="gov_viewer">政府唯讀（觀看全市資料）</option>
+        <option value="gov_editor">政府管理（可修改資料）</option>
+        <option value="platform_admin">平台管理員（最高權限）</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">所屬公司</label>
+      <select class="form-select" id="f-contractor">
+        <option value="">— 無（政府或平台帳號）—</option>
+      </select>
+      <div class="form-hint">政府帳號或平台管理員不需選公司。</div>
+    </div>
+    <div class="form-error" id="user-modal-err"></div>
+
+    <div class="modal-actions">
+      <button class="btn-primary"   id="user-modal-submit">建立帳號</button>
+      <button class="btn-secondary" id="user-modal-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 重設密碼 Modal ══ -->
+<div class="modal-overlay hidden" id="pw-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="pw-modal-title">重設密碼</div>
+    <div class="form-group">
+      <label class="form-label">新密碼 *</label>
+      <input class="form-input" id="f-new-pw" type="password" placeholder="至少 8 個字元" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label">確認新密碼 *</label>
+      <input class="form-input" id="f-new-pw2" type="password" placeholder="再輸入一次">
+    </div>
+    <div class="form-error" id="pw-modal-err"></div>
+    <div class="modal-actions">
+      <button class="btn-primary"   id="pw-modal-submit">確認重設</button>
+      <button class="btn-secondary" id="pw-modal-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 新增公司 Modal ══ -->
+<div class="modal-overlay hidden" id="co-modal">
+  <div class="modal-box">
+    <div class="modal-title">新增公司</div>
+    <div class="form-group">
+      <label class="form-label">公司名稱 *</label>
+      <input class="form-input" id="f-co-name" type="text" placeholder="例：怡仁生態景觀有限公司">
+    </div>
+    <div class="form-group">
+      <label class="form-label">合約名稱</label>
+      <input class="form-input" id="f-co-contract" type="text" placeholder="例：115年度南區行道樹修剪工程">
+    </div>
+    <div class="form-group">
+      <label class="form-label">管理單位</label>
+      <input class="form-input" id="f-co-unit" type="text" placeholder="例：南區園藝工程隊">
+    </div>
+    <div class="form-error" id="co-modal-err"></div>
+    <div class="modal-actions">
+      <button class="btn-primary"   id="co-modal-submit">新增公司</button>
+      <button class="btn-secondary" id="co-modal-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+const ADM_API = API_BASE.replace('/public', '') + '/api/auth';
+
+let allUsers     = [];
+let allCompanies = [];
+let currentRoleFilter = '';
+let editTarget   = null;  // { id } 編輯中的 user
+let pwTarget     = null;  // { id, display_name }
+
+const ROLE_LABELS = {
+  platform_admin:   '平台管理員',
+  contractor_admin: '廠商主管',
+  inspector:        '評估員',
+  surveyor:         '普查員',
+  gov_viewer:       '政府唯讀',
+  gov_editor:       '政府管理',
+};
+
+// ── Auth guard ──────────────────────────────────────────────────────────────
+(function init() {
+  if (!Auth.isLoggedIn()) {
+    window.location.href = '/login.html?next=' + encodeURIComponent(location.pathname);
+    return;
+  }
+  const user = Auth.getUser();
+  if (user?.role !== 'platform_admin') {
+    document.getElementById('main-body').innerHTML =
+      '<div style="padding:30px;color:#c00;font-weight:700;text-align:center;">🔒 此頁面僅限平台管理員。</div>';
+    return;
+  }
+  document.getElementById('huser').textContent = user.display_name || user.username || '';
+  bindFilters();
+  bindModals();
+  loadAll();
+})();
+
+// ── 一次載入公司 + 帳號 ──────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadCompanies(), loadUsers()]);
+}
+
+async function loadCompanies() {
+  try {
+    const res = await Auth.authFetch(`${ADM_API}/companies`);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    allCompanies = data.companies || [];
+    renderCompanies();
+    populateCompanySelect();
+  } catch {}
+}
+
+async function loadUsers() {
+  document.getElementById('user-list').innerHTML = '<div class="empty-row">載入中…</div>';
+  try {
+    const res = await Auth.authFetch(`${ADM_API}/users`);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    allUsers = data.users || [];
+    renderUsers();
+  } catch (e) {
+    document.getElementById('user-list').innerHTML = `<div class="empty-row" style="color:#c00;">載入失敗：${e.message}</div>`;
+  }
+}
+
+// ── 渲染公司列表 ─────────────────────────────────────────────────────────────
+function renderCompanies() {
+  const el = document.getElementById('company-list');
+  if (!allCompanies.length) { el.innerHTML = '<div class="empty-row">尚無公司資料。</div>'; return; }
+
+  el.innerHTML = allCompanies.map(c => {
+    const userCount = allUsers.filter(u => u.contractor_id == c.id).length;
+    return `
+      <div class="company-row">
+        <div class="company-icon">🏢</div>
+        <div class="company-info">
+          <div class="company-name">${esc(c.name)}${!c.is_active ? ' <span style="color:#aaa;font-size:0.72rem;">（停用）</span>' : ''}</div>
+          <div class="company-meta">${esc(c.contract_name || '')}${c.management_unit ? '　' + esc(c.management_unit) : ''}</div>
+        </div>
+        <div class="company-count">👤 ${userCount} 人</div>
+      </div>`;
+  }).join('');
+}
+
+// ── 渲染帳號列表 ─────────────────────────────────────────────────────────────
+function renderUsers() {
+  const el = document.getElementById('user-list');
+  const filtered = currentRoleFilter
+    ? allUsers.filter(u => u.role === currentRoleFilter)
+    : allUsers;
+
+  if (!filtered.length) { el.innerHTML = '<div class="empty-row">沒有符合條件的帳號。</div>'; return; }
+
+  el.innerHTML = filtered.map(u => {
+    const roleLabel = ROLE_LABELS[u.role] || u.role;
+    const companyName = u.contractor_name || (allCompanies.find(c => c.id == u.contractor_id)?.name) || '';
+    const initials = (u.display_name || u.username || '?').slice(0, 2);
+    const inactive = !u.is_active;
+
+    return `
+      <div class="user-row${inactive ? ' inactive' : ''}" data-id="${u.id}">
+        <div class="user-avatar">${esc(initials)}</div>
+        <div class="user-info">
+          <div class="user-name">${esc(u.display_name || u.username)}</div>
+          <div class="user-meta">
+            @${esc(u.username)}
+            ${companyName ? '　🏢 ' + esc(companyName) : ''}
+            ${inactive ? '　<span style="color:#dc2626;">停用</span>' : ''}
+          </div>
+        </div>
+        <div class="user-right">
+          <span class="role-badge role-${u.role}">${roleLabel}</span>
+          <button class="btn-icon" onclick="openEditModal(${u.id})">✏️ 編輯</button>
+          <button class="btn-icon" onclick="openPwModal(${u.id}, '${esc(u.display_name || u.username)}')">🔑 密碼</button>
+          <button class="btn-icon ${inactive ? 'btn-activate' : 'btn-deactivate'}"
+            onclick="toggleActive(${u.id}, ${inactive})">
+            ${inactive ? '✅ 啟用' : '🚫 停用'}
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── 篩選 chips ───────────────────────────────────────────────────────────────
+function bindFilters() {
+  document.querySelectorAll('#role-filter-bar .filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#role-filter-bar .filter-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRoleFilter = btn.dataset.role;
+      renderUsers();
+    });
+  });
+}
+
+// ── 啟用 / 停用 ──────────────────────────────────────────────────────────────
+async function toggleActive(userId, currentlyInactive) {
+  const newActive = currentlyInactive; // 若目前停用→啟用，反之亦然
+  try {
+    const res = await Auth.authFetch(`${ADM_API}/users/${userId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: newActive }),
+    });
+    if (res && res.ok) {
+      const u = allUsers.find(u => u.id === userId);
+      if (u) u.is_active = newActive ? 1 : 0;
+      renderUsers(); renderCompanies();
+    } else {
+      alert('操作失敗');
+    }
+  } catch (e) { alert('網路錯誤：' + e.message); }
+}
+
+// ── 公司 select 填充 ─────────────────────────────────────────────────────────
+function populateCompanySelect() {
+  const sel = document.getElementById('f-contractor');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— 無（政府或平台帳號）—</option>';
+  allCompanies.filter(c => c.is_active).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
+}
+
+// ── Edit modal ───────────────────────────────────────────────────────────────
+function openEditModal(userId) {
+  const u = allUsers.find(u => u.id === userId);
+  if (!u) return;
+  editTarget = u;
+
+  document.getElementById('user-modal-title').textContent = `✏️ 編輯帳號：${u.display_name || u.username}`;
+  document.getElementById('fg-username').style.display = 'none';   // 帳號名稱不可改
+  document.getElementById('fg-password').style.display = 'none';   // 密碼另外改
+  document.getElementById('f-display-name').value = u.display_name || '';
+  document.getElementById('f-role').value = u.role || '';
+  document.getElementById('f-contractor').value = u.contractor_id || '';
+  document.getElementById('user-modal-err').textContent = '';
+  document.getElementById('user-modal-submit').textContent = '儲存變更';
+  document.getElementById('user-modal').classList.remove('hidden');
+}
+
+function openCreateModal() {
+  editTarget = null;
+  document.getElementById('user-modal-title').textContent = '＋ 新增帳號';
+  document.getElementById('fg-username').style.display = '';
+  document.getElementById('fg-password').style.display = '';
+  document.getElementById('f-username').value = '';
+  document.getElementById('f-display-name').value = '';
+  document.getElementById('f-password').value = '';
+  document.getElementById('f-role').value = '';
+  document.getElementById('f-contractor').value = '';
+  document.getElementById('user-modal-err').textContent = '';
+  document.getElementById('user-modal-submit').textContent = '建立帳號';
+  document.getElementById('user-modal').classList.remove('hidden');
+}
+
+// ── 重設密碼 modal ────────────────────────────────────────────────────────────
+function openPwModal(userId, displayName) {
+  pwTarget = { id: userId, display_name: displayName };
+  document.getElementById('pw-modal-title').textContent = `🔑 重設密碼：${displayName}`;
+  document.getElementById('f-new-pw').value  = '';
+  document.getElementById('f-new-pw2').value = '';
+  document.getElementById('pw-modal-err').textContent = '';
+  document.getElementById('pw-modal').classList.remove('hidden');
+}
+
+// ── Modal 綁定 ────────────────────────────────────────────────────────────────
+function bindModals() {
+  // User modal
+  document.getElementById('btn-add-user').addEventListener('click', openCreateModal);
+  document.getElementById('user-modal-cancel').addEventListener('click', () => {
+    document.getElementById('user-modal').classList.add('hidden');
+  });
+  document.getElementById('user-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('user-modal'))
+      document.getElementById('user-modal').classList.add('hidden');
+  });
+  document.getElementById('user-modal-submit').addEventListener('click', submitUserModal);
+
+  // PW modal
+  document.getElementById('pw-modal-cancel').addEventListener('click', () => {
+    document.getElementById('pw-modal').classList.add('hidden');
+  });
+  document.getElementById('pw-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('pw-modal'))
+      document.getElementById('pw-modal').classList.add('hidden');
+  });
+  document.getElementById('pw-modal-submit').addEventListener('click', submitPwModal);
+
+  // Company modal
+  document.getElementById('btn-add-company').addEventListener('click', () => {
+    document.getElementById('f-co-name').value = '';
+    document.getElementById('f-co-contract').value = '';
+    document.getElementById('f-co-unit').value = '';
+    document.getElementById('co-modal-err').textContent = '';
+    document.getElementById('co-modal').classList.remove('hidden');
+  });
+  document.getElementById('co-modal-cancel').addEventListener('click', () => {
+    document.getElementById('co-modal').classList.add('hidden');
+  });
+  document.getElementById('co-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('co-modal'))
+      document.getElementById('co-modal').classList.add('hidden');
+  });
+  document.getElementById('co-modal-submit').addEventListener('click', submitCoModal);
+}
+
+// ── Submit: 新增 / 編輯 帳號 ─────────────────────────────────────────────────
+async function submitUserModal() {
+  const btn = document.getElementById('user-modal-submit');
+  const errEl = document.getElementById('user-modal-err');
+  errEl.textContent = '';
+  btn.disabled = true; btn.textContent = '處理中…';
+
+  const displayName  = document.getElementById('f-display-name').value.trim();
+  const role         = document.getElementById('f-role').value;
+  const contractorId = document.getElementById('f-contractor').value || null;
+
+  if (!displayName || !role) {
+    errEl.textContent = '顯示名稱和角色為必填。';
+    btn.disabled = false; btn.textContent = editTarget ? '儲存變更' : '建立帳號';
+    return;
+  }
+
+  try {
+    let res;
+    if (editTarget) {
+      // 編輯
+      res = await Auth.authFetch(`${ADM_API}/users/${editTarget.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_name: displayName, role, contractor_id: contractorId }),
+      });
+    } else {
+      // 新增
+      const username = document.getElementById('f-username').value.trim();
+      const password = document.getElementById('f-password').value;
+      if (!username || !password) {
+        errEl.textContent = '帳號名稱和密碼為必填。';
+        btn.disabled = false; btn.textContent = '建立帳號';
+        return;
+      }
+      res = await Auth.authFetch(`${ADM_API}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, display_name: displayName, password, role, contractor_id: contractorId }),
+      });
+    }
+    if (!res) throw new Error('連線失敗');
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || '操作失敗'; btn.disabled = false; btn.textContent = editTarget ? '儲存變更' : '建立帳號'; return; }
+
+    document.getElementById('user-modal').classList.add('hidden');
+    await loadUsers();
+    renderCompanies();
+  } catch (e) {
+    errEl.textContent = '網路錯誤：' + e.message;
+    btn.disabled = false; btn.textContent = editTarget ? '儲存變更' : '建立帳號';
+  }
+}
+
+// ── Submit: 重設密碼 ──────────────────────────────────────────────────────────
+async function submitPwModal() {
+  const btn   = document.getElementById('pw-modal-submit');
+  const errEl = document.getElementById('pw-modal-err');
+  errEl.textContent = '';
+
+  const pw  = document.getElementById('f-new-pw').value;
+  const pw2 = document.getElementById('f-new-pw2').value;
+  if (pw.length < 8)  { errEl.textContent = '密碼至少 8 個字元。'; return; }
+  if (pw !== pw2)     { errEl.textContent = '兩次密碼不一致。'; return; }
+
+  btn.disabled = true; btn.textContent = '重設中…';
+  try {
+    const res = await Auth.authFetch(`${ADM_API}/users/${pwTarget.id}/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    if (!res) throw new Error('連線失敗');
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || '重設失敗'; btn.disabled = false; btn.textContent = '確認重設'; return; }
+
+    document.getElementById('pw-modal').classList.add('hidden');
+    alert(`✅ ${pwTarget.display_name} 的密碼已重設。`);
+  } catch (e) {
+    errEl.textContent = '網路錯誤：' + e.message;
+    btn.disabled = false; btn.textContent = '確認重設';
+  }
+}
+
+// ── Submit: 新增公司 ──────────────────────────────────────────────────────────
+async function submitCoModal() {
+  const btn   = document.getElementById('co-modal-submit');
+  const errEl = document.getElementById('co-modal-err');
+  errEl.textContent = '';
+
+  const name = document.getElementById('f-co-name').value.trim();
+  if (!name) { errEl.textContent = '公司名稱為必填。'; return; }
+
+  btn.disabled = true; btn.textContent = '新增中…';
+  try {
+    const res = await Auth.authFetch(`${ADM_API}/companies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        contract_name:   document.getElementById('f-co-contract').value.trim(),
+        management_unit: document.getElementById('f-co-unit').value.trim(),
+      }),
+    });
+    if (!res) throw new Error('連線失敗');
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || '新增失敗'; btn.disabled = false; btn.textContent = '新增公司'; return; }
+
+    document.getElementById('co-modal').classList.add('hidden');
+    await loadCompanies();
+  } catch (e) {
+    errEl.textContent = '網路錯誤：' + e.message;
+    btn.disabled = false; btn.textContent = '新增公司';
+  }
+}
+
+// ── HTML escape ──────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+</body>
+</html>

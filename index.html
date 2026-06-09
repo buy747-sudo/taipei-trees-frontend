@@ -218,12 +218,14 @@
           ? `<a href="/survey.html" id="auth-survey-btn">📝 普查</a>` : '';
         const listBtn   = ['surveyor','inspector','contractor_admin','platform_admin'].includes(role)
           ? `<a href="/survey-list.html" id="auth-list-btn">📋 紀錄</a>` : '';
-        const riskListBtn = role === 'platform_admin'
-          ? `<a href="/risk-list.html" id="auth-risk-list-btn">📊 評估管理</a>` : '';
+        const riskListBtn = ['contractor_admin','platform_admin'].includes(role)
+          ? `<a href="/risk-list.html" id="auth-risk-list-btn">📊 評估紀錄</a>` : '';
         const riskBtn   = ['inspector','contractor_admin','platform_admin'].includes(role)
           ? `<a href="/risk.html" id="auth-risk-btn">⚠️ 評估</a>` : '';
+        const adminBtn  = role === 'platform_admin'
+          ? `<a href="/admin.html" id="auth-admin-btn">⚙️ 帳號管理</a>` : '';
         area.innerHTML =
-          surveyBtn + listBtn + riskBtn + riskListBtn +
+          surveyBtn + listBtn + riskBtn + riskListBtn + adminBtn +
           `<span id="auth-user">${label}</span>` +
           `<button id="auth-logout-btn">登出</button>`;
         document.getElementById('auth-logout-btn').addEventListener('click', () => {
