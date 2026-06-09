@@ -500,6 +500,14 @@ a.btn-report {
 }
 a.btn-report:hover { background: #ffedd5; }
 
+a.btn-nav {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; font-weight: 800;
+  background: #eff6ff; color: #1e40af; text-decoration: none;
+  border: 1.5px solid #60a5fa; flex: 1.15;
+}
+a.btn-nav:hover { background: #dbeafe; }
+
 .bchip-note { font-size: 0.68rem; color: #aaa; margin-top: 3px; }
 
 /* ── Public Report Page ──────────────────────────────── */

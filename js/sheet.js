@@ -95,6 +95,18 @@ function openSheet(tree) {
     reportBtn.hidden = false;
   }
 
+  // 導航按鈕：點擊後開啟 Google Maps 導航到該樹位置
+  const navBtn = document.getElementById('sheet-nav-btn');
+  if (navBtn) {
+    if (tree.lat != null && tree.lng != null) {
+      // Google Maps 導航 URL：iOS / Android 均可開啟 Google Maps app 或瀏覽器版
+      navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${tree.lat},${tree.lng}&travelmode=driving`;
+      navBtn.hidden = false;
+    } else {
+      navBtn.hidden = true;
+    }
+  }
+
   // 樹種生態說明
   const eco = document.getElementById('sheet-eco');
   const speciesInfo = typeof getSpeciesInfo === 'function' ? getSpeciesInfo(tree.species_name) : null;
