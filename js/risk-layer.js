@@ -34,14 +34,41 @@ const RiskLayer = (() => {
     });
   }
 
+  // 傾斜>30度 藍色圖示（主幹傾斜＞30度，含全形＞與半形>）
+  function _makeTiltIcon() {
+    const size = 26;
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        width:${size}px;height:${size}px;
+        background:#1d4ed8;
+        border:2.5px solid rgba(255,255,255,0.9);
+        border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:14px;line-height:1;color:#fff;
+        box-shadow:0 0 0 3px rgba(29,78,216,0.40),0 2px 6px rgba(0,0,0,0.50);
+        cursor:pointer;font-weight:900;">∠</div>`,
+      iconSize:   [size, size],
+      iconAnchor: [size / 2, size / 2],
+      popupAnchor:[0, -(size / 2 + 4)],
+    });
+  }
+
+  function _isTiltOver30(tiltStatus) {
+    return /[＞>]\s*30/.test(tiltStatus || '');
+  }
+
   // ── 狀態 ────────────────────────────────────────────────────────────────────
   let _highLayer   = null;
   let _midLayer    = null;
+  let _tiltLayer   = null;
   let _loaded      = false;
   let _highVisible = false;
   let _midVisible  = false;
+  let _tiltVisible = false;
   let _btnHigh     = null;
   let _btnMid      = null;
+  let _btnTilt     = null;
 
   function _updateBtn(btn, active) {
     if (!btn) return;
@@ -59,10 +86,10 @@ const RiskLayer = (() => {
 
       _highLayer = L.layerGroup();
       _midLayer  = L.layerGroup();
+      _tiltLayer = L.layerGroup();
 
       flags.forEach(f => {
         if (f.lat == null || f.lng == null) return;
-        const marker = L.marker([f.lat, f.lng], { icon: _makeIcon(f.risk_level) });
 
         const tilt    = f.tilt_status  ? `<div class="rp-row">傾斜：${f.tilt_status}</div>` : '';
         const defect  = f.defect_rate != null ? `<div class="rp-row">缺失率：${f.defect_rate}%</div>` : '';
@@ -70,24 +97,34 @@ const RiskLayer = (() => {
         const navUrl  = `https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lng}&travelmode=driving`;
         const cls     = f.risk_level === '高' ? 'rp-high' : 'rp-mid';
 
-        marker.bindPopup(`
+        const popupHtml = `
           <div class="risk-popup">
             <div class="rp-header ${cls}">⚠ ${f.risk_level}風險　${f.species_name || ''}</div>
             <div class="rp-code">${f.registry_code}</div>
             <div class="rp-row">${f.district || ''}　${f.road_section || ''}</div>
             ${tilt}${defect}${factors}
             <a class="rp-nav" href="${navUrl}" target="_blank" rel="noopener">🚗 導航前往</a>
-          </div>`, { maxWidth: 260 });
+          </div>`;
+
+        const marker = L.marker([f.lat, f.lng], { icon: _makeIcon(f.risk_level) });
+        marker.bindPopup(popupHtml, { maxWidth: 260 });
 
         if (f.risk_level === '高') {
           _highLayer.addLayer(marker);
         } else {
           _midLayer.addLayer(marker);
         }
+
+        // 傾斜>30度獨立圖層（用獨立 marker，避免與風險圖層共用實例互相影響）
+        if (_isTiltOver30(f.tilt_status)) {
+          const tiltMarker = L.marker([f.lat, f.lng], { icon: _makeTiltIcon() });
+          tiltMarker.bindPopup(popupHtml, { maxWidth: 260 });
+          _tiltLayer.addLayer(tiltMarker);
+        }
       });
 
       _loaded = true;
-      console.log(`[RiskLayer] 高風險 ${_highLayer.getLayers().length} 棵 / 中風險 ${_midLayer.getLayers().length} 棵`);
+      console.log(`[RiskLayer] 高風險 ${_highLayer.getLayers().length} 棵 / 中風險 ${_midLayer.getLayers().length} 棵 / 傾斜>30度 ${_tiltLayer.getLayers().length} 棵`);
     } catch (e) {
       console.warn('[RiskLayer] 載入失敗', e);
     }
@@ -121,6 +158,20 @@ const RiskLayer = (() => {
     if (_btnMid) _btnMid.title = _midVisible ? '隱藏中風險樹木' : '顯示中風險樹木';
   }
 
+  // ── 切換傾斜>30度圖層 ───────────────────────────────────────────────────────
+  async function toggleTilt() {
+    if (!_loaded) await _load();
+    if (!_tiltLayer) return;
+    _tiltVisible = !_tiltVisible;
+    if (_tiltVisible) {
+      _tiltLayer.addTo(_map);
+    } else {
+      _map.removeLayer(_tiltLayer);
+    }
+    _updateBtn(_btnTilt, _tiltVisible);
+    if (_btnTilt) _btnTilt.title = _tiltVisible ? '隱藏主幹傾斜>30度樹木' : '顯示主幹傾斜>30度樹木';
+  }
+
   // ── 初始化：在地圖上加入兩個切換按鈕 ──────────────────────────────────────
   function init() {
     if (!Auth.isLoggedIn()) return;
@@ -145,8 +196,13 @@ const RiskLayer = (() => {
           _btnMid.innerHTML  = '<span class="rl-symbol">⚠</span><span class="rl-label">中</span>';
           _btnMid.title      = '顯示中風險樹木';
 
+          _btnTilt = L.DomUtil.create('button', 'rl-btn rl-tilt', wrap);
+          _btnTilt.innerHTML = '<span class="rl-symbol">∠</span><span class="rl-label">斜</span>';
+          _btnTilt.title     = '顯示主幹傾斜>30度樹木';
+
           L.DomEvent.on(_btnHigh, 'click', toggleHigh);
           L.DomEvent.on(_btnMid,  'click', toggleMid);
+          L.DomEvent.on(_btnTilt, 'click', toggleTilt);
           return wrap;
         },
       });
@@ -154,7 +210,7 @@ const RiskLayer = (() => {
     }, 200);
   }
 
-  return { init, toggleHigh, toggleMid };
+  return { init, toggleHigh, toggleMid, toggleTilt };
 })();
 
 // ── CSS（動態注入）────────────────────────────────────────────────────────────
@@ -196,6 +252,12 @@ const RiskLayer = (() => {
     .rl-mid .rl-symbol    { color: #78350f; font-size: 14px; font-weight: 900; line-height: 1; }
     .rl-mid .rl-label     { color: #92400e; font-size: 10px; font-weight: 700; line-height: 1; }
     .rl-mid.rl-active     { background: #fbbf24; border-color: #b45309; }
+
+    /* ── 傾斜>30度：藍 ── */
+    .rl-tilt              { background: #1d4ed8; }
+    .rl-tilt .rl-symbol   { color: #fff; font-size: 15px; font-weight: 900; line-height: 1; }
+    .rl-tilt .rl-label    { color: rgba(255,255,255,0.90); font-size: 10px; font-weight: 700; line-height: 1; }
+    .rl-tilt.rl-active    { background: #1e40af; border-color: #93c5fd; }
 
     /* ── Popup ── */
     .risk-popup { font-family: system-ui, sans-serif; font-size: 0.82rem; min-width: 200px; }
