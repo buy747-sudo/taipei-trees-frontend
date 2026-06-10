@@ -40,12 +40,12 @@ function renderTreeList(trees) {
 let _lastBboxKey = '';
 let _isLoading = false;
 
-async function loadTrees() {
+async function loadTrees(retry = 0) {
   if (_isLoading) return;
   const bounds = getMapBounds();
   const params = { ...bounds, ...getFilterParams() };
   const bboxKey = JSON.stringify(params);
-  if (bboxKey === _lastBboxKey) return;
+  if (retry === 0 && bboxKey === _lastBboxKey) return;
   _lastBboxKey = bboxKey;
   _isLoading = true;
 
@@ -60,8 +60,15 @@ async function loadTrees() {
     const shown = Math.min(trees.length, 50);
     document.getElementById('count-label').textContent = `此範圍顯示 ${shown} 棵`;
   } catch (e) {
-    document.getElementById('count-label').textContent = '載入失敗，請稍後再試';
-    showToast('無法載入樹木資料');
+    // 失敗後重置 key，否則同一範圍不會再重新查詢
+    _lastBboxKey = '';
+    if (retry < 2) {
+      document.getElementById('count-label').textContent = '載入失敗，重試中…';
+      setTimeout(() => loadTrees(retry + 1), 2000 * (retry + 1));
+    } else {
+      document.getElementById('count-label').textContent = '載入失敗，請稍後再試';
+      showToast('無法載入樹木資料，請稍後再試');
+    }
     console.error(e);
   } finally {
     _isLoading = false;

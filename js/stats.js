@@ -37,7 +37,7 @@ function renderStats(data) {
 
   tbody.innerHTML = districts.map(([name, d]) =>
     `<tr data-district="${name}">
-      <td>${name}</td>
+      <td>${name || '未分區'}</td>
       <td>${(d.total || 0).toLocaleString()}</td>
       <td>${(d.street || 0).toLocaleString()}</td>
       <td>${(d.protected || 0).toLocaleString()}</td>
