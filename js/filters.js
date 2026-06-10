@@ -152,9 +152,14 @@ async function searchByAddress(address) {
       return;
     }
 
-    const { lat, lon, display_name } = results[0];
-    // 路段搜尋用 zoom 16，可看到更長範圍的樹木分布
-    _map.flyTo([parseFloat(lat), parseFloat(lon)], 16);
+    const { lat, lon, display_name, boundingbox } = results[0];
+    // 優先用 boundingbox 讓整條路段置中，避免只用單點造成樹木偏落底部
+    if (boundingbox && boundingbox.length === 4) {
+      const [south, north, west, east] = boundingbox.map(parseFloat);
+      _map.fitBounds([[south, west], [north, east]], { padding: [40, 40], maxZoom: 17 });
+    } else {
+      _map.flyTo([parseFloat(lat), parseFloat(lon)], 16);
+    }
 
     // 顯示地址第一段（逗號前），避免太長
     const short = display_name.split(',')[0];

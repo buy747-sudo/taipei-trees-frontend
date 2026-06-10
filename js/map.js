@@ -146,10 +146,25 @@ function initMap() {
     if (typeof onMapMoved === 'function') onMapMoved();
   });
 
-  // 確保 layout 穩定後重算地圖尺寸，避免 #public-intro 高度影響初始中心點
-  setTimeout(() => _map.invalidateSize(), 150);
+  // 動態計算可視高度，避免 header 高度不固定（登入/未登入）造成地圖底部超出視窗
+  setTimeout(fitMapToViewport, 100);
+  window.addEventListener('resize', fitMapToViewport);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitMapToViewport);
+  }
 
   return _map;
+}
+
+function fitMapToViewport() {
+  const topBar  = document.getElementById('top-bar');
+  const dataBar = document.getElementById('data-bar');
+  const mapEl   = document.getElementById('map-container');
+  if (!topBar || !dataBar || !mapEl) return;
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  const available = vh - topBar.offsetHeight - dataBar.offsetHeight;
+  mapEl.style.height = Math.max(available, 200) + 'px';
+  if (_map) _map.invalidateSize();
 }
 
 function getMap() { return _map; }

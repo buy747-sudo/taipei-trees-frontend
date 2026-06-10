@@ -1,7 +1,7 @@
 const API_BASE = 'https://office.yiren-eco.online/public';
 
-const TAIPEI_CENTER = [25.0478, 121.5319];
-const DEFAULT_ZOOM = 15;
+const TAIPEI_CENTER = [25.034, 121.527];
+const DEFAULT_ZOOM = 14;
 
 const DISTRICT_CENTERS = {
   '信義區': [25.0327, 121.5654],
