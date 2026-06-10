@@ -251,6 +251,29 @@
   <script src="js/measure.js?v=20260609b"></script>
   <script src="js/export.js?v=20260609b"></script>
   <script src="js/app.js?v=20260609b"></script>
+  <script>
+    // ── 首頁訪客計數 beacon ──────────────────────────────────────────────────
+    // 用 localStorage 產生不含個人識別資訊的 session_id（每個瀏覽器一個）
+    (function sendPageview() {
+      try {
+        const STORAGE_KEY = 'tt_sid';
+        let sid = localStorage.getItem(STORAGE_KEY);
+        if (!sid) {
+          sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          localStorage.setItem(STORAGE_KEY, sid);
+        }
+        const apiBase = (typeof API_BASE !== 'undefined')
+          ? API_BASE.replace('/public', '')
+          : 'https://office.yiren-eco.online';
+        fetch(apiBase + '/api/auth/pageview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ page: '/', session_id: sid }),
+          keepalive: true,
+        }).catch(() => {});
+      } catch (_) {}
+    })();
+  </script>
 
 </body>
 </html>
