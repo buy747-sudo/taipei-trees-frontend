@@ -156,7 +156,8 @@ async function startAssessment() {
       body: JSON.stringify({ tree_code: _tree.registry_code }),
     });
     if (!res) return;
-    const data = await res.json();
+    let data = {};
+    try { data = await res.json(); } catch { /* 非 JSON 回應（iOS Safari SyntaxError 防護） */ }
     if (!res.ok) {
       alert(data.error || '無法建立評估，請重試');
       return;
