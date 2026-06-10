@@ -162,7 +162,9 @@ function fitMapToViewport() {
   const mapEl   = document.getElementById('map-container');
   if (!topBar || !dataBar || !mapEl) return;
   const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-  const available = vh - topBar.offsetHeight - dataBar.offsetHeight;
+  // 也要扣掉底部統計列，否則匯出/統計總覽按鈕會被推出視窗外
+  const statsBar = document.getElementById('stats-bar');
+  const available = vh - topBar.offsetHeight - dataBar.offsetHeight - (statsBar ? statsBar.offsetHeight : 0);
   mapEl.style.height = Math.max(available, 200) + 'px';
   if (_map) _map.invalidateSize();
 }

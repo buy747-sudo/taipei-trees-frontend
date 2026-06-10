@@ -198,7 +198,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 .chip.active { background: #7ecb94; color: #1a1a1a; border-color: #7ecb94; font-weight: 600; }
 
 /* ── Map ──────────────────────────────────────────────── */
-#map-container { height: calc(100vh - 182px); min-height: 300px; width: 100%; z-index: 0; position: relative; }
+#map-container { height: calc(100vh - 230px); min-height: 300px; width: 100%; z-index: 0; position: relative; }
 
 /* ── 自訂底圖縮圖控制器 ────────────────────────────────── */
 .bm-ctrl { position: relative !important; }
@@ -413,7 +413,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── RWD（桌機）──────────────────────────────────────── */
 @media (min-width: 768px) {
-  #map-container { height: calc(100vh - 238px); }
+  #map-container { height: calc(100vh - 286px); }
   #detail-sheet { max-width: 480px; right: 20px; left: auto; border-radius: 16px; bottom: 20px; }
   #tree-list { max-height: none; }
 }
@@ -423,7 +423,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   .top-nav-links { justify-content: flex-start; margin-bottom: 6px; }
   #public-intro { grid-template-columns: 1fr; gap: 10px; }
   .intro-steps { justify-content: flex-start; }
-  #map-container { height: calc(100vh - 304px); }
+  #map-container { height: calc(100vh - 352px); }
 }
 
 /* ── Map Legend ───────────────────────────────────────── */
