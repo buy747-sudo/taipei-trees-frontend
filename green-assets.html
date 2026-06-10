@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="theme-color" content="#f4faf5">
+  <title>台北市城市綠資產儀表板｜樹木總數・固碳量・生態效益</title>
+  <meta name="description" content="台北市城市綠資產即時儀表板：全市行道樹與受保護樹木總數、累積固碳量、年度吸碳量、各行政區排行與常見樹種統計，以開放資料即時呈現。">
+  <link rel="canonical" href="https://taipei-trees.org/green-assets.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="台北市城市綠資產儀表板">
+  <meta property="og:description" content="一頁看懂台北市的城市綠資產：樹木總數、碳匯與生態效益即時統計。">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      min-height: 100vh; color: #173f24; background: #f4faf5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .ga-bg {
+      position: fixed; inset: 0; pointer-events: none; opacity: 0.8;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(126,203,148,0.24), transparent 18rem),
+        radial-gradient(circle at 82% 12%, rgba(44,181,165,0.18), transparent 22rem),
+        linear-gradient(120deg, rgba(255,255,255,0.88), rgba(244,250,245,0.92));
+    }
+    .ga-shell { position: relative; max-width: 1240px; margin: 0 auto; padding: 18px 16px 40px; }
+
+    .ga-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .ga-nav a {
+      color: #1a5c2a; text-decoration: none; border: 1px solid #cfe8d4;
+      border-radius: 999px; padding: 8px 14px; font-size: 0.88rem;
+      background: rgba(255,255,255,0.86); font-weight: 700;
+    }
+    .ga-nav a:hover { background: #edf8ef; }
+
+    .ga-hero { margin-bottom: 24px; }
+    .hero-kicker { color: #2f7d4a; font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; letter-spacing: 0.08em; }
+    .ga-hero h1 { font-size: clamp(1.9rem, 4.5vw, 3.4rem); line-height: 1.12; margin-bottom: 10px; }
+    .ga-hero p { color: #3f5948; line-height: 1.75; max-width: 720px; font-size: 0.95rem; }
+
+    /* 大數字英雄區 */
+    .big-counter {
+      margin: 22px 0 6px;
+      display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    }
+    .big-num {
+      font-size: clamp(3.2rem, 9vw, 6rem); font-weight: 900; line-height: 1;
+      background: linear-gradient(120deg, #1a5c2a, #2cb5a5);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      font-variant-numeric: tabular-nums;
+    }
+    .big-unit { font-size: 1.3rem; font-weight: 800; color: #2f7d4a; }
+    .big-note { color: #607468; font-size: 0.85rem; margin-bottom: 4px; }
+
+    /* 指標卡 */
+    .metric-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+    }
+    .metric-card {
+      border: 1px solid #d4e8d8; background: rgba(255,255,255,0.92);
+      border-radius: 10px; padding: 16px 14px; min-height: 110px;
+      box-shadow: 0 10px 26px rgba(21,83,43,0.08);
+    }
+    .metric-label { color: #607468; font-size: 0.82rem; display: flex; align-items: center; gap: 6px; }
+    .metric-value { color: #173f24; font-size: 1.75rem; font-weight: 900; margin: 8px 0 2px; font-variant-numeric: tabular-nums; }
+    .metric-unit { color: #13816f; font-size: 0.82rem; font-weight: 800; }
+
+    /* 換算卡：把數字翻譯成人話 */
+    .convert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; }
+    .convert-card {
+      border-radius: 10px; padding: 16px;
+      background: linear-gradient(135deg, #edf8ef, #e3f4ef);
+      border: 1px solid #cfe8d4;
+    }
+    .convert-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .convert-text { color: #2a4a35; font-size: 0.92rem; line-height: 1.65; }
+    .convert-text strong { color: #13816f; font-size: 1.15rem; font-weight: 900; }
+
+    /* 圖表面板 */
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .chart-panel {
+      border: 1px solid #d4e8d8; background: rgba(255,255,255,0.92);
+      box-shadow: 0 14px 34px rgba(21,83,43,0.09);
+      border-radius: 10px; padding: 16px;
+    }
+    .chart-panel.full { grid-column: 1 / -1; }
+    .panel-title { color: #1a5c2a; font-size: 1.02rem; font-weight: 900; margin-bottom: 4px; }
+    .panel-sub { color: #607468; font-size: 0.82rem; margin-bottom: 10px; }
+    .chart-box { width: 100%; height: 420px; }
+    .chart-box.tall { height: 460px; }
+    .chart-box.short { height: 360px; }
+
+    .ga-footer {
+      margin-top: 26px; padding-top: 16px; border-top: 1px solid #d4e8d8;
+      color: #607468; font-size: 0.8rem; line-height: 1.8;
+    }
+    .ga-footer a { color: #1a5c2a; }
+
+    .loading-hint { text-align: center; color: #607468; padding: 60px 0; font-size: 0.95rem; }
+
+    @media (max-width: 900px) {
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+      .convert-grid { grid-template-columns: 1fr; }
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-box { height: 380px; }
+      .chart-box.tall { height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ga-bg" aria-hidden="true"></div>
+  <div class="ga-shell">
+
+    <nav class="ga-nav">
+      <a href="/">← 回地圖首頁</a>
+      <a href="/about.html">樹木知識庫</a>
+    </nav>
+
+    <header class="ga-hero">
+      <p class="hero-kicker">TAIPEI URBAN GREEN ASSETS</p>
+      <h1>台北市城市綠資產</h1>
+      <p>台北市的每一棵公共樹木，都是城市的綠色資產。這裡用開放資料即時呈現：我們有多少棵樹、它們替城市儲存了多少碳、每年又默默吸收了多少 CO₂。</p>
+
+      <div class="big-counter">
+        <span class="big-num" id="big-total">—</span>
+        <span class="big-unit">棵</span>
+      </div>
+      <p class="big-note">台北市公共樹木總數（行道樹＋受保護樹木）</p>
+    </header>
+
+    <div id="dashboard" hidden>
+
+      <!-- 指標卡 -->
+      <section class="metric-grid" aria-label="核心指標">
+        <div class="metric-card">
+          <div class="metric-label">🟢 行道樹</div>
+          <div class="metric-value" id="m-street">—</div>
+          <div class="metric-unit">棵</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">⭐ 受保護樹木</div>
+          <div class="metric-value" id="m-protected">—</div>
+          <div class="metric-unit">棵</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">🌍 累積固碳量</div>
+          <div class="metric-value" id="m-carbon">—</div>
+          <div class="metric-unit">公噸 CO₂</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">💨 每年再吸碳</div>
+          <div class="metric-value" id="m-annual">—</div>
+          <div class="metric-unit">公噸 CO₂／年</div>
+        </div>
+      </section>
+
+      <!-- 換算卡 -->
+      <section class="convert-grid" aria-label="生活化換算">
+        <div class="convert-card">
+          <div class="convert-icon">🚗</div>
+          <div class="convert-text">全市樹木每年吸收的 CO₂，相當於 <strong id="c-cars">—</strong> 輛自小客車一整年的排放量。</div>
+        </div>
+        <div class="convert-card">
+          <div class="convert-icon">✈️</div>
+          <div class="convert-text">累積固碳量相當於 <strong id="c-flights">—</strong> 人次台北—東京來回航班的碳排放。</div>
+        </div>
+        <div class="convert-card">
+          <div class="convert-icon">🧑‍🤝‍🧑</div>
+          <div class="convert-text">以台北市約 247 萬人口計算，平均每 <strong id="c-people">—</strong> 位市民就擁有一棵公共樹木。</div>
+        </div>
+      </section>
+
+      <!-- 圖表 -->
+      <section class="chart-grid" aria-label="統計圖表">
+        <div class="chart-panel full">
+          <div class="panel-title">哪一區的樹最多？</div>
+          <div class="panel-sub">各行政區公共樹木數量（點擊長條可前往該區地圖）</div>
+          <div id="chart-district" class="chart-box tall"></div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="panel-title">哪一區固碳最多？</div>
+          <div class="panel-sub">各行政區累積固碳量（公噸 CO₂）</div>
+          <div id="chart-carbon" class="chart-box short"></div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="panel-title">台北市最常見的樹是？</div>
+          <div class="panel-sub">公共樹木樹種排行（前 10 名）</div>
+          <div id="chart-species" class="chart-box short"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <div id="loading" class="loading-hint">📡 正在載入全市最新統計資料…</div>
+
+    <footer class="ga-footer">
+      <p>資料來源：台北市政府開放資料平台（data.taipei，OGDL 授權）；統計即時取自本平台資料庫，資料截至 <span id="data-date">—</span>。</p>
+      <p>換算基準：自小客車年排放約 2.2 公噸 CO₂（環境部統計）；台北—東京來回航班每人約 0.27 公噸 CO₂（ICAO 碳排計算器）。固碳量估算方法：Brown (1997) 生物量方程式 + IPCC (2006) 碳轉換係數，詳見<a href="/data-policy.html">資料說明</a>。</p>
+      <p><a href="/">台北市樹木查詢平台 taipei-trees.org</a>｜<a href="/daan-forest-dashboard.html">大安森林公園碳匯儀表板</a></p>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+  <script>
+    const API_STATS = 'https://office.yiren-eco.online/public/stats';
+
+    const GREEN  = '#1a5c2a';
+    const TEAL   = '#2cb5a5';
+    const GOLD   = '#f59e0b';
+    const INK    = '#173f24';
+    const MUTED  = '#607468';
+
+    const nf = new Intl.NumberFormat('zh-TW');
+
+    /* 大數字滾動動畫 */
+    function countUp(el, target, dur = 1600) {
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = nf.format(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function baseAxis() {
+      return {
+        axisLine: { lineStyle: { color: '#cfe8d4' } },
+        axisLabel: { color: MUTED, fontSize: 12 },
+        splitLine: { lineStyle: { color: '#e8f2ea' } },
+      };
+    }
+
+    async function init() {
+      let data;
+      try {
+        const res = await fetch(API_STATS);
+        data = await res.json();
+      } catch (e) {
+        document.getElementById('loading').textContent = '統計資料暫時無法載入，請稍後再試。';
+        return;
+      }
+
+      document.getElementById('loading').hidden = true;
+      document.getElementById('dashboard').hidden = false;
+
+      /* ── 核心數字 ── */
+      countUp(document.getElementById('big-total'), data.total || 0);
+      countUp(document.getElementById('m-street'), data.street || 0, 1200);
+      countUp(document.getElementById('m-protected'), data.protected || 0, 1200);
+      document.getElementById('m-carbon').textContent = nf.format(Math.round(data.total_carbon_tonnes || 0));
+      document.getElementById('m-annual').textContent = nf.format(data.total_annual_co2_tonnes || 0);
+
+      /* ── 換算 ── */
+      const annual = data.total_annual_co2_tonnes || 0;
+      const carbon = data.total_carbon_tonnes || 0;
+      document.getElementById('c-cars').textContent = nf.format(Math.round(annual / 2.2));
+      document.getElementById('c-flights').textContent = nf.format(Math.round(carbon / 0.27));
+      document.getElementById('c-people').textContent = data.total ? Math.round(2470000 / data.total) : '—';
+      document.getElementById('data-date').textContent = new Date().toLocaleDateString('zh-TW');
+
+      /* ── 行政區資料整理 ── */
+      const districts = Object.entries(data.by_district || {})
+        .map(([name, d]) => ({ name: name || '未分區', ...d }))
+        .sort((a, b) => a.total - b.total);   // 橫條圖由下往上遞增
+
+      /* ── 圖1：各行政區樹木數（橫條，行道樹/受保護堆疊）── */
+      const chDistrict = echarts.init(document.getElementById('chart-district'));
+      chDistrict.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { data: ['行道樹', '受保護樹木'], textStyle: { color: INK }, top: 0 },
+        grid: { left: 8, right: 30, top: 34, bottom: 8, containLabel: true },
+        xAxis: { type: 'value', ...baseAxis() },
+        yAxis: { type: 'category', data: districts.map(d => d.name), ...baseAxis() },
+        series: [
+          {
+            name: '行道樹', type: 'bar', stack: 'total',
+            data: districts.map(d => d.street),
+            itemStyle: { color: GREEN, borderRadius: [0, 0, 0, 0] },
+            emphasis: { focus: 'series' },
+          },
+          {
+            name: '受保護樹木', type: 'bar', stack: 'total',
+            data: districts.map(d => d.protected),
+            itemStyle: { color: GOLD, borderRadius: [0, 4, 4, 0] },
+            label: {
+              show: true, position: 'right', color: MUTED, fontSize: 11,
+              formatter: p => nf.format(districts[p.dataIndex].total),
+            },
+          },
+        ],
+      });
+      chDistrict.on('click', (p) => {
+        const name = districts[p.dataIndex].name;
+        if (name !== '未分區') location.href = `/?district=${encodeURIComponent(name)}`;
+      });
+
+      /* ── 圖2：各行政區固碳量 ── */
+      const carbonSorted = [...districts].sort((a, b) => a.carbon_tonnes - b.carbon_tonnes);
+      const chCarbon = echarts.init(document.getElementById('chart-carbon'));
+      chCarbon.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+          formatter: p => `${p[0].name}<br>固碳 <b>${nf.format(p[0].value)}</b> 公噸 CO₂` },
+        grid: { left: 8, right: 40, top: 10, bottom: 8, containLabel: true },
+        xAxis: { type: 'value', ...baseAxis() },
+        yAxis: { type: 'category', data: carbonSorted.map(d => d.name), ...baseAxis() },
+        series: [{
+          type: 'bar',
+          data: carbonSorted.map(d => d.carbon_tonnes),
+          itemStyle: {
+            borderRadius: [0, 4, 4, 0],
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              { offset: 0, color: GREEN }, { offset: 1, color: TEAL },
+            ]),
+          },
+          label: { show: true, position: 'right', color: MUTED, fontSize: 11,
+            formatter: p => nf.format(p.value) },
+        }],
+      });
+
+      /* ── 圖3：常見樹種（玫瑰圖）── */
+      const species = (data.top_species || []).slice(0, 10);
+      const chSpecies = echarts.init(document.getElementById('chart-species'));
+      chSpecies.setOption({
+        tooltip: { formatter: p => `${p.name}<br><b>${nf.format(p.value)}</b> 棵（${p.percent}%）` },
+        series: [{
+          type: 'pie',
+          roseType: 'radius',
+          radius: ['18%', '72%'],
+          center: ['50%', '52%'],
+          itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+          label: { color: INK, fontSize: 12, formatter: '{b}\n{c}棵' },
+          data: species.map((s, i) => ({
+            name: s.name, value: s.count,
+            itemStyle: { color: [
+              '#1a5c2a', '#2f7d4a', '#2cb5a5', '#13816f', '#5fa777',
+              '#7ecb94', '#a3d9b1', '#f59e0b', '#d97706', '#b45309',
+            ][i] },
+          })),
+        }],
+      });
+
+      /* 響應式 */
+      window.addEventListener('resize', () => {
+        chDistrict.resize(); chCarbon.resize(); chSpecies.resize();
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
