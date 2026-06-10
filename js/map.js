@@ -8,9 +8,10 @@ function initMap() {
     zoomControl: true,
   });
 
-  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19,
+  // 預設街道圖：CARTO Voyager — 色調柔和，樹木標記視覺對比更好
+  const osm = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 20,
   });
 
   const esri = L.tileLayer(
@@ -49,7 +50,7 @@ function initMap() {
   // ── 自訂底圖縮圖切換器 ────────────────────────────────
   // 縮圖：台北市中心附近 zoom=10 tile(x=857, y=438)
   const THUMBS = {
-    osm:  'https://a.tile.openstreetmap.org/10/857/438.png',
+    osm:  'https://a.basemaps.cartocdn.com/rastertiles/voyager/10/857/438.png',
     esri: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/438/857',
     nlsc: 'https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/10/438/857',
   };
