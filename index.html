@@ -251,6 +251,11 @@
   <script src="js/measure.js?v=20260609b"></script>
   <script src="js/export.js?v=20260609b"></script>
   <script src="js/app.js?v=20260609b"></script>
+  <script src="js/risk-layer.js?v=20260610a"></script>
+  <script>
+    // ── 風險圖層初始化（登入員工才啟用）
+    document.addEventListener('DOMContentLoaded', () => { RiskLayer.init(); });
+  </script>
   <script>
     // ── 首頁訪客計數 beacon ──────────────────────────────────────────────────
     // 用 localStorage 產生不含個人識別資訊的 session_id（每個瀏覽器一個）
