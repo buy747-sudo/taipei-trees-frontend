@@ -128,9 +128,11 @@ function openSheet(tree) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data || !data.zone_name) return;
+        // nearby=true 表示樹位於街廓間的馬路上，顯示最近分區
+        const prefix = data.nearby ? '鄰近 ' : '';
         zoneCard.innerHTML =
           `<div class="zone-label">📍 土地脈絡（參考）</div>` +
-          `<div class="zone-name">${data.zone_name}` +
+          `<div class="zone-name">${prefix}${data.zone_name}` +
           (data.zone_code ? ` <span class="zone-code">${data.zone_code}</span>` : '') +
           `</div>` +
           (data.zone_desc ? `<div class="zone-desc">${data.zone_desc}</div>` : '') +
