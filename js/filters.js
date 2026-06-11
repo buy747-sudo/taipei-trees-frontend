@@ -12,8 +12,31 @@ function getFilterParams() {
   if (filterState.district) params.district = filterState.district;
   if (filterState.species) params.species = filterState.species;
   if (filterState.category && filterState.category !== 'all') params.category = filterState.category;
-  params.limit = 500;
+  params.limit = getTreeLoadLimit();
   return params;
+}
+
+function getTreeLoadLimit() {
+  const width = window.innerWidth || 1024;
+  const map = (typeof getMap === 'function') ? getMap() : null;
+  const zoom = map && typeof map.getZoom === 'function' ? map.getZoom() : DEFAULT_ZOOM;
+
+  let base = 800;
+  if (width <= 640) base = 300;
+  else if (width <= 1023) base = 500;
+
+  if (zoom <= 12) return Math.min(base, 300);
+  if (zoom >= 17) {
+    if (width <= 640) return 500;
+    if (width <= 1023) return 800;
+    return 1200;
+  }
+  if (zoom >= 16) {
+    if (width <= 640) return 400;
+    if (width <= 1023) return 700;
+    return 1000;
+  }
+  return base;
 }
 
 let _filterTimer = null;

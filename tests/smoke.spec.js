@@ -123,6 +123,34 @@ test('首頁手機版隱藏資料列並維持觸控優先', async ({ page }) => 
   expect(layout.columns).toBe(2);
 });
 
+test('首頁依裝置與 zoom 動態調整地圖載入量', async ({ page }) => {
+  async function firstLimitFor(width, zoom) {
+    const limits = [];
+    await page.setViewportSize({ width, height: 820 });
+    await page.route('**/public/trees**', route => {
+      const url = new URL(route.request().url());
+      limits.push(url.searchParams.get('limit'));
+      route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ total: 0, trees: [] }),
+      });
+    });
+    await page.addInitScript(z => {
+      window.__TT_TEST_ZOOM__ = z;
+    }, zoom);
+    await page.goto(BASE);
+    await expect.poll(() => limits[0]).toBeTruthy();
+    await page.unroute('**/public/trees**');
+    return Number(limits[0]);
+  }
+
+  expect(await firstLimitFor(390, 14)).toBe(300);
+  expect(await firstLimitFor(820, 14)).toBe(500);
+  expect(await firstLimitFor(1280, 14)).toBe(800);
+  expect(await firstLimitFor(1280, 12)).toBe(300);
+  expect(await firstLimitFor(1280, 17)).toBe(1200);
+});
+
 test('地圖容器存在且 Leaflet 初始化', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.locator('#map-container')).toBeVisible();

@@ -4,7 +4,7 @@ let _map, _clusterGroup;
 function initMap() {
   _map = L.map('map-container', {
     center: INITIAL_MAP_CENTER || TAIPEI_CENTER,
-    zoom: DEFAULT_ZOOM,
+    zoom: Number.isFinite(window.__TT_TEST_ZOOM__) ? window.__TT_TEST_ZOOM__ : DEFAULT_ZOOM,
     zoomControl: true,
   });
 
@@ -196,7 +196,8 @@ function prepareInitialMapViewport() {
   fitMapToViewport();
   if (!_map) return;
   _map.invalidateSize();
-  _map.setView(INITIAL_MAP_CENTER || TAIPEI_CENTER, DEFAULT_ZOOM, { animate: false });
+  const zoom = Number.isFinite(window.__TT_TEST_ZOOM__) ? window.__TT_TEST_ZOOM__ : DEFAULT_ZOOM;
+  _map.setView(INITIAL_MAP_CENTER || TAIPEI_CENTER, zoom, { animate: false });
 }
 
 function getMap() { return _map; }
