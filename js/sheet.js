@@ -119,6 +119,29 @@ function openSheet(tree) {
     eco.hidden = true;
   }
 
+  // 土地脈絡卡（非同步，不阻塞 sheet 開啟）
+  const zoneCard = document.getElementById('sheet-zone-card');
+  if (zoneCard && tree.lat != null && tree.lng != null) {
+    zoneCard.hidden = true;
+    zoneCard.innerHTML = '';
+    fetch(`${API_BASE}/public/zone?lat=${tree.lat}&lng=${tree.lng}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || !data.zone_name) return;
+        zoneCard.innerHTML =
+          `<div class="zone-label">📍 土地脈絡（參考）</div>` +
+          `<div class="zone-name">${data.zone_name}` +
+          (data.zone_code ? ` <span class="zone-code">${data.zone_code}</span>` : '') +
+          `</div>` +
+          (data.zone_desc ? `<div class="zone-desc">${data.zone_desc}</div>` : '') +
+          `<div class="zone-note">僅供參考，GPS 有數公尺誤差，正式分區以都發局公告為準</div>`;
+        zoneCard.hidden = false;
+      })
+      .catch(() => {});
+  } else if (zoneCard) {
+    zoneCard.hidden = true;
+  }
+
   sheet.hidden = false;
   overlay.hidden = false;
   document.body.style.overflow = 'hidden';
