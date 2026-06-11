@@ -1,8 +1,9 @@
 const API_BASE = 'https://office.yiren-eco.online/public';
 
 const TAIPEI_CENTER = [25.034, 121.527];
-const INITIAL_MAP_CENTER = [24.9915, 121.548];
-const DEFAULT_ZOOM = 14;
+// 初始畫面：大安森林公園（樹木密集、受保護樹多，開站畫面最有看頭）
+const INITIAL_MAP_CENTER = [25.0297, 121.5358];
+const DEFAULT_ZOOM = 16;
 
 const DISTRICT_CENTERS = {
   '信義區': [25.0327, 121.5654],
