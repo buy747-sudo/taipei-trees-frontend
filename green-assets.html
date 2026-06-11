@@ -92,6 +92,39 @@
     .chart-box.tall { height: 460px; }
     .chart-box.short { height: 360px; }
 
+    /* 樹木效益敘事區（參考 NYC Tree Map / Learn / Benefits 的敘事架構） */
+    .benefit-sec { margin-top: 30px; }
+    .benefit-sec-kicker { color: #2f7d4a; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .benefit-sec h2 { font-size: clamp(1.4rem, 3vw, 2rem); color: #173f24; margin-bottom: 10px; }
+    .benefit-sec-intro { color: #3f5948; line-height: 1.8; max-width: 760px; font-size: 0.93rem; margin-bottom: 18px; }
+    .benefit-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .gb-card {
+      border: 1px solid #d4e8d8; background: rgba(255,255,255,0.92);
+      border-radius: 10px; padding: 18px;
+      box-shadow: 0 10px 26px rgba(21,83,43,0.08);
+    }
+    .gb-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .gb-title { color: #1a5c2a; font-size: 1rem; font-weight: 900; margin-bottom: 8px; }
+    .gb-body { color: #3f5948; font-size: 0.88rem; line-height: 1.75; }
+    .gb-body strong { color: #13816f; }
+    .gb-fact {
+      margin-top: 10px; padding: 9px 12px; border-radius: 8px;
+      background: linear-gradient(135deg, #edf8ef, #e3f4ef);
+      border: 1px solid #cfe8d4; font-size: 0.8rem; color: #2a4a35; line-height: 1.6;
+    }
+    .benefit-cta {
+      margin-top: 16px; text-align: center;
+      background: linear-gradient(120deg, #1a5c2a, #1f8a64);
+      border-radius: 12px; padding: 20px 16px; color: #fff;
+    }
+    .benefit-cta p { font-size: 0.95rem; margin-bottom: 12px; line-height: 1.7; }
+    .benefit-cta a {
+      display: inline-block; background: #fff; color: #1a5c2a;
+      border-radius: 999px; padding: 10px 22px; font-weight: 800;
+      text-decoration: none; font-size: 0.9rem; margin: 0 6px 6px;
+    }
+    @media (max-width: 720px) { .benefit-cards-grid { grid-template-columns: 1fr; } }
+
     .ga-footer {
       margin-top: 26px; padding-top: 16px; border-top: 1px solid #d4e8d8;
       color: #607468; font-size: 0.8rem; line-height: 1.8;
@@ -196,6 +229,66 @@
     </div>
 
     <div id="loading" class="loading-hint">📡 正在載入全市最新統計資料…</div>
+
+    <!-- 樹木效益敘事區（參考 NYC Tree Map 的 Benefits 頁面架構） -->
+    <section class="benefit-sec" aria-label="樹木為城市做了什麼">
+      <p class="benefit-sec-kicker">WHY TREES MATTER</p>
+      <h2>樹木為城市做了什麼？</h2>
+      <p class="benefit-sec-intro">
+        樹木和馬路、下水道、橋樑一樣，是城市的基礎建設——只是它不用鋼筋水泥，而且會自己長大、增值。
+        台北每一棵行道樹，每天都在默默提供這四件事：
+      </p>
+
+      <div class="benefit-cards-grid">
+        <div class="gb-card">
+          <div class="gb-icon">💧</div>
+          <div class="gb-title">雨水截留 — 天然的滯洪池</div>
+          <div class="gb-body">
+            下大雨時，樹冠會先接住一部分雨水，讓它留在枝葉上慢慢蒸發，減少瞬間湧入下水道的逕流。
+            對午後雷陣雨頻繁的台北來說，每棵樹都是一座<strong>免費的小型滯洪設施</strong>，也減少了路面污染物被直接沖入河川。
+          </div>
+          <div class="gb-fact">一棵成熟行道樹每年可截留約 20 公噸雨水——相當於 100 多個浴缸的水量。</div>
+        </div>
+
+        <div class="gb-card">
+          <div class="gb-icon">☂️</div>
+          <div class="gb-title">降溫節能 — 城市的天然冷氣</div>
+          <div class="gb-body">
+            夏天樹蔭下的體感溫度可以比烈日下低好幾度。成排的行道樹能緩解都市熱島效應，
+            讓周邊建築<strong>少開冷氣、少耗電</strong>——省下的電又進一步減少碳排放，是正向循環。
+          </div>
+          <div class="gb-fact">一棵大樹的遮蔭面積可達上百平方公尺，約等於 8～10 個汽車停車位的範圍。</div>
+        </div>
+
+        <div class="gb-card">
+          <div class="gb-icon">🌬️</div>
+          <div class="gb-title">空氣淨化 — 會呼吸的濾網</div>
+          <div class="gb-body">
+            葉片會吸附 PM₂.₅ 等懸浮微粒、吸收二氧化氮與臭氧等有害氣體，同時釋放氧氣。
+            空氣污染與氣喘、咳嗽、呼吸道疾病息息相關——路樹多的街道，
+            就是<strong>對肺最友善的街道</strong>。
+          </div>
+          <div class="gb-fact">以全市路樹的葉面積估算，每年清除的空污健康價值可達數億元。</div>
+        </div>
+
+        <div class="gb-card">
+          <div class="gb-icon">🌍</div>
+          <div class="gb-title">固碳儲碳 — 活的碳金庫</div>
+          <div class="gb-body">
+            樹木生長時把大氣中的 CO₂ 固定在樹幹、枝條和根系裡，活得越久存得越多。
+            上方儀表板的「累積固碳量」就是全市樹木一輩子存下來的碳資產——
+            這座<strong>活的碳金庫</strong>還在逐年增值。
+          </div>
+          <div class="gb-fact">全市公共樹木每年新吸收的 CO₂，相當於數千輛汽車一整年的排放量（見上方即時數字）。</div>
+        </div>
+      </div>
+
+      <div class="benefit-cta">
+        <p>這些不是抽象的概念——本平台每一棵樹都有自己的效益估算。<br>點開任何一棵樹，看看它每年為台北做了多少事。</p>
+        <a href="/">🗺️ 打開地圖，點一棵樹</a>
+        <a href="/eco-benefits.html">🌿 了解生態效益怎麼算</a>
+      </div>
+    </section>
 
     <footer class="ga-footer">
       <p>資料來源：台北市政府開放資料平台（data.taipei，OGDL 授權）；統計即時取自本平台資料庫，資料截至 <span id="data-date">—</span>。</p>
