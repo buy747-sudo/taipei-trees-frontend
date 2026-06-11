@@ -151,6 +151,39 @@ test('首頁依裝置與 zoom 動態調整地圖載入量', async ({ page }) => 
   expect(await firstLimitFor(1280, 17)).toBe(1200);
 });
 
+test('首頁地圖樹點依樹種分類與冠幅呈現顏色形狀大小', async ({ page }) => {
+  await page.route('**/public/trees**', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      total: 6,
+      trees: [
+        { registry_code: 'EV001', species_name: '樟樹', tree_category: 'street', lat: 24.991, lng: 121.548, crown_m: 4 },
+        { registry_code: 'DE001', species_name: '楓香', tree_category: 'street', lat: 24.992, lng: 121.548, crown_m: 8 },
+        { registry_code: 'PA001', species_name: '大王椰子', tree_category: 'street', lat: 24.993, lng: 121.548, crown_m: 6 },
+        { registry_code: 'CO001', species_name: '黑松', tree_category: 'street', lat: 24.994, lng: 121.548, crown_m: 5 },
+        { registry_code: 'FL001', species_name: '鳳凰木', tree_category: 'street', lat: 24.995, lng: 121.548, crown_m: 7 },
+        { registry_code: 'PR001', species_name: '榕樹', tree_category: 'protected', lat: 24.996, lng: 121.548, crown_m: 10 },
+      ],
+    }),
+  }));
+
+  await page.goto(BASE);
+  await expect(page.locator('.tree-marker')).toHaveCount(6);
+  await expect(page.locator('.tree-marker.evergreen')).toHaveAttribute('title', /樟樹/);
+  await expect(page.locator('.tree-marker.deciduous')).toHaveAttribute('title', /楓香/);
+  await expect(page.locator('.tree-marker.palm')).toHaveAttribute('title', /大王椰子/);
+  await expect(page.locator('.tree-marker.conifer')).toHaveAttribute('title', /黑松/);
+  await expect(page.locator('.tree-marker.flowering')).toHaveAttribute('title', /鳳凰木/);
+  await expect(page.locator('.tree-marker.protected')).toHaveAttribute('title', /榕樹/);
+
+  const sizes = await page.evaluate(() => {
+    const evergreen = document.querySelector('.tree-marker.evergreen').getBoundingClientRect();
+    const deciduous = document.querySelector('.tree-marker.deciduous').getBoundingClientRect();
+    return { evergreen: evergreen.width, deciduous: deciduous.width };
+  });
+  expect(sizes.deciduous).toBeGreaterThan(sizes.evergreen);
+});
+
 test('地圖容器存在且 Leaflet 初始化', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.locator('#map-container')).toBeVisible();

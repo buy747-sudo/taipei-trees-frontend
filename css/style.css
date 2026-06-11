@@ -591,9 +591,9 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 /* ── Map Legend ───────────────────────────────────────── */
 #map-legend {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-  z-index: 1000; display: flex; align-items: center; gap: 10px;
+  z-index: 1000; display: flex; align-items: center; gap: 8px;
   background: rgba(255,255,255,0.82); border-radius: 24px;
-  padding: 6px 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.22);
+  padding: 6px 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.22);
   pointer-events: none; backdrop-filter: blur(6px);
 }
 .legend-dot {
@@ -601,8 +601,17 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   border: 2px solid rgba(255,255,255,0.8);
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-.legend-dot.street { background: #1a5c2a; border-color: #fff; }
+.legend-dot.evergreen { background: #1a5c2a; border-color: #fff; }
+.legend-dot.deciduous { background: #9a5a2f; border-color: #fff; }
+.legend-dot.flowering { background: #e879a7; border-color: #fff; }
+.legend-dot.palm { background: #7cc7d8; border-color: #fff; }
 .legend-dot.park   { background: #fbcfe8; border-color: #f9a8d4; }
+.legend-triangle {
+  width: 16px; height: 16px; flex-shrink: 0;
+  background: #0f3f2e;
+  clip-path: polygon(50% 4%,96% 92%,4% 92%);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
 .legend-star {
   width: 16px; height: 16px; flex-shrink: 0;
   background: #f59e0b;
