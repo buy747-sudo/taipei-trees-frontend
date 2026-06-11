@@ -87,6 +87,20 @@
     .role-surveyor         { background: #dcfce7; color: #14532d; }
     .role-gov_viewer       { background: #ede9fe; color: #4c1d95; }
     .role-gov_editor       { background: #f3e8ff; color: #581c87; }
+    .role-assoc_admin      { background: #fef3c7; color: #78350f; }
+    .role-gov_clerk        { background: #e0e7ff; color: #312e81; }
+    .role-gov_supervisor   { background: #ede9fe; color: #4c1d95; }
+    .role-gov_it           { background: #cffafe; color: #155e75; }
+
+    /* 公司功能開關（公會治理） */
+    .feat-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .feat-toggle {
+      font-size: 0.72rem; padding: 3px 8px; border-radius: 12px; cursor: pointer;
+      border: 1px solid #d4e8d8; background: #f0fdf4; color: #14532d; font-weight: 600;
+    }
+    .feat-toggle:not(.on) { background: #f9fafb; color: #9ca3af; border-color: #e5e7eb; }
+    .feat-toggle:disabled { cursor: not-allowed; opacity: 0.7; }
+    .feat-toggle.on:not(:disabled):hover { background: #dcfce7; }
 
     /* ── Action buttons ── */
     .btn-icon {
@@ -264,8 +278,10 @@
       <button class="filter-chip" data-role="contractor_admin">廠商主管</button>
       <button class="filter-chip" data-role="inspector">評估員</button>
       <button class="filter-chip" data-role="surveyor">普查員</button>
-      <button class="filter-chip" data-role="gov_viewer">政府唯讀</button>
-      <button class="filter-chip" data-role="gov_editor">政府管理</button>
+      <button class="filter-chip" data-role="assoc_admin">公會</button>
+      <button class="filter-chip" data-role="gov_clerk">政府辦事員</button>
+      <button class="filter-chip" data-role="gov_supervisor">政府主管</button>
+      <button class="filter-chip" data-role="gov_it">資訊室</button>
     </div>
     <div class="section-body" id="user-list"><div class="empty-row">載入中…</div></div>
   </div>
@@ -296,8 +312,10 @@
         <option value="contractor_admin">廠商主管（可看公司所有普查＆評估）</option>
         <option value="inspector">評估員（風險評估）</option>
         <option value="surveyor">普查員（行道樹普查）</option>
-        <option value="gov_viewer">政府唯讀（觀看全市資料）</option>
-        <option value="gov_editor">政府管理（可修改資料）</option>
+        <option value="assoc_admin">公會管理員（建公司帳號＋產業總覽）</option>
+        <option value="gov_clerk">政府辦事員（全市資料唯讀）</option>
+        <option value="gov_supervisor">政府主管（儀表板與趨勢）</option>
+        <option value="gov_it">資訊室（資料品質與修正）</option>
         <option value="platform_admin">平台管理員（最高權限）</option>
       </select>
     </div>
@@ -366,6 +384,7 @@
 <script>
 const ADM_API = API_BASE.replace('/public', '') + '/api/auth';
 
+let IS_SUPER     = false;   // platform_admin 才能切功能開關
 let allUsers     = [];
 let allCompanies = [];
 let currentRoleFilter = '';
@@ -374,9 +393,13 @@ let pwTarget     = null;  // { id, display_name }
 
 const ROLE_LABELS = {
   platform_admin:   '平台管理員',
+  assoc_admin:      '公會管理員',
   contractor_admin: '廠商主管',
   inspector:        '評估員',
   surveyor:         '普查員',
+  gov_clerk:        '政府辦事員',
+  gov_supervisor:   '政府主管',
+  gov_it:           '資訊室',
   gov_viewer:       '政府唯讀',
   gov_editor:       '政府管理',
 };
@@ -388,16 +411,21 @@ const ROLE_LABELS = {
     return;
   }
   const user = Auth.getUser();
-  if (user?.role !== 'platform_admin') {
+  if (!['platform_admin', 'assoc_admin'].includes(user?.role)) {
     document.getElementById('main-body').innerHTML =
-      '<div style="padding:30px;color:#c00;font-weight:700;text-align:center;">🔒 此頁面僅限平台管理員。</div>';
+      '<div style="padding:30px;color:#c00;font-weight:700;text-align:center;">🔒 此頁面僅限平台管理員與公會管理員。</div>';
     return;
+  }
+  IS_SUPER = user.role === 'platform_admin';
+  // 公會：隱藏數據總覽（analytics 為 platform_admin 限定）
+  if (!IS_SUPER) {
+    document.getElementById('analytics-section')?.setAttribute('hidden', '');
   }
   document.getElementById('huser').textContent = user.display_name || user.username || '';
   bindFilters();
   bindModals();
   loadAll();
-  loadAnalytics();
+  if (IS_SUPER) loadAnalytics();
 })();
 
 // ── 一次載入公司 + 帳號 ──────────────────────────────────────────────────────
@@ -413,10 +441,15 @@ const ROLE_COLORS_CHIP = {
   surveyor:         'background:#dcfce7;color:#14532d',
   gov_viewer:       'background:#ede9fe;color:#4c1d95',
   gov_editor:       'background:#f3e8ff;color:#581c87',
+  assoc_admin:      'background:#fef3c7;color:#78350f',
+  gov_clerk:        'background:#e0e7ff;color:#312e81',
+  gov_supervisor:   'background:#ede9fe;color:#4c1d95',
+  gov_it:           'background:#cffafe;color:#155e75',
 };
 const ROLE_LABELS_CHIP = {
-  platform_admin: '平台管理員', contractor_admin: '廠商主管',
+  platform_admin: '平台管理員', assoc_admin: '公會管理員', contractor_admin: '廠商主管',
   inspector: '評估員', surveyor: '普查員',
+  gov_clerk: '政府辦事員', gov_supervisor: '政府主管', gov_it: '資訊室',
   gov_viewer: '政府唯讀', gov_editor: '政府管理',
 };
 
@@ -494,18 +527,65 @@ function renderCompanies() {
   const el = document.getElementById('company-list');
   if (!allCompanies.length) { el.innerHTML = '<div class="empty-row">尚無公司資料。</div>'; return; }
 
+  const FEATURES = [
+    ['survey_enabled',     '📝 普查'],
+    ['assessment_enabled', '⚠️ 評估'],
+    ['risk_layer_enabled', '🗺 風險圖層'],
+    ['export_enabled',     '📥 匯出'],
+  ];
+
   el.innerHTML = allCompanies.map(c => {
     const userCount = allUsers.filter(u => u.contractor_id == c.id).length;
+    const toggles = FEATURES.map(([key, label]) => {
+      const on = c[key] !== 0 && c[key] !== false;
+      return `<button class="feat-toggle${on ? ' on' : ''}" data-cid="${c.id}" data-feat="${key}"
+                ${IS_SUPER ? '' : 'disabled'} title="${IS_SUPER ? '點擊切換' : '僅平台管理員可切換'}">
+                ${label} ${on ? '✅' : '🚫'}</button>`;
+    }).join('');
     return `
       <div class="company-row">
         <div class="company-icon">🏢</div>
         <div class="company-info">
           <div class="company-name">${esc(c.name)}${!c.is_active ? ' <span style="color:#aaa;font-size:0.72rem;">（停用）</span>' : ''}</div>
           <div class="company-meta">${esc(c.contract_name || '')}${c.management_unit ? '　' + esc(c.management_unit) : ''}</div>
+          <div class="feat-row">${toggles}</div>
         </div>
         <div class="company-count">👤 ${userCount} 人</div>
       </div>`;
   }).join('');
+
+  if (IS_SUPER) {
+    el.querySelectorAll('.feat-toggle').forEach(btn => {
+      btn.addEventListener('click', () => toggleCompanyFeature(btn));
+    });
+  }
+}
+
+// ── 切換公司功能開關（platform_admin 限定，後端寫 audit log）─────────────────
+async function toggleCompanyFeature(btn) {
+  const cid  = btn.dataset.cid;
+  const feat = btn.dataset.feat;
+  const company = allCompanies.find(c => c.id == cid);
+  if (!company) return;
+  const newVal = !(company[feat] !== 0 && company[feat] !== false);
+  btn.disabled = true;
+  try {
+    const res = await Auth.authFetch(`${ADM_API}/companies/${cid}/features`, {
+      method: 'PATCH',
+      body: JSON.stringify({ [feat]: newVal }),
+    });
+    if (!res || !res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || '切換失敗');
+      return;
+    }
+    company[feat] = newVal ? 1 : 0;
+    renderCompanies();
+  } catch (e) {
+    alert('網路錯誤，請重試');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ── 渲染帳號列表 ─────────────────────────────────────────────────────────────

@@ -231,16 +231,21 @@
         const user = Auth.getUser();
         const label = user.display_name || user.username;
         const role  = user.role || 'surveyor';
-        // 角色權限：surveyor 只有普查；inspector 以上才有評估
-        const surveyBtn = ['surveyor','inspector','contractor_admin','platform_admin'].includes(role)
+        // 公司功能開關（GOVERNANCE_PLAN）：舊 session 無 features 視為全開
+        const feats = user.features || null;
+        const has = f => !feats || feats[f] !== false;
+        const govRoles = ['gov_clerk','gov_supervisor','gov_it','gov_viewer','gov_editor'];
+        const isGov = govRoles.includes(role);
+        // 角色權限：surveyor 只有普查；inspector 以上才有評估；政府線唯讀清單
+        const surveyBtn = ['surveyor','inspector','contractor_admin','platform_admin'].includes(role) && has('survey_enabled')
           ? `<a href="/survey.html" id="auth-survey-btn">📝 普查</a>` : '';
-        const listBtn   = ['surveyor','inspector','contractor_admin','platform_admin'].includes(role)
+        const listBtn   = (['surveyor','inspector','contractor_admin','platform_admin'].includes(role) && has('survey_enabled')) || isGov
           ? `<a href="/survey-list.html" id="auth-list-btn">📋 紀錄</a>` : '';
-        const riskListBtn = ['contractor_admin','platform_admin'].includes(role)
+        const riskListBtn = ['contractor_admin','platform_admin'].includes(role) || isGov
           ? `<a href="/risk-list.html" id="auth-risk-list-btn">📊 評估紀錄</a>` : '';
-        const riskBtn   = ['inspector','contractor_admin','platform_admin'].includes(role)
+        const riskBtn   = ['inspector','contractor_admin','platform_admin'].includes(role) && has('assessment_enabled')
           ? `<a href="/risk.html" id="auth-risk-btn">⚠️ 評估</a>` : '';
-        const adminBtn  = role === 'platform_admin'
+        const adminBtn  = ['platform_admin','assoc_admin'].includes(role)
           ? `<a href="/admin.html" id="auth-admin-btn">⚙️ 帳號管理</a>` : '';
         area.innerHTML =
           surveyBtn + listBtn + riskBtn + riskListBtn + adminBtn +
