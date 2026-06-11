@@ -40,9 +40,13 @@ function renderTreeList(trees) {
 
 let _lastBboxKey = '';
 let _isLoading = false;
+let _needsReload = false;
 
 async function loadTrees(retry = 0) {
-  if (_isLoading) return;
+  if (_isLoading) {
+    if (retry === 0) _needsReload = true;
+    return;
+  }
   const bounds = getMapBounds();
   const params = { ...bounds, ...getFilterParams() };
   const bboxKey = JSON.stringify(params);
@@ -52,11 +56,11 @@ async function loadTrees(retry = 0) {
 
   const countLabel = document.getElementById('count-label');
   if (countLabel) countLabel.textContent = '地圖資料載入中…';
-  clearMarkers();
 
   try {
     const data = await apiFetchTrees(params);
     const trees = data.trees || [];
+    clearMarkers();
     addTreeMarkers(trees);
     renderTreeList(trees);
     if (countLabel) countLabel.textContent = '點選地圖上的樹木查看詳情';
@@ -64,15 +68,25 @@ async function loadTrees(retry = 0) {
     // 失敗後重置 key，否則同一範圍不會再重新查詢
     _lastBboxKey = '';
     if (retry < 2) {
-      if (countLabel) countLabel.textContent = '載入失敗，重試中…';
+      if (countLabel) {
+        countLabel.textContent = treeMarkerCount() ? '地圖資料暫時無法更新，保留目前樹點…' : '載入失敗，重試中…';
+      }
       setTimeout(() => loadTrees(retry + 1), 2000 * (retry + 1));
     } else {
-      if (countLabel) countLabel.textContent = '載入失敗，請稍後再試';
-      showToast('無法載入樹木資料，請稍後再試');
+      if (treeMarkerCount()) {
+        if (countLabel) countLabel.textContent = '點選地圖上的樹木查看詳情';
+      } else {
+        if (countLabel) countLabel.textContent = '載入失敗，請稍後再試';
+        showToast('無法載入樹木資料，請稍後再試');
+      }
     }
     console.error(e);
   } finally {
     _isLoading = false;
+    if (_needsReload && retry === 0) {
+      _needsReload = false;
+      setTimeout(() => loadTrees(), 250);
+    }
   }
 }
 

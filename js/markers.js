@@ -70,3 +70,7 @@ function addTreeMarkers(trees) {
 function clearMarkers() {
   _clusterGroup.clearLayers();
 }
+
+function treeMarkerCount() {
+  return _clusterGroup ? _clusterGroup.getLayers().length : 0;
+}

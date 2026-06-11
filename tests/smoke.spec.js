@@ -184,6 +184,39 @@ test('首頁地圖樹點依樹種分類與冠幅呈現顏色形狀大小', async
   expect(sizes.deciduous).toBeGreaterThan(sizes.evergreen);
 });
 
+test('首頁移動地圖遇到暫時載入失敗時保留既有樹點且不打擾', async ({ page }) => {
+  let calls = 0;
+  await page.route('**/public/trees**', route => {
+    calls += 1;
+    if (calls === 1) {
+      route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          total: 1,
+          trees: [
+            { registry_code: 'KEEP001', species_name: '樟樹', tree_category: 'street', lat: 24.991, lng: 121.548, crown_m: 4 },
+          ],
+        }),
+      });
+      return;
+    }
+    route.fulfill({
+      status: 503,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'temporary unavailable' }),
+    });
+  });
+
+  await page.goto(BASE);
+  await expect(page.locator('.tree-marker')).toHaveCount(1);
+  await page.evaluate(() => window.getMap().panTo([25.03, 121.56], { animate: false }));
+  await page.waitForTimeout(7000);
+
+  await expect(page.locator('.tree-marker')).toHaveCount(1);
+  await expect(page.locator('#toast')).not.toContainText('無法載入樹木資料');
+  await expect(page.locator('#count-label')).toContainText('點選地圖上的樹木查看詳情');
+});
+
 test('地圖容器存在且 Leaflet 初始化', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.locator('#map-container')).toBeVisible();
