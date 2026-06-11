@@ -61,6 +61,8 @@ test('首頁保留 SEO 標題並顯示民眾探索入口', async ({ page }) => {
   await expect(page.locator('#explore-section')).toContainText('城市綠資產');
   await expect(page.locator('#explore-section')).toContainText('樹種百科');
   await expect(page.locator('#explore-section')).toContainText('受保護樹木');
+  await expect(page.locator('#explore-section a[href="/typhoon-safety.html"]')).toContainText('颱風樹木安全');
+  await expect(page.locator('#explore-section a[href="/tree-risk-guide.html"]')).toContainText('樹木風險怎麼看');
   await expect(page.locator('#auth-login-btn')).toContainText('工作登入');
 });
 
