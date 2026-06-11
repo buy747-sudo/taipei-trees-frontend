@@ -125,70 +125,6 @@
     }
     @media (max-width: 720px) { .benefit-cards-grid { grid-template-columns: 1fr; } }
 
-    /* 校園樹木延伸統計 */
-    .campus-assets {
-      margin: 28px 0 30px;
-      border: 1px solid #cfe8d4;
-      background: rgba(255,255,255,0.94);
-      border-radius: 10px;
-      padding: 18px;
-      box-shadow: 0 10px 26px rgba(21,83,43,0.08);
-    }
-    .campus-kicker {
-      color: #2f7d4a;
-      font-weight: 800;
-      font-size: 0.82rem;
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-    .campus-assets h2 {
-      color: #173f24;
-      font-size: clamp(1.3rem, 2.7vw, 1.85rem);
-      margin-bottom: 8px;
-    }
-    .campus-intro {
-      color: #3f5948;
-      font-size: 0.9rem;
-      line-height: 1.75;
-      max-width: 780px;
-      margin-bottom: 14px;
-    }
-    .campus-grid {
-      display: grid;
-      grid-template-columns: 1.25fr 1fr 1fr;
-      gap: 12px;
-    }
-    .campus-card {
-      border: 1px solid #d4e8d8;
-      border-radius: 10px;
-      padding: 14px;
-      background: linear-gradient(135deg, #f8fcf9, #edf8ef);
-      min-height: 126px;
-    }
-    .campus-card strong {
-      display: block;
-      color: #1a5c2a;
-      font-size: 0.95rem;
-      margin-bottom: 7px;
-    }
-    .campus-card p {
-      color: #3f5948;
-      font-size: 0.84rem;
-      line-height: 1.65;
-    }
-    .campus-card a { color: #1a5c2a; font-weight: 800; }
-    .campus-note {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-left: 4px solid #f59e0b;
-      border-radius: 0 8px 8px 0;
-      background: #fff8e1;
-      color: #5a4a1a;
-      font-size: 0.82rem;
-      line-height: 1.65;
-    }
-    @media (max-width: 900px) { .campus-grid { grid-template-columns: 1fr; } }
-
     .ga-footer {
       margin-top: 26px; padding-top: 16px; border-top: 1px solid #d4e8d8;
       color: #607468; font-size: 0.8rem; line-height: 1.8;
@@ -294,39 +230,6 @@
 
     <div id="loading" class="loading-hint">📡 正在載入全市最新統計資料…</div>
 
-    <section id="campus-assets" class="campus-assets" aria-label="校園樹木延伸統計">
-      <p class="campus-kicker">CAMPUS TREE OPEN DATA</p>
-      <h2>校園樹木延伸統計</h2>
-      <p class="campus-intro">
-        台北的綠資產不只在道路與受保護樹木裡，也存在校園。教育部「校園樹木資訊平臺」提供 Open Data / Open API，
-        可作為未來呈現校園樹種組成與環境教育成果的延伸資料來源。
-      </p>
-      <div class="campus-grid">
-        <div class="campus-card">
-          <strong>資料來源</strong>
-          <p>
-            教育部校園樹木資訊平臺<br>
-            <a href="https://edutreemap.moe.edu.tw/trees/#/OpenData" target="_blank" rel="noopener">Open Data / Open API 頁面</a>
-          </p>
-        </div>
-        <div class="campus-card">
-          <strong>可取得內容</strong>
-          <p><span style="font-weight:800;color:#13816f;">School/GetTrees</span><br>校園編號、校園名稱、樹種名稱與數量統計。</p>
-        </div>
-        <div class="campus-card">
-          <strong>授權與引用</strong>
-          <p>
-            依政府資料開放授權條款（Open Government Data License，OGDL）1.0 版使用。<br>
-            <a href="https://data.gov.tw/license" target="_blank" rel="noopener">查看授權條款</a>
-          </p>
-        </div>
-      </div>
-      <p class="campus-note">
-        目前教育部 API 提供的是校園層級樹種數量統計，不是單棵樹座標、照片、胸徑、樹高或冠幅資料；
-        本站若納入校園資料，會以統計圖表呈現，並以原資料提供單位公告為準。
-      </p>
-    </section>
-
     <!-- 樹木效益敘事區（參考 NYC Tree Map 的 Benefits 頁面架構） -->
     <section class="benefit-sec" aria-label="樹木為城市做了什麼">
       <p class="benefit-sec-kicker">WHY TREES MATTER</p>
@@ -389,7 +292,6 @@
 
     <footer class="ga-footer">
       <p>資料來源：台北市政府開放資料平台（data.taipei，OGDL 授權）；統計即時取自本平台資料庫，資料截至 <span id="data-date">—</span>。</p>
-      <p>校園樹木延伸資料來源：教育部「校園樹木資訊平臺」Open Data / Open API，API 服務為 School/GetTrees，資料內容為校園編號、校園名稱、樹種名稱與數量統計；依政府資料開放授權條款（Open Government Data License，OGDL）1.0 版使用。</p>
       <p>換算基準：自小客車年排放約 2.2 公噸 CO₂（環境部統計）；台北—東京來回航班每人約 0.27 公噸 CO₂（ICAO 碳排計算器）。固碳量估算方法：Brown (1997) 生物量方程式 + IPCC (2006) 碳轉換係數，詳見<a href="/data-policy.html">資料說明</a>。</p>
       <p><a href="/">台北市樹木查詢平台 taipei-trees.org</a>｜<a href="/daan-forest-dashboard.html">大安森林公園碳匯儀表板</a></p>
     </footer>
