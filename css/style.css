@@ -382,6 +382,15 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   background: #eef8f0;
   border-color: #9ad5aa;
 }
+.explore-card--report {
+  background: #fff8ed;
+  border-color: #f2c47b;
+}
+.explore-card--report:hover,
+.explore-card--report:focus {
+  background: #fff2d9;
+  border-color: #e69a2f;
+}
 .explore-icon {
   grid-row: 1 / span 2;
   width: 34px;
@@ -394,6 +403,9 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   color: #fff;
   font-weight: 900;
   font-size: 1rem;
+}
+.explore-card--report .explore-icon {
+  background: #b45309;
 }
 .explore-card strong {
   font-size: 0.96rem;

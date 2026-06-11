@@ -326,6 +326,14 @@ test('首頁公開頂部不顯示通報大按鈕', async ({ page }) => {
   await expect(page.locator('.intro-report-link')).toHaveCount(0);
 });
 
+test('首頁探索區提供低干擾的樹木異常通報入口', async ({ page }) => {
+  await page.goto(BASE);
+  const reportCard = page.locator('#explore-section a[href="/report.html"]');
+  await expect(reportCard).toBeVisible();
+  await expect(reportCard).toContainText('通報樹木異常');
+  await expect(reportCard).toContainText('緊急狀況請聯絡 1999');
+});
+
 test('report.html 顯示民眾通報表單與 1999 提醒', async ({ page }) => {
   await page.goto(BASE + '/report.html');
   await expect(page).toHaveTitle(/通報樹木異常/);
