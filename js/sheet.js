@@ -70,6 +70,7 @@ function openSheet(tree) {
       `<div class="benefit-chips">` +
       `<span class="bchip">💧 截雨 <strong>${rain}</strong>/年</span>` +
       `<span class="bchip">🌬️ 空污 <strong>${ntd}</strong>/年</span>` +
+      `<span class="bchip">☂️ 遮蔭 <strong>${benefitData.shade_m2} m²</strong></span>` +
       `</div>${estNote}`;
     benefitEl.hidden = false;
   } else {

@@ -85,6 +85,15 @@ function render(tree) {
       document.getElementById('bc-rain').textContent = b.rain_L.toLocaleString();
     }
     document.getElementById('bc-air').textContent = 'NT$' + b.airpoll_ntd.toLocaleString();
+    const shadeEl = document.getElementById('bc-shade');
+    if (shadeEl && b.shade_m2 != null) {
+      shadeEl.textContent = b.shade_m2.toLocaleString();
+      // 換算成停車位數量比較有感（標準汽車停車位約 12.5 m²）
+      const slots = Math.round(b.shade_m2 / 12.5);
+      if (slots >= 1) {
+        document.getElementById('bc-shade-unit').textContent = `m²（約 ${slots} 個停車位）`;
+      }
+    }
     if (b.height_estimated) {
       const note = document.createElement('p');
       note.style.cssText = 'font-size:0.72rem;color:#aaa;margin-top:10px;text-align:center;';

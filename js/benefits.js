@@ -67,5 +67,8 @@ function calcBenefits(tree) {
   const pm25_removed = leafArea * PM25_REMOVAL_KG_M2;
   const airpoll_ntd = Math.round(pm25_removed * PM25_HEALTH_NTD_KG * COPOLLUTANT_FACTOR);
 
-  return { co2_kg, rain_L, airpoll_ntd, height_estimated: heightEstimated };
+  // ④ 遮蔭價值（m²）：樹冠垂直投影面積，夏季可降低地表溫度
+  const shade_m2 = Math.round(crownArea);
+
+  return { co2_kg, rain_L, airpoll_ntd, shade_m2, height_estimated: heightEstimated };
 }

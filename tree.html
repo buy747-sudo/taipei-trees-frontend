@@ -76,8 +76,8 @@
     .location-card p { color: #5f4a25; font-size: 0.9rem; line-height: 1.65; margin: 0; }
 
     /* 效益卡片 */
-    .benefit-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-    @media (max-width: 420px) { .benefit-cards { grid-template-columns: 1fr; } }
+    .benefit-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (min-width: 640px) { .benefit-cards { grid-template-columns: repeat(4, 1fr); } }
     .benefit-card {
       background: #f0f9f1; border: 1.5px solid #c8e6c9;
       border-radius: 12px; padding: 14px 10px; text-align: center;
@@ -210,6 +210,12 @@
             <div class="bc-value" id="bc-air">—</div>
             <div class="bc-unit">NT$/年</div>
           </div>
+          <div class="benefit-card">
+            <div class="bc-icon">&#9730;&#65039;</div>
+            <div class="bc-label">遮蔭面積</div>
+            <div class="bc-value" id="bc-shade">—</div>
+            <div class="bc-unit" id="bc-shade-unit">m²</div>
+          </div>
         </div>
 
         <details>
@@ -234,6 +240,12 @@
             <span class="formula">效益 = 葉面積 × 0.028 kg/m²/年 × NT$620/kg × 1.55</span>
             1.55 為 O₃、NO₂、SO₂ 等其他污染物加成係數。
             <div class="cite">引用：Nowak, D.J. et al. (2014) Environmental Pollution 193: 119–127；台灣環境部健康風險評估</div>
+
+            <br><strong>&#9730;&#65039; 遮蔭面積</strong><br>
+            以樹冠垂直投影面積估算遮蔭範圍，夏季樹蔭下體感溫度可低於日照處數度：
+            <span class="formula">遮蔭面積 = π × (冠幅/2)²</span>
+            無冠幅資料時以樹高 × 0.4 估算冠幅。
+            <div class="cite">引用：Armson, D. et al. (2012) Urban Forestry &amp; Urban Greening 11: 245–255</div>
 
             <br><em style="font-size:0.7rem;color:#aaa;">以上為基於樹木尺寸的估算值，實際效益受樹種、立地條件、氣候等因素影響。</em>
           </div>
@@ -267,7 +279,7 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/species.js?v=20260601"></script>
-  <script src="js/benefits.js"></script>
-  <script src="js/tree.js"></script>
+  <script src="js/benefits.js?v=20260611g"></script>
+  <script src="js/tree.js?v=20260611g"></script>
 </body>
 </html>
