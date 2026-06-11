@@ -47,6 +47,15 @@ function initMap() {
     }
   );
 
+  const landsect = L.tileLayer(
+    'https://wmts.nlsc.gov.tw/wmts/LANDSECT/default/GoogleMapsCompatible/{z}/{y}/{x}',
+    {
+      attribution: '© 內政部國土測繪中心 段籍圖',
+      maxZoom: 20,
+      opacity: 0.85,
+    }
+  );
+
   // ── 自訂底圖縮圖切換器 ────────────────────────────────
   // 縮圖：台北市中心附近 zoom=10 tile(x=857, y=438)
   const THUMBS = {
@@ -97,23 +106,36 @@ function initMap() {
         });
       });
 
-      // 覆蓋圖層
+      // 參考圖層（開關狀態記憶於 localStorage，下次開啟自動還原）
       const hr = L.DomUtil.create('div', 'bm-hr', panel);
       const lbOv = L.DomUtil.create('p', 'bm-section-label', panel);
-      lbOv.textContent = '覆蓋圖層';
+      lbOv.textContent = '參考圖層';
+
+      const OVERLAY_KEY = 'tt_overlays';
+      let savedOverlays = [];
+      try { savedOverlays = JSON.parse(localStorage.getItem(OVERLAY_KEY)) || []; } catch { /* 忽略壞資料 */ }
 
       [
-        { label: '國土利用調查', layer: luimap    },
-        { label: '都市計畫分區', layer: urbanPlan },
-      ].forEach(({ label, layer }) => {
+        { id: 'luimap',   label: '土地利用現況', layer: luimap    },
+        { id: 'urban',    label: '都市計畫分區', layer: urbanPlan },
+        { id: 'landsect', label: '地籍段界',     layer: landsect  },
+      ].forEach(({ id, label, layer }) => {
         const lbl = L.DomUtil.create('label', 'bm-overlay', panel);
         const cb  = L.DomUtil.create('input', '', lbl);
         cb.type = 'checkbox';
         lbl.appendChild(document.createTextNode(' ' + label));
+        if (savedOverlays.includes(id)) { cb.checked = true; map.addLayer(layer); }
         L.DomEvent.on(cb, 'change', () => {
           cb.checked ? map.addLayer(layer) : map.removeLayer(layer);
+          const idx = savedOverlays.indexOf(id);
+          if (cb.checked && idx === -1) savedOverlays.push(id);
+          if (!cb.checked && idx !== -1) savedOverlays.splice(idx, 1);
+          try { localStorage.setItem(OVERLAY_KEY, JSON.stringify(savedOverlays)); } catch { /* 無痕模式 */ }
         });
       });
+
+      const note = L.DomUtil.create('p', 'bm-note', panel);
+      note.textContent = '參考圖層僅供參考，正式土地權屬與分區以地政、都發機關公告資料為準。';
 
       // 開關
       L.DomEvent.on(btn, 'click', (e) => {
