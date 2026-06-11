@@ -520,13 +520,11 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 /* ── RWD（桌機）──────────────────────────────────────── */
 @media (min-width: 768px) {
   #detail-sheet { max-width: 480px; right: 20px; left: auto; border-radius: 16px; bottom: 20px; }
-  #tree-list { max-height: none; }
 }
 
 /* ── 平板：大地圖 + 下方資訊，適合展示與現場操作 ───────── */
 @media (min-width: 641px) and (max-width: 1023px) {
   #map-container { height: calc(100vh - 250px); min-height: 500px; }
-  #tree-list { max-height: 34vh; }
   .explore-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -537,7 +535,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
     grid-template-columns: minmax(0, 1fr) 360px;
     grid-template-areas:
       "data data"
-      "map list"
+      "map explore"
       "stats explore";
     align-items: stretch;
     background: #fff;
@@ -556,16 +554,9 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
     grid-column: 1 / -1;
     grid-row: auto;
   }
-  #tree-list {
-    grid-area: list;
-    max-height: none;
-    min-height: 0;
-    border-left: 0;
-    overflow-y: auto;
-  }
   #explore-section {
     grid-area: explore;
-    border-top: 1px solid #dbe7dd;
+    border-top: 0;
     border-left: 1px solid #dbe7dd;
     padding: 14px 12px 16px;
   }

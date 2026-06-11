@@ -56,29 +56,28 @@ test('首頁保留 SEO 標題並顯示民眾探索入口', async ({ page }) => {
   await page.goto(BASE);
   await expect(page).toHaveTitle('台北市樹木查詢｜行道樹 & 受保護樹｜掃碼即時查詢');
   await expect(page.locator('#page-nav-strip')).toHaveCount(0);
+  await expect(page.locator('#tree-list')).toHaveCount(0);
+  await expect(page.locator('body')).not.toContainText('此範圍顯示');
   await expect(page.locator('#explore-section')).toContainText('城市綠資產');
   await expect(page.locator('#explore-section')).toContainText('樹種百科');
   await expect(page.locator('#explore-section')).toContainText('受保護樹木');
   await expect(page.locator('#auth-login-btn')).toContainText('工作登入');
 });
 
-test('首頁電腦版採地圖加右側資訊欄', async ({ page }) => {
+test('首頁電腦版採地圖加右側探索欄', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 820 });
   await page.goto(BASE);
   const layout = await page.evaluate(() => {
     const map = document.getElementById('map-container').getBoundingClientRect();
-    const list = document.getElementById('tree-list').getBoundingClientRect();
     const explore = document.getElementById('explore-section').getBoundingClientRect();
     const grid = getComputedStyle(document.getElementById('explore-section').querySelector('.explore-grid'));
     return {
       mapLeft: map.left,
       mapRight: map.right,
-      listLeft: list.left,
       exploreLeft: explore.left,
       columns: grid.gridTemplateColumns.split(' ').length,
     };
   });
-  expect(layout.listLeft).toBeGreaterThan(layout.mapRight - 2);
   expect(layout.exploreLeft).toBeGreaterThan(layout.mapRight - 2);
   expect(layout.columns).toBe(1);
 });
@@ -88,15 +87,15 @@ test('首頁平板版採堆疊地圖與雙欄探索', async ({ page }) => {
   await page.goto(BASE);
   const layout = await page.evaluate(() => {
     const map = document.getElementById('map-container').getBoundingClientRect();
-    const list = document.getElementById('tree-list').getBoundingClientRect();
+    const explore = document.getElementById('explore-section').getBoundingClientRect();
     const grid = getComputedStyle(document.getElementById('explore-section').querySelector('.explore-grid'));
     return {
-      listTop: list.top,
+      exploreTop: explore.top,
       mapBottom: map.bottom,
       columns: grid.gridTemplateColumns.split(' ').length,
     };
   });
-  expect(layout.listTop).toBeGreaterThan(layout.mapBottom - 2);
+  expect(layout.exploreTop).toBeGreaterThan(layout.mapBottom - 2);
   expect(layout.columns).toBe(2);
 });
 

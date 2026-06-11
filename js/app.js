@@ -10,6 +10,7 @@ function showToast(msg, duration = 2800) {
 
 function renderTreeList(trees) {
   const ul = document.getElementById('tree-list');
+  if (!ul) return;
   if (!trees.length) {
     ul.innerHTML = '<li style="padding:16px;color:#888;text-align:center;">此範圍內無樹木資料</li>';
     return;
@@ -49,7 +50,8 @@ async function loadTrees(retry = 0) {
   _lastBboxKey = bboxKey;
   _isLoading = true;
 
-  document.getElementById('count-label').textContent = '載入中…';
+  const countLabel = document.getElementById('count-label');
+  if (countLabel) countLabel.textContent = '地圖資料載入中…';
   clearMarkers();
 
   try {
@@ -57,16 +59,15 @@ async function loadTrees(retry = 0) {
     const trees = data.trees || [];
     addTreeMarkers(trees);
     renderTreeList(trees);
-    const shown = Math.min(trees.length, 50);
-    document.getElementById('count-label').textContent = `此範圍顯示 ${shown} 棵`;
+    if (countLabel) countLabel.textContent = '點選地圖上的樹木查看詳情';
   } catch (e) {
     // 失敗後重置 key，否則同一範圍不會再重新查詢
     _lastBboxKey = '';
     if (retry < 2) {
-      document.getElementById('count-label').textContent = '載入失敗，重試中…';
+      if (countLabel) countLabel.textContent = '載入失敗，重試中…';
       setTimeout(() => loadTrees(retry + 1), 2000 * (retry + 1));
     } else {
-      document.getElementById('count-label').textContent = '載入失敗，請稍後再試';
+      if (countLabel) countLabel.textContent = '載入失敗，請稍後再試';
       showToast('無法載入樹木資料，請稍後再試');
     }
     console.error(e);
