@@ -119,6 +119,51 @@ function openSheet(tree) {
     eco.hidden = true;
   }
 
+  // 受保護樹木故事卡（城市老朋友）
+  const storyCard = document.getElementById('sheet-story-card');
+  if (storyCard) {
+    if (tree.tree_category === 'protected') {
+      const district = tree.district || '台北市';
+      const species  = tree.species_name || '老樹';
+
+      // 為什麼值得保護：依現有資料挑最有力的一句
+      let why;
+      if (tree.age_years != null && tree.age_years >= 50) {
+        why = `它的樹齡約 ${tree.age_years} 年，靜靜看著這座城市長大，是活的歷史見證。`;
+      } else if (tree.dbh_cm != null && tree.dbh_cm >= 100) {
+        why = `它的胸徑達 ${Math.round(tree.dbh_cm)} 公分，是一棵成熟的大型樹木，能長到這個規模需要數十年以上的歲月。`;
+      } else {
+        why = `它依《臺北市樹木保護自治條例》列冊保護，具有景觀、生態、歷史或文化價值。`;
+      }
+
+      // PT-{n} → 文化局單棵樹頁面（已驗證編號一一對應）
+      const m = /^PT-(\d+)$/.exec(tree.registry_code || '');
+      const officialLink = m
+        ? `<a class="story-official" href="https://eculture.gov.taipei/trees/zh-tw/tree/${m[1]}" target="_blank" rel="noopener">🔗 查看官方照片與完整資料（臺北市受保護樹木資訊平台）</a>`
+        : '';
+
+      storyCard.innerHTML =
+        `<div class="story-badge">⭐ 城市老朋友</div>` +
+        `<p class="story-intro">這是一棵位於${district}的受保護${species}，已列入臺北市受保護樹木名冊。它不只是路邊的一棵樹，更是陪伴這座城市的老朋友。</p>` +
+        `<p class="story-why">${why}</p>` +
+        `<div class="story-rules">` +
+          `<div class="story-rules-title">🛡️ 保護提醒</div>` +
+          `<ul>` +
+            `<li>不任意修剪、不釘掛招牌</li>` +
+            `<li>不破壞樹皮與根系</li>` +
+            `<li>工程施工應避開根系範圍</li>` +
+          `</ul>` +
+          `<div class="story-1999">緊急倒伏、斷枝、影響人車安全，請撥 <strong>1999</strong> 市民熱線</div>` +
+        `</div>` +
+        officialLink +
+        `<div class="story-note">本站不保存單棵受保護樹木現地照片，官方照片請見上方平台連結。</div>`;
+      storyCard.hidden = false;
+    } else {
+      storyCard.hidden = true;
+      storyCard.innerHTML = '';
+    }
+  }
+
   // 土地脈絡卡（非同步，不阻塞 sheet 開啟）
   const zoneCard = document.getElementById('sheet-zone-card');
   if (zoneCard && tree.lat != null && tree.lng != null) {

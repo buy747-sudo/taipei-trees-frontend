@@ -373,6 +373,39 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 .eco-traits { margin-bottom: 6px; }
 .eco-aliases { font-size: 0.82rem; color: #8a7450; }
 
+/* 受保護樹木故事卡（城市老朋友） */
+#sheet-story-card {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #f59e0b; border-radius: 12px;
+  padding: 14px 16px; margin: 4px 0 14px;
+}
+.story-badge {
+  display: inline-block; background: #f59e0b; color: #fff;
+  font-size: 0.78rem; font-weight: 800; border-radius: 999px;
+  padding: 3px 12px; margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(245,158,11,0.4);
+}
+.story-intro { font-size: 0.88rem; color: #78350f; line-height: 1.7; margin: 0 0 8px; }
+.story-why   { font-size: 0.85rem; color: #92400e; line-height: 1.65; margin: 0 0 10px; }
+.story-rules {
+  background: rgba(255,255,255,0.65); border-radius: 8px;
+  padding: 10px 12px; margin-bottom: 10px;
+}
+.story-rules-title { font-size: 0.8rem; font-weight: 800; color: #92400e; margin-bottom: 5px; }
+.story-rules ul { margin: 0; padding-left: 18px; }
+.story-rules li { font-size: 0.8rem; color: #78350f; line-height: 1.6; }
+.story-1999 {
+  font-size: 0.8rem; color: #b45309; margin-top: 6px;
+  padding-top: 6px; border-top: 1px dashed #fcd34d;
+}
+.story-official {
+  display: block; font-size: 0.83rem; font-weight: 700; color: #1a5c2a;
+  background: #fff; border: 1px solid #d1d5db; border-radius: 8px;
+  padding: 9px 12px; text-decoration: none; text-align: center;
+}
+.story-official:active { background: #f0fdf4; }
+.story-note { font-size: 0.7rem; color: #a16207; margin-top: 8px; line-height: 1.5; }
+
 /* 土地脈絡卡 */
 #sheet-zone-card {
   background: #eef4fb; border-radius: 10px; padding: 12px 14px;
