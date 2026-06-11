@@ -1,0 +1,85 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 🌳 台北市樹木查詢 v0.6
+      - generic [ref=e5]:
+        - link "通報異常" [ref=e6] [cursor=pointer]:
+          - /url: report.html
+        - link "大安碳匯" [ref=e7] [cursor=pointer]:
+          - /url: daan-forest-dashboard.html
+        - link "知識庫" [ref=e8] [cursor=pointer]:
+          - /url: about.html
+        - link "說明 ？" [ref=e9] [cursor=pointer]:
+          - /url: guide.html
+        - link "工作登入" [ref=e11] [cursor=pointer]:
+          - /url: /login.html
+    - generic [ref=e12]:
+      - generic [ref=e13]: 樹籍編號或 QR 網址
+      - searchbox "樹籍編號或 QR 網址" [ref=e14]
+      - button "掃碼查詢" [ref=e15] [cursor=pointer]: 📷 掃碼
+    - generic [ref=e16]:
+      - generic [ref=e17]: 行政區篩選
+      - combobox "行政區篩選" [ref=e18]:
+        - option "全部行政區" [selected]
+        - option "信義區"
+        - option "大安區"
+        - option "中正區"
+        - option "萬華區"
+        - option "中山區"
+        - option "松山區"
+        - option "大同區"
+        - option "內湖區"
+        - option "南港區"
+        - option "文山區"
+        - option "士林區"
+        - option "北投區"
+      - generic [ref=e19]: 樹種篩選
+      - searchbox "樹種篩選" [ref=e20]
+      - generic [ref=e21]:
+        - button "全部" [ref=e22] [cursor=pointer]
+        - button "行道樹" [ref=e23] [cursor=pointer]
+        - button "受保護" [ref=e24] [cursor=pointer]
+  - main [ref=e25]:
+    - region "台北樹木查詢導覽" [ref=e26]:
+      - generic [ref=e27]:
+        - paragraph [ref=e28]: 城市裡的樹木資料地圖
+        - heading "找一棵你身邊的樹" [level=2] [ref=e29]
+        - paragraph [ref=e30]: 掃描樹牌 QR Code，或輸入樹籍編號，就能查看樹種、位置與生態效益。
+      - generic "使用方式" [ref=e31]:
+        - generic [ref=e32]: 1 掃描樹牌
+        - generic [ref=e33]: 2 查看樹木名片
+        - generic [ref=e34]: 3 通報異常或分享
+      - link "通報樹木異常" [ref=e35] [cursor=pointer]:
+        - /url: /report.html
+    - generic [ref=e36]:
+      - generic:
+        - generic: 行道樹
+        - generic: 受保護
+      - generic:
+        - generic [ref=e37]:
+          - button "Zoom in" [ref=e38] [cursor=pointer]: +
+          - button "Zoom out" [ref=e39] [cursor=pointer]: −
+        - generic:
+          - button "Layers" [ref=e41] [cursor=pointer]
+          - link "我的位置" [ref=e43] [cursor=pointer]:
+            - /url: "#"
+            - text: 📍
+        - generic [ref=e44]:
+          - link "Leaflet" [ref=e45] [cursor=pointer]:
+            - /url: https://leafletjs.com
+            - img [ref=e46]
+            - text: Leaflet
+          - text: "| ©"
+          - link "OpenStreetMap" [ref=e50] [cursor=pointer]:
+            - /url: https://www.openstreetmap.org/copyright
+          - text: contributors
+    - generic [ref=e51]:
+      - generic [ref=e52]: 載入中…
+      - button "統計總覽 ▾" [ref=e53] [cursor=pointer]
+    - list "樹木列表"
+  - contentinfo [ref=e54]:
+    - paragraph [ref=e55]: 行道樹資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市行道樹分布圖」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。
+    - paragraph [ref=e56]: 受保護樹木資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市受保護樹木」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。
+    - paragraph [ref=e57]:
+      - link "資料來源與授權聲明" [ref=e58] [cursor=pointer]:
+        - /url: /data-policy.html

@@ -1,6 +1,6 @@
 # PROJECT_MEMORY — taipei-trees.org 台北市樹木查詢平台
 
-> 最後整理：2026-06-08  
+> 最後整理：2026-06-10  
 > 來源：repo 內 Markdown、`~/.claude/projects/-Users-nash911-taipei-trees-frontend/memory/`、`.gstack` checkpoints、相關 Claude JSONL 聊天記錄、`~/MASTER_PLAN.md`、`~/API_CONTRACT.md`。  
 > 注意：原 AGENTS/CLAUDE 文件曾記錄 MarkerCluster；目前程式碼現況是 `L.layerGroup` 逐點顯示，不再使用 MarkerCluster 群集。
 
@@ -52,6 +52,7 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - 底部 sheet：顯示樹籍、樹種、學名、行政區、路段位置、樹高、胸徑、冠幅、樹齡、調查日期。
 - sheet 支援 `history.pushState` 與 `?id=<tree_code>` 深連結。
 - sheet 加「您好，我是某樹種」問候語與「查看詳情」主要按鈕。
+- **2026-06-10 新增**：sheet 底部加入「🚗 導航前往」藍色按鈕（`.btn-nav`），開啟 Google Maps 導航到該樹 GPS 座標，供外業吊車直接導航。
 
 ### 樹木資料與生態效益
 
@@ -70,7 +71,8 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - `js/auth.js`：JWT 儲存於 `localStorage`，key 為 `tt_token`；使用者資訊 key 為 `tt_user`。
 - 認證 API：`https://office.yiren-eco.online/api/auth/login`、`/api/auth/me`。
 - 登入後 `index.html` 右上顯示作業入口：依 role 控制按鈕可見性。
-- 目前登入沿用 tree-app 的 `admins` 表，`platform_users` 保留作未來外部廠商/政府帳號用途。
+- **2026-06-10 更新**：所有員工帳號已從 `admins` 表遷移至 `platform_users`。14 個帳號遷移，密碼不變（werkzeug hash 直接複製）。`admin1` = `platform_admin`，其餘員工 = `inspector`（可做普查+評估），`contractor_id=2`（怡仁）。
+- 目前登入優先查 `platform_users`，找不到才 fallback 到 `admins` 表（向後相容）。`platform_users` 保留用於外部廠商或政府帳號。
 - token 有效期 8 小時，戶外作業一天足夠。
 - **2026-06-07 確認**：Auth 系統 Phase 1–5 完整驗證通過：
   - `/api/auth/login` 回傳 200 + JWT，role 正確
@@ -79,6 +81,12 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
   - **Role-based UI**：`surveyor` 只顯示「普查」；`inspector` 以上才顯示「評估」
   - `login.html` 已移除測試帳號 demo/demo 提示
 - **架構決策（2026-06-07）**：台北樹木前台完全沿用 tree-app 現有 JWT 系統，不自建認證。tree-app = 資料庫 + 認證中心 + API 後端；taipei-trees.org = 公開前台 + 作業介面（純前端）。
+
+### iOS Safari 非 JSON 回應保護
+
+- **2026-06-10 修正**：`survey.js` 與 `risk.js` 所有 `res.json()` 呼叫改以 try/catch 包裝。
+- 根因：後端 500 時回傳 HTML 錯誤頁，iOS Safari 的 `res.json()` 拋出 `SyntaxError: The string did not match the expected pattern`（Chrome 顯示 `Unexpected token <`）。
+- 修正後統一顯示「伺服器錯誤（HTTP 5xx），請稍後重試。」，不再閃退。
 
 ### 普查模式
 
@@ -144,6 +152,35 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - **2026-06-08 更新**：`risk.html` 新增除役警告橫幅 `#tree-retired-warn`：
   - 黃底警示：「此樹木已被機關標記為除役/未分類，不在公開查詢範圍內，仍可進行評估並記錄，但請確認樹籍編號無誤。」
   - 對 street/protected 自動 `hidden`；category=NULL 時顯示。
+
+### 普查清單 survey-list.html（2026-06-10 完整重寫）
+
+- 角色管控：surveyor → 自己；contractor_admin → 同公司；platform_admin → 全部。
+- 4 張統計卡：總筆數 / 已送出 / 草稿 / ⚠️ 需注意。
+- 異常管理：橘色左邊框 + ⚠️ 徽章；resolve modal（標記已處理 / 填備註）。
+- API：`PATCH /api/survey/<id>/resolve`。
+
+### 評估清單 risk-list.html（2026-06-10 完整重寫）
+
+- 同上角色管控，5 張統計卡（加 A 級危害紅卡）。
+- 相同異常管理 modal。
+
+### admin.html 帳號管理頁（2026-06-10 新增）
+
+- `platform_admin` 專用。
+- 公司列表 + 帳號 CRUD（新增/編輯/停用/啟用/重設密碼）。
+- 頁面最上方有 📊 數據總覽：6 張統計卡（啟用帳號/近7天活躍/今日登入/近30天活躍/首頁今日訪客/首頁近30天訪客）。
+- 登入記錄表（帳號/顯示名稱/角色色碼/IP/時間）。
+- 後端 v2.23 新增：`login_logs`、`page_views` 表；`GET /api/auth/analytics`、`GET /api/auth/analytics/logs`、`POST /api/auth/pageview`。
+
+### 政府中高風險樹木圖層（2026-06-10 新增，內部員工專用）
+
+- 資料來源：114 年南區行道樹健檢（大安/信義/文山），1,144 棵（高風險 420 / 中風險 724）。
+- 已匯入 NAS `gov_risk_flags` 表，API：`GET /api/risk-flags`（JWT protected，不對外公開）。
+- 前端：`js/risk-layer.js`，登入後地圖左上角出現深紅色 ⚠️ 按鈕才能切換顯示。
+- 圖示：高風險 = 紅色大圓 (#dc2626)、中風險 = 橘色小圓 (#ea580c)。
+- popup 含：樹種/路段/傾斜/缺失率/關鍵因子/🚗 導航。
+- **安全原則**：未登入用戶完全看不到此圖層，也不會發出 `/api/risk-flags` 請求。
 
 ### 測試與部署
 
@@ -433,17 +470,18 @@ office.yiren-eco.online → tree_app.db
 
 ### 認證與權限
 
-- 登入沿用 tree-app `admins` 表，員工不需另外註冊。
-- `platform_users` 保留備用，用於未來外部廠商或政府帳號。
+- **2026-06-10 更新**：所有員工帳號已遷移到 `platform_users`，`admins` 表僅作 fallback。
+- `platform_users` 為主帳號來源；外部廠商與政府帳號也將在此表建立。
 - JWT 由 tree-app 發行，前端存在 `localStorage`。
 - token 8 小時有效。
 - role 對應：
   - `owner` → `platform_admin`
   - `manager` → `contractor_admin`
-  - `planner` → `surveyor`
-  - `inspector` / `inspector_reviewer` → `inspector`
-- 未來角色曾規劃包含：`public`、`surveyor`、`inspector`、`contractor_admin`、`gov_viewer`、`gov_editor`、`platform_admin`。
-- 帳號管理規劃包含平台管理員、廠商主管、普查主管、巡檢主管、普查員、巡檢員、政府唯讀保留角色，但目前不是評選前主線。
+  - `inspector` → inspector（普查 + 評估，既是普查員也是評估員）
+  - `surveyor` → 只做普查
+  - `gov_viewer` / `gov_editor` → 政府唯讀/編輯
+- **2026-06-10 確認**：`inspector` 可同時做普查（survey.html）和評估（risk.html），不需要兩個角色。
+- 角色色碼徽章已在 admin.html 實作：platform_admin=深藍、contractor_admin=藍、inspector=綠、surveyor=青、gov_viewer=灰、gov_editor=橘。
 
 ### 普查規範
 
@@ -492,6 +530,55 @@ office.yiren-eco.online → tree_app.db
 - 不在 tree-app 重複做普查/風險評估前端。
 
 ---
+
+## 2026-06-10 NAS 重開機穩定性
+
+### Cloudflare Tunnel 設定（已確認正常）
+
+config.yml 位置：`/volume1/docker/cloudflared-config/config.yml`
+```yaml
+tunnel: 50257270-c783-42c5-ab5a-683a4b9467f2
+credentials-file: /etc/cloudflared/50257270-c783-42c5-ab5a-683a4b9467f2.json
+ingress:
+  - hostname: office.yiren-eco.online
+    service: http://tree-app:5000
+  - hostname: yiren-eco.online
+    service: http://app:3000
+  - hostname: "*.yiren-eco.online"
+    service: http://app:3000
+  - service: http_status:404
+```
+
+**關鍵原則**：cloudflared 用 Docker container name 連線（不用 IP），本機 IP 改變不影響。但 config.yml 的 tunnel ID 必須與 `/etc/cloudflared/<ID>.json` 檔名一致。
+
+**重開機後若掛掉的排查順序**：
+1. `sudo docker ps` 確認 tree-app-tunnel 是 Up 還是 Restarting
+2. `sudo docker logs tree-app-tunnel` 看錯誤
+3. 常見問題：credentials file not found → config.yml tunnel ID 不符
+4. 修正後：`sudo docker restart tree-app-tunnel`
+
+**待做（防患未然）**：在路由器設定 DHCP 保留，NAS MAC 位址 → 固定本機 IP。
+
+## 2026-06-10 全站功能 QA 檢查（正式站）
+
+完整報告：`.gstack/qa-reports/qa-report-taipei-trees-org-2026-06-10.md`（含截圖）。
+測試對象為 https://taipei-trees.org 正式站，桌面 1280×800 與手機 375×812 雙視窗。
+
+### 結果總覽
+
+- 健康分數 **90 / 100**，17 項核心功能全部通過。
+- 通過項目：地圖載入（2 秒內 500 標記）、標記點擊詳情視窗、深層連結 `?id=`、導航前往（Google Maps 座標正確）、通報預填參數、tree.html 詳情頁、受保護樹篩選（星形標記）、樹籍編號搜尋、無效搜尋友善提示、進階查詢（行政區＋樹種）、統計總覽面板、QR 掃碼無相機時的錯誤處理、9 個子頁面（report/guide/about/login/eco-benefits/species/carbon-ranking/law/data-policy）全部正常、carbon-ranking 動態資料、通報表單空白驗證、手機版排版、OGDL 授權聲明。
+
+### 問題與處理結果
+
+1. **【高】API 間歇性失效時地圖靜默空白** → ✅ 已修正（commit `362fceb`）。測試中觀察到一次 `/public/trees` 與 `/api/auth/pageview` 同時被 CORS 擋下（後端回應缺 ACAO header），地圖 0 標記且無自動重試。真正根因有兩層：(a) NAS 後端短暫異常（見本頁「NAS 重開機穩定性」）；(b) 前端 bug——`loadTrees` 失敗時 `_lastBboxKey` 已被設定，同一範圍永遠不會重新查詢。修正：失敗後重置 key ＋ 自動重試 2 次（2s/4s 退避），本機模擬「失敗兩次後成功」驗證通過。
+2. **【低】統計面板空白行政區列** → ✅ 已修正（同 commit）。Nash 確認原始資料就沒有行政區、GPS 位置顯示正常即可；前端把空字串顯示為「未分區」。
+3. **【資訊→已修正】匯出按鈕「看不到」** → ✅ 已修正（commit `8eeed8e`）。Nash 回報首頁找不到匯出按鈕，追查後是版面 bug：`fitMapToViewport()` 計算地圖高度時沒扣掉底部統計列 48px，整條 stats-bar（含 📥 匯出與統計總覽）剛好被推出視窗外，桌機手機都看不到。修正：JS 計算多扣 stats-bar 高度，CSS 三個斷點同步調整。Nash 已實機確認 Excel 可正常下載、傾斜圖層登入後顯示正常（2026-06-10）。
+
+### 後續新增功能（同日）
+
+- **「主幹傾斜>30度」藍色獨立圖層**（commit `476181c`，員工登入後專用）：地圖左側高/中風險按鈕下方新增藍色「∠斜」切換按鈕，篩選 `tilt_status` 含「＞30」「>30」的樹（涵蓋全形/半形與「且臨近園路」變體），依 114 年清冊約 115 棵。藍色圓形 ∠ 標記、popup 同風險圖層（含導航）。
+- 資料來源確認：114行道樹大表（大安/文山/信義）「樹木傾斜狀況」欄位值有 9 種變體，>30度共 115 筆（102+1+12）。
 
 ## 後續接手提醒
 

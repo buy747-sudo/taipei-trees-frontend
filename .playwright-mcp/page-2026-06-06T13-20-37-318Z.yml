@@ -1,0 +1,82 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "← 地圖" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - strong [ref=e4]: 民眾通報
+  - main [ref=e5]:
+    - generic [ref=e6]:
+      - paragraph [ref=e7]: 協助發現樹木異常
+      - heading "通報樹木異常" [level=1] [ref=e8]
+      - paragraph [ref=e9]: 本平台協助收集樹木異常資訊，通報內容將提供管理人員檢視；本站僅接受通報，不保證個案回覆、處理時程或派工結果。
+      - generic [ref=e10]: 若為緊急事項，例如樹木倒伏、枝幹即將掉落、已影響人車安全，請立即聯絡 1999。
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - text: Website
+        - textbox [ref=e13]
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - paragraph [ref=e16]: 通報對象
+          - heading "尚未指定樹木" [level=2] [ref=e17]
+          - paragraph [ref=e18]: 可從地圖或樹木詳情頁進入通報；也可以直接描述位置。
+        - link "選擇地圖上的樹" [ref=e19] [cursor=pointer]:
+          - /url: /
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: 問題內容
+        - group "問題類型" [ref=e22]:
+          - generic [ref=e23]: 問題類型
+          - generic [ref=e24]:
+            - generic [ref=e25] [cursor=pointer]:
+              - radio "枯枝、斷枝、掉枝風險" [ref=e26]
+              - generic [ref=e27]: 枯枝、斷枝、掉枝風險
+            - generic [ref=e28] [cursor=pointer]:
+              - radio "樹木明顯傾斜或倒伏" [ref=e29]
+              - generic [ref=e30]: 樹木明顯傾斜或倒伏
+            - generic [ref=e31] [cursor=pointer]:
+              - radio "病蟲害或菇菌異常" [ref=e32]
+              - generic [ref=e33]: 病蟲害或菇菌異常
+            - generic [ref=e34] [cursor=pointer]:
+              - radio "樹穴、支架、鋪面問題" [ref=e35]
+              - generic [ref=e36]: 樹穴、支架、鋪面問題
+            - generic [ref=e37] [cursor=pointer]:
+              - radio "樹牌或 QR Code 損壞" [ref=e38]
+              - generic [ref=e39]: 樹牌或 QR Code 損壞
+            - generic [ref=e40] [cursor=pointer]:
+              - radio "遮擋交通號誌、路牌、民宅" [ref=e41]
+              - generic [ref=e42]: 遮擋交通號誌、路牌、民宅
+            - generic [ref=e43] [cursor=pointer]:
+              - radio "其他問題" [ref=e44]
+              - generic [ref=e45]: 其他問題
+        - generic [ref=e46]:
+          - generic [ref=e47]: 緊急程度
+          - combobox "緊急程度" [ref=e48]:
+            - option "一般，可供管理人員後續檢視" [selected]
+            - option "可能危險，建議優先查看"
+            - option "已影響人車安全，我也會聯絡 1999"
+        - generic [ref=e49]:
+          - generic [ref=e50]: 問題描述
+          - textbox "問題描述" [ref=e51]:
+            - /placeholder: 請描述你看到的狀況，例如枝條斷裂位置、傾斜方向、是否靠近道路或住家。
+      - generic [ref=e52]:
+        - paragraph [ref=e53]: 位置與照片
+        - generic [ref=e54]:
+          - generic [ref=e55]: 位置描述
+          - textbox "位置描述" [ref=e56]:
+            - /placeholder: 例如：大安森林公園捷運站 5 號出口旁、仁愛路二段人行道
+        - generic [ref=e57]:
+          - button "使用目前位置" [ref=e58] [cursor=pointer]
+          - generic [ref=e59]: 定位只用於本次通報。
+        - generic [ref=e60]:
+          - generic [ref=e61]: 照片（選填，最多 3 張）
+          - button "照片（選填，最多 3 張） 請避免拍到人臉、車牌、門牌等個資。每張照片上限 8MB。" [ref=e62]
+          - generic [ref=e63]: 請避免拍到人臉、車牌、門牌等個資。每張照片上限 8MB。
+      - generic [ref=e64]:
+        - paragraph [ref=e65]: 聯絡方式
+        - generic [ref=e66]:
+          - generic [ref=e67]: 聯絡方式（選填）
+          - textbox "聯絡方式（選填）" [ref=e68]:
+            - /placeholder: 電話或 Email，可留空
+      - alert [ref=e69]
+      - generic [ref=e70]:
+        - button "送出通報" [ref=e71] [cursor=pointer]
+        - link "回到地圖" [ref=e72] [cursor=pointer]:
+          - /url: /

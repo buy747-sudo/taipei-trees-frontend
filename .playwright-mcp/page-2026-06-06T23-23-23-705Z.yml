@@ -1,0 +1,155 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "← 回地圖" [ref=e3] [cursor=pointer]:
+      - /url: index.html
+    - heading "🌳 台北市行道樹知識庫" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "台北市的樹，比你想的還要厲害" [level=2] [ref=e7]
+      - paragraph [ref=e8]:
+        - text: 它們站在路邊，默默幫我們遮太陽、過濾空氣、吸收碳排。
+        - text: 台北市超過 9 萬棵行道樹，每一棵都有自己的故事。
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: 92,776
+          - text: 棵行道樹
+        - generic [ref=e12]:
+          - generic [ref=e13]: 3,874
+          - text: 棵受保護樹木
+        - generic [ref=e14]:
+          - generic [ref=e15]: "12"
+          - text: 行政區全覆蓋
+    - generic [ref=e16]:
+      - link "🌿 行道樹固碳" [ref=e17] [cursor=pointer]:
+        - /url: "#carbon"
+      - link "⭐ 受保護老樹" [ref=e18] [cursor=pointer]:
+        - /url: "#protected"
+      - link "🌲 常見樹種" [ref=e19] [cursor=pointer]:
+        - /url: "#species"
+      - link "📷 QR Code" [ref=e20] [cursor=pointer]:
+        - /url: "#qr"
+      - link "❓ 常見問題" [ref=e21] [cursor=pointer]:
+        - /url: "#faq"
+    - img "台北市整排行道樹街景" [ref=e23]
+    - generic [ref=e24]:
+      - heading "🌿 台北市行道樹每年「吸走」多少碳？" [level=2] [ref=e25]
+      - paragraph [ref=e26]:
+        - text: 每次走在台北市的林蔭大道，有沒有想過——這些台北市行道樹除了遮蔭，還在默默做一件很重要的事：
+        - strong [ref=e27]: 固碳
+        - text: 。
+      - paragraph [ref=e28]: 樹木透過光合作用，把空氣中的二氧化碳（CO₂）轉化成木材、葉片、根部，讓碳「鎖」在樹體裡面，這就是所謂的固碳。簡單說：樹木是大自然的「碳吸塵器」。
+      - generic [ref=e29]:
+        - strong [ref=e30]: 📊 算給你看：
+        - text: 一棵成熟榕樹每年固碳約
+        - strong [ref=e31]: 12 公斤 CO₂
+        - text: ，等於少開車 60 公里的排放量。
+        - text: 台北市 92,776 棵行道樹加起來，每年固碳量相當於
+        - strong [ref=e32]: 數千台汽車少跑一整年！
+      - paragraph [ref=e33]: 更厲害的是，台北市行道樹除了固碳，還能：
+      - list [ref=e34]:
+        - listitem [ref=e35]:
+          - text: 🌡️
+          - strong [ref=e36]: 降低體感溫度 3–5°C
+          - text: ——台北夏天你需要這個
+        - listitem [ref=e37]: 💨 過濾空氣中的懸浮粒子（PM2.5）
+        - listitem [ref=e38]: 🌧️ 減少都市熱島效應、降低暴雨逕流
+        - listitem [ref=e39]: 🐦 提供鳥類與昆蟲的棲息空間
+        - listitem [ref=e40]: 😊 有研究證明：看到綠色植物能降低人的壓力指數
+      - img "陽光穿透樹葉的特寫" [ref=e42]
+    - generic [ref=e43]:
+      - heading "⭐ 台北市受保護樹木——活過兩百年的見證者" [level=2] [ref=e44]
+      - paragraph [ref=e45]:
+        - text: 台北市有
+        - strong [ref=e46]: 3,874 棵
+        - text: 受保護樹木，都是樹齡、樹徑、樹高達到一定標準，或具有特殊歷史、文化意義的珍貴老樹。一旦被列為受保護樹木，就不能隨意移植或砍除。
+      - generic [ref=e47]:
+        - strong [ref=e48]: 什麼樣的樹才能被「受保護」？
+        - text: 依台北市受保護樹木認定標準，通常符合下列其中一項：
+        - text: ① 胸徑達 80 公分以上的老樹
+        - text: ② 樹齡達 50 年以上
+        - text: ③ 具有歷史、文化、生態或景觀重要性
+      - paragraph [ref=e49]: 走在台北市街頭，如果看到某棵樹特別粗壯、氣根垂掛、樹幹上掛著橢圓形的「受保護樹木」標牌——那棵樹可能已經站在那裡超過一百年，默默見證了這座城市從農地變成現代都市的整個過程。
+      - paragraph [ref=e50]: 用本站的「受保護」篩選按鈕，就可以在地圖上看到台北市所有受保護老樹的位置（金色星星 ⭐），點開還能看到它的樹齡與樹種。
+      - generic [ref=e51]:
+        - generic [ref=e52]: 📸
+        - strong [ref=e53]: 受保護樹木橢圓標牌特寫
+        - generic [ref=e54]: （待拍攝：掛在樹上的受保護樹木標牌，要清楚、有質感）
+      - generic [ref=e55]:
+        - generic [ref=e56]: 📸
+        - strong [ref=e57]: 百年老樹根部延伸
+        - generic [ref=e58]: （待拍攝：地面根部延伸的壯觀感，強調樹齡）
+    - generic [ref=e59]:
+      - heading "🌲 台北市最常見的行道樹種類" [level=2] [ref=e60]
+      - paragraph [ref=e61]: 台北市行道樹種類繁多，從熱帶的榕樹、樟樹，到季節感強的楓香、阿勃勒，構成了台北市獨特的綠色街景。以下是最常在台北市行道樹中看到的幾種：
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "榕樹" [level=4] [ref=e64]
+          - generic [ref=e65]: Ficus microcarpa
+          - paragraph [ref=e66]: 台北市行道樹中的天王！氣根垂掛、樹冠寬大，夏天遮蔭效果最好，在台灣各地最為常見。
+        - generic [ref=e67]:
+          - heading "樟樹" [level=4] [ref=e68]
+          - generic [ref=e69]: Cinnamomum camphora
+          - paragraph [ref=e70]: 葉片有淡淡的樟腦香氣，揉一下更明顯。台北市老樟樹不少，很多已達受保護等級。
+        - generic [ref=e71]:
+          - heading "小葉欖仁" [level=4] [ref=e72]
+          - generic [ref=e73]: Terminalia mantaly
+          - paragraph [ref=e74]: 傘狀樹形優美，層次分明像日本漫畫裡的樹。近年台北市大量種植於安全島。
+        - generic [ref=e75]:
+          - heading "印度橡膠樹" [level=4] [ref=e76]
+          - generic [ref=e77]: Ficus elastica
+          - paragraph [ref=e78]: 大片墨綠色葉，有白色乳汁。常見於公園與校園，部分植株樹齡驚人。
+        - generic [ref=e79]:
+          - heading "阿勃勒" [level=4] [ref=e80]
+          - generic [ref=e81]: Cassia fistula
+          - paragraph [ref=e82]: 每年五六月開出滿樹金黃色花串，有「黃金雨」之稱，是台北市行道樹中最夢幻的物種之一。
+        - generic [ref=e83]:
+          - heading "楓香" [level=4] [ref=e84]
+          - generic [ref=e85]: Liquidambar formosana
+          - paragraph [ref=e86]: 秋冬葉片轉為橘紅色，是台灣少數有明顯秋色變化的樹種，台北市大安森林公園附近可見。
+      - generic [ref=e87]:
+        - generic [ref=e88]: 📸
+        - strong [ref=e89]: 榕樹氣根特寫
+        - generic [ref=e90]: （待拍攝：榕樹氣根垂掛，要有蒼勁的感覺）
+      - generic [ref=e91]:
+        - generic [ref=e92]: 📸
+        - strong [ref=e93]: 樟樹葉片逆光特寫
+        - generic [ref=e94]: （待拍攝：逆光拍樟樹葉，葉脈清晰，有光感）
+    - generic [ref=e95]:
+      - heading "📷 台北市行道樹 QR Code——每棵樹都有自己的身分證" [level=2] [ref=e96]
+      - paragraph [ref=e97]: 台北市政府為大多數行道樹建立了電子樹籍，並在樹牌上貼有 QR Code。掃描後可以查到：樹種學名、樹高、胸徑、樹齡、行政區、每年固碳量等完整資料。
+      - paragraph [ref=e98]:
+        - text: 過去要查這些資料，需要知道如何使用政府系統。現在用
+        - strong [ref=e99]: taipei-trees.org
+        - text: 掃描台北市行道樹 QR Code，不需要下載 App、不需要登入，掃了就看得到。
+      - generic [ref=e100]:
+        - strong [ref=e101]: 📱 怎麼掃？
+        - text: 1. 打開 taipei-trees.org
+        - text: 2. 按頂部「📷 掃碼」按鈕
+        - text: 3. 對準樹牌上的黑白方框，1 秒自動辨識
+        - text: 4. 樹木完整資料立刻出現！
+      - generic [ref=e102]:
+        - generic [ref=e103]: 📸
+        - strong [ref=e104]: 手持手機掃描行道樹 QR Code
+        - generic [ref=e105]: （待拍攝：手機對著樹牌 QR Code，要看得到樹牌編號）
+      - img "台北市行道樹樹牌 QR Code 特寫" [ref=e107]
+    - generic [ref=e108]:
+      - heading "❓ 常見問題" [level=2] [ref=e109]
+      - generic [ref=e111] [cursor=pointer]: 台北市一共有幾棵行道樹？ ▾
+      - generic [ref=e113] [cursor=pointer]: 台北市行道樹的資料多久更新一次？ ▾
+      - generic [ref=e115] [cursor=pointer]: 掃描行道樹 QR Code 需要下載 App 嗎？ ▾
+      - generic [ref=e117] [cursor=pointer]: 受保護樹木和一般行道樹有什麼不同？ ▾
+      - generic [ref=e119] [cursor=pointer]: 可以查台北市公園裡的樹嗎？ ▾
+      - generic [ref=e121] [cursor=pointer]: 樹木資料有錯誤，可以回報嗎？ ▾
+      - generic [ref=e123] [cursor=pointer]: 台北市哪個行政區的行道樹最多？ ▾
+      - generic [ref=e125] [cursor=pointer]: 「胸徑」是什麼意思？ ▾
+    - generic [ref=e126]:
+      - link "🗺️ 去地圖查詢台北市行道樹" [ref=e127] [cursor=pointer]:
+        - /url: index.html
+      - link "查看使用說明 →" [ref=e128] [cursor=pointer]:
+        - /url: guide.html
+  - contentinfo [ref=e129]:
+    - paragraph [ref=e130]: 行道樹資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市行道樹分布圖」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。
+    - paragraph [ref=e131]: 受保護樹木資料來源：臺北市政府開放資料平台（data.taipei），資料集「臺北市受保護樹木」，依政府資料開放授權條款（OGDL）使用，版權屬臺北市政府工務局公園路燈工程管理處。
+    - paragraph [ref=e132]:
+      - link "資料來源與授權聲明完整頁面 →" [ref=e133] [cursor=pointer]:
+        - /url: /data-policy.html
