@@ -124,7 +124,7 @@ function openSheet(tree) {
   if (zoneCard && tree.lat != null && tree.lng != null) {
     zoneCard.hidden = true;
     zoneCard.innerHTML = '';
-    fetch(`${API_BASE}/public/zone?lat=${tree.lat}&lng=${tree.lng}`)
+    fetch(`${API_BASE}/zone?lat=${tree.lat}&lng=${tree.lng}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data || !data.zone_name) return;
