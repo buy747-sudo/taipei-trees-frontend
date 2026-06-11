@@ -137,6 +137,22 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 }
 .adv-select:focus, .adv-input:focus { border-color: #1a5c2a; background: #fff; }
 .adv-input::placeholder { color: #aaa; }
+/* 樹型篩選按鈕（顏色與地圖圖例一致） */
+#adv-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.adv-type {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 6px; border-radius: 12px; font-size: 0.88rem;
+  border: 1.5px solid #cde8d0; background: #f8fdf9; color: #1a1a1a;
+  cursor: pointer; transition: all 0.12s;
+}
+.adv-type.active {
+  border-color: #1a5c2a; background: #e0f4e8; font-weight: 700;
+  box-shadow: inset 0 0 0 1px #1a5c2a;
+}
+.type-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.type-tri  { border-radius: 0; clip-path: polygon(50% 4%, 96% 92%, 4% 92%); }
+.type-star { border-radius: 0; clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+
 #adv-submit {
   width: 100%; padding: 13px; background: #1a5c2a; color: #fff;
   border: none; border-radius: 14px; font-size: 1rem; font-weight: 700;

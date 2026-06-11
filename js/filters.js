@@ -5,13 +5,37 @@ const filterState = {
   road:     '',   // 進階查詢路段（僅用於定位，不傳給 API）
   species:  '',
   category: 'all',
+  group:    '',   // 樹型：evergreen/deciduous/flowering/palm/conifer/protected
+  dbh:      '',   // 胸徑區間，格式 "min-max"（max 可空 = 不設上限）
+  height:   '',   // 樹高區間，格式同上
 };
+
+// "15-30" → { min: 15, max: 30 }；"75-" → { min: 75 }
+function parseRange(str) {
+  if (!str) return null;
+  const [min, max] = str.split('-');
+  const r = {};
+  if (min !== '') r.min = parseFloat(min);
+  if (max !== '' && max !== undefined) r.max = parseFloat(max);
+  return r;
+}
 
 function getFilterParams() {
   const params = {};
   if (filterState.district) params.district = filterState.district;
   if (filterState.species) params.species = filterState.species;
   if (filterState.category && filterState.category !== 'all') params.category = filterState.category;
+  if (filterState.group) params.group = filterState.group;
+  const dbh = parseRange(filterState.dbh);
+  if (dbh) {
+    if (dbh.min > 0) params.min_dbh = dbh.min;
+    if (dbh.max != null) params.max_dbh = dbh.max;
+  }
+  const h = parseRange(filterState.height);
+  if (h) {
+    if (h.min > 0) params.min_height = h.min;
+    if (h.max != null) params.max_height = h.max;
+  }
   params.limit = getTreeLoadLimit();
   return params;
 }
@@ -56,9 +80,34 @@ function initAdvSearch() {
   const distSel  = document.getElementById('adv-district');
   const roadInp  = document.getElementById('adv-road');
   const specInp  = document.getElementById('adv-species');
+  const dbhSel   = document.getElementById('adv-dbh');
+  const hgtSel   = document.getElementById('adv-height');
+  const typeBtns = document.querySelectorAll('.adv-type');
   const submit   = document.getElementById('adv-submit');
   const reset    = document.getElementById('adv-reset');
   const tagsDiv  = document.getElementById('adv-active-tags');
+
+  // 樹型按鈕：單選，再點一次取消
+  let pendingGroup = '';
+  typeBtns.forEach(b => {
+    b.addEventListener('click', () => {
+      const g = b.dataset.group;
+      pendingGroup = (pendingGroup === g) ? '' : g;
+      typeBtns.forEach(x => x.classList.toggle('active', x.dataset.group === pendingGroup));
+    });
+  });
+
+  const GROUP_LABELS = {
+    evergreen: '常綠', deciduous: '落葉', flowering: '開花',
+    palm: '棕櫚', conifer: '針葉', protected: '受保護',
+  };
+  const DBH_LABELS = {
+    '0-15': '15cm以下', '15-30': '15–30cm', '30-45': '30–45cm',
+    '45-60': '45–60cm', '60-75': '60–75cm', '75-': '75cm以上',
+  };
+  const HGT_LABELS = {
+    '0-5': '5m以下', '5-10': '5–10m', '10-15': '10–15m', '15-': '15m以上',
+  };
 
   function openDrawer() {
     overlay.hidden = false;
@@ -86,6 +135,9 @@ function initAdvSearch() {
     if (filterState.district) tags.push({ key: 'district', label: '區：' + filterState.district });
     if (filterState.road)     tags.push({ key: 'road',     label: '路：' + filterState.road });
     if (filterState.species)  tags.push({ key: 'species',  label: '種：' + filterState.species });
+    if (filterState.group)    tags.push({ key: 'group',    label: '型：' + GROUP_LABELS[filterState.group] });
+    if (filterState.dbh)      tags.push({ key: 'dbh',      label: '徑：' + DBH_LABELS[filterState.dbh] });
+    if (filterState.height)   tags.push({ key: 'height',   label: '高：' + HGT_LABELS[filterState.height] });
 
     if (!tags.length) { tagsDiv.hidden = true; return; }
     tagsDiv.hidden = false;
@@ -101,6 +153,12 @@ function initAdvSearch() {
         if (k === 'district') distSel.value = '';
         if (k === 'road')     roadInp.value = '';
         if (k === 'species')  specInp.value = '';
+        if (k === 'dbh')      dbhSel.value = '';
+        if (k === 'height')   hgtSel.value = '';
+        if (k === 'group') {
+          pendingGroup = '';
+          typeBtns.forEach(x => x.classList.remove('active'));
+        }
         renderTags();
         scheduleReload();
       });
@@ -116,6 +174,9 @@ function initAdvSearch() {
     filterState.district = dist;
     filterState.road     = road;
     filterState.species  = spec;
+    filterState.group    = pendingGroup;
+    filterState.dbh      = dbhSel.value;
+    filterState.height   = hgtSel.value;
 
     closeDrawer();
     renderTags();
@@ -135,9 +196,16 @@ function initAdvSearch() {
     distSel.value = '';
     roadInp.value = '';
     specInp.value = '';
+    dbhSel.value  = '';
+    hgtSel.value  = '';
+    pendingGroup  = '';
+    typeBtns.forEach(x => x.classList.remove('active'));
     filterState.district = '';
     filterState.road     = '';
     filterState.species  = '';
+    filterState.group    = '';
+    filterState.dbh      = '';
+    filterState.height   = '';
     renderTags();
     scheduleReload();
   });

@@ -96,6 +96,36 @@
         placeholder="如：榕樹、樟樹、茄苳"
         autocomplete="off">
 
+      <label class="adv-label">樹型（與地圖圖例顏色相同）</label>
+      <div id="adv-type-grid">
+        <button type="button" class="adv-type" data-group="evergreen"><span class="type-dot" style="background:#1a5c2a"></span>常綠</button>
+        <button type="button" class="adv-type" data-group="deciduous"><span class="type-dot" style="background:#9a5a2f"></span>落葉</button>
+        <button type="button" class="adv-type" data-group="flowering"><span class="type-dot" style="background:#e879a7"></span>開花</button>
+        <button type="button" class="adv-type" data-group="palm"><span class="type-dot" style="background:#7cc7d8"></span>棕櫚</button>
+        <button type="button" class="adv-type" data-group="conifer"><span class="type-dot type-tri" style="background:#0f3f2e"></span>針葉</button>
+        <button type="button" class="adv-type" data-group="protected"><span class="type-dot type-star" style="background:#f59e0b"></span>受保護</button>
+      </div>
+
+      <label class="adv-label" for="adv-dbh">胸徑（樹幹直徑）</label>
+      <select id="adv-dbh" class="adv-select">
+        <option value="">不限</option>
+        <option value="0-15">15 cm 以下</option>
+        <option value="15-30">15–30 cm</option>
+        <option value="30-45">30–45 cm</option>
+        <option value="45-60">45–60 cm</option>
+        <option value="60-75">60–75 cm</option>
+        <option value="75-">75 cm 以上（巨木級）</option>
+      </select>
+
+      <label class="adv-label" for="adv-height">樹高</label>
+      <select id="adv-height" class="adv-select">
+        <option value="">不限</option>
+        <option value="0-5">5 m 以下</option>
+        <option value="5-10">5–10 m</option>
+        <option value="10-15">10–15 m</option>
+        <option value="15-">15 m 以上</option>
+      </select>
+
       <button id="adv-submit">開始查詢</button>
       <button id="adv-reset">清除條件</button>
     </div>
@@ -307,7 +337,7 @@
   <script src="js/markers.js?v=20260611b"></script>
   <script src="js/benefits.js?v=20260611g"></script>
   <script src="js/sheet.js?v=20260611g"></script>
-  <script src="js/filters.js?v=20260611a"></script>
+  <script src="js/filters.js?v=20260611i"></script>
   <script src="js/qr.js?v=20260609b"></script>
   <script src="js/stats.js?v=20260611a"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
