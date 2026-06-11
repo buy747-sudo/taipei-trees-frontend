@@ -201,23 +201,82 @@
     </div>
 
     <div class="guide-section">
-      <h2>🗺️ 認識地圖圖示</h2>
+      <h2>🗺️ 認識地圖圖示（顏色代表樹型）</h2>
+      <p>每棵樹的標記顏色代表它的樹型，圓點大小反映樹冠大小：</p>
       <div class="legend-row">
-        <div class="legend-guide-item"><div class="dot" style="background:#1a5c2a"></div>行道樹（全市 9 萬餘棵）</div>
+        <div class="legend-guide-item"><div class="dot" style="background:#1a5c2a"></div>常綠闊葉（榕樹、樟樹等）</div>
+        <div class="legend-guide-item"><div class="dot" style="background:#9a5a2f"></div>落葉樹（楓香、欒樹等）</div>
+        <div class="legend-guide-item"><div class="dot" style="background:#e879a7"></div>開花觀賞樹（櫻花、風鈴木等）</div>
+        <div class="legend-guide-item"><div class="dot" style="background:#7cc7d8"></div>棕櫚類（椰子、蒲葵等）</div>
+        <div class="legend-guide-item"><div style="width:14px;height:14px;background:#0f3f2e;clip-path:polygon(50% 4%,96% 92%,4% 92%);flex-shrink:0"></div>針葉樹（松、杉、柏）</div>
         <div class="legend-guide-item"><div class="star-icon"></div>受保護樹木（珍貴老樹，約 3,800 棵）</div>
-        <div class="legend-guide-item"><div style="width:22px;height:22px;border-radius:50%;background:#f0c040;border:3px solid #e8a800;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700">8</div>聚合群組（縮放後展開）</div>
       </div>
     </div>
 
     <div class="guide-section">
-      <h2>🎛️ 篩選台北市行道樹種類與分布</h2>
+      <h2>🎛️ 進階查詢：六種條件組合篩選</h2>
       <div class="icon-row">
         <div class="icon-item"><span>🏙️</span>行政區</div>
-        <div class="icon-item"><span>🌿</span>樹種篩選</div>
-        <div class="icon-item"><span>🟢</span>行道樹</div>
-        <div class="icon-item"><span>⭐</span>受保護樹</div>
+        <div class="icon-item"><span>🛣️</span>路段</div>
+        <div class="icon-item"><span>🌿</span>樹種</div>
+        <div class="icon-item"><span>🎨</span>樹型</div>
+        <div class="icon-item"><span>📏</span>胸徑</div>
+        <div class="icon-item"><span>📐</span>樹高</div>
       </div>
-      <p style="margin-top:12px">選擇行政區（信義區、大安區、中山區等 12 區）後地圖自動飛至該區；輸入樹種關鍵字（如「榕樹」、「樟樹」、「印度橡膠樹」）可快速篩選台北市行道樹種類分布。</p>
+      <p style="margin-top:12px">按「🔍 進階查詢」開啟完整篩選：選行政區自動飛至該區、輸入路段（如「仁愛路四段」）直接定位、樹種關鍵字篩選，
+      還可以按<strong>樹型</strong>（常綠／落葉／開花／棕櫚／針葉／受保護，顏色與地圖一致）、
+      <strong>胸徑</strong>（15 公分一級，最高「75 cm 以上巨木級」）和<strong>樹高</strong>組合查詢。
+      例如：「大安區＋開花＋胸徑 45cm 以上」就能找出該區的大型開花樹。已套用的條件會顯示成標籤，可單獨移除。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>🛰️ 切換底圖與專業參考圖層</h2>
+      <p>點地圖右上角 <strong>🗺 按鈕</strong>可切換三種底圖（街道圖／衛星圖／正射影像），並可疊加三種政府公開參考圖層：</p>
+      <ul>
+        <li><strong>土地利用現況</strong>——一眼看出樹木周邊是道路、公園、住宅或商業區</li>
+        <li><strong>都市計畫分區</strong>——臺北市都發局正式分區色塊</li>
+        <li><strong>地籍段界</strong>——地段名稱與界線</li>
+      </ul>
+      <p>開啟過的圖層會自動記住，下次打開網站直接還原。圖層僅供參考，正式土地資訊以地政、都發機關公告為準。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>🌿 點開樹木：生態效益與土地脈絡</h2>
+      <p>點選任何一棵樹，詳情卡會顯示它每年為城市做的事：</p>
+      <ul>
+        <li><strong>🌱 年固碳量</strong>——吸收多少 CO₂，換算等於少開車幾公里</li>
+        <li><strong>💧 雨水截留</strong>——樹冠每年接住多少雨水</li>
+        <li><strong>🌬️ 空污效益</strong>——清除 PM₂.₅ 等污染物的健康價值</li>
+        <li><strong>☂️ 遮蔭面積</strong>——樹蔭覆蓋範圍，約等於幾個停車位</li>
+        <li><strong>📍 土地脈絡</strong>——這棵樹位於（或鄰近）哪種都市計畫分區</li>
+      </ul>
+      <p>按「🌿 查看詳情」進入完整頁面，包含計算方法說明與學術文獻。每項估算方法詳見<a href="/eco-benefits.html" style="color:#1a5c2a;font-weight:700">生態效益頁</a>。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>⭐ 受保護樹木：城市老朋友故事卡</h2>
+      <p>點選金色星星（受保護樹木）會多顯示一張<strong>「城市老朋友」故事卡</strong>：
+      介紹這棵樹為什麼值得保護、保護提醒（不任意修剪、不釘掛招牌、施工避開根系），
+      並提供臺北市文化局官方平台連結查看更完整的列管資料與照片。
+      遇到老樹倒伏、斷枝等緊急狀況，請撥 <strong>1999</strong> 市民熱線。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>🚨 通報異常與導航前往</h2>
+      <p>發現樹木傾斜、斷枝、病蟲害？點開該樹詳情按「通報異常」，系統自動帶入樹籍編號與位置，拍照上傳即可協助養護單位掌握狀況。
+      「🚗 導航前往」按鈕則會開啟 Google Maps 導航到這棵樹的位置。</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>🌍 更多探索頁面</h2>
+      <ul>
+        <li><a href="/green-assets.html" style="color:#1a5c2a;font-weight:700">城市綠資產儀表板</a>——全市樹木總數、固碳量即時統計與圖表</li>
+        <li><a href="/species.html" style="color:#1a5c2a;font-weight:700">樹種百科</a>——認識台北常見行道樹</li>
+        <li><a href="/carbon-ranking.html" style="color:#1a5c2a;font-weight:700">固碳排行</a>——哪些樹最會存碳</li>
+        <li><a href="/eco-benefits.html" style="color:#1a5c2a;font-weight:700">生態效益</a>——路段效益比較與計算方法</li>
+        <li><a href="/law.html" style="color:#1a5c2a;font-weight:700">法規查詢</a>——樹木保護相關法規</li>
+        <li><a href="/about.html" style="color:#1a5c2a;font-weight:700">知識庫</a>——樹木知識與常見問題</li>
+      </ul>
     </div>
 
     <div class="guide-section">
@@ -289,7 +348,7 @@
           <span>地圖會自動移動，顯示您附近的台北市行道樹與受保護老樹分布。綠色圓點是行道樹，金色星星是珍貴的受保護樹木。</span>
         </div>
       </div>
-      <div class="tip-box">🟢 綠色圓點 = 路邊的行道樹<br>⭐ 金色星星 = 珍貴受保護老樹（台北市有 3,800 多棵！）</div>
+      <div class="tip-box">🟢 圓點 = 路邊的行道樹（顏色代表樹的種類：深綠是常綠樹、棕色是落葉樹、粉紅是開花樹）<br>⭐ 金色星星 = 珍貴受保護老樹（台北市有 3,800 多棵！）</div>
     </div>
 
     <div class="guide-section">
@@ -360,9 +419,12 @@
         <ol>
           <li>打開地圖，按右上角的 <strong>📍 按鈕</strong></li>
           <li>地圖會飛到你的位置，顯示你家附近的台北市行道樹分布</li>
-          <li>點一個 <strong>綠色圓點</strong>，看這棵台北市行道樹叫什麼名字！</li>
+          <li>點一個 <strong>彩色圓點</strong>，看這棵台北市行道樹叫什麼名字！（深綠＝常綠樹、棕色＝落葉樹、粉紅＝會開花的樹、水藍＝棕櫚樹）</li>
           <li>再試試看點一個 <strong>金色星星 ⭐</strong>，那是台北市受保護的珍貴老樹！</li>
         </ol>
+      </div>
+      <div class="fact-box">
+        🎨 小挑戰：用「進階查詢」按粉紅色的「開花」按鈕，地圖上就只剩會開花的樹！春天去找櫻花和風鈴木吧！
       </div>
     </div>
 
