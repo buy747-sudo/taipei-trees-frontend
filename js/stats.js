@@ -47,7 +47,8 @@ function renderStats(data) {
   tbody.querySelectorAll('tr').forEach(tr => {
     tr.addEventListener('click', () => {
       const d = tr.dataset.district;
-      document.getElementById('filter-district').value = d;
+      const sel = document.getElementById('filter-district') || document.getElementById('adv-district');
+      if (sel) sel.value = d;
       filterState.district = d;
       flyToDistrict(d);
       scheduleReload();

@@ -37,7 +37,7 @@
   <!-- Leaflet 1.9 -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <link rel="stylesheet" href="css/style.css?v=20260610c">
+  <link rel="stylesheet" href="css/style.css?v=20260611a">
 </head>
 <body>
 
@@ -45,20 +45,21 @@
   <header id="top-bar">
     <div id="top-title-row">
       <div id="site-title"><span aria-hidden="true">🌳</span> 台北市樹木查詢 <span id="version-badge">v0.8</span></div>
+      <!-- ── 功能頁導覽列（手機自動換行橫向捲動；桌機與標題同行）── -->
+      <nav id="page-nav-strip">
+        <a href="eco-benefits.html">🌿 生態效益</a>
+        <a href="species.html">🌳 樹種百科</a>
+        <a href="carbon-ranking.html">🏆 固碳排行</a>
+        <a href="law.html">⚖️ 法規查詢</a>
+        <a href="about.html">📖 知識庫</a>
+        <a href="green-assets.html">🌍 綠資產</a>
+      </nav>
       <div class="top-nav-links">
         <a href="report.html" id="report-nav-btn">通報異常</a>
         <a href="guide.html"  class="nav-link">說明 ？</a>
         <span id="auth-area"></span>
       </div>
     </div>
-    <!-- ── 功能頁導覽列（橫向捲動）── -->
-    <nav id="page-nav-strip">
-      <a href="eco-benefits.html">🌿 生態效益</a>
-      <a href="species.html">🌳 樹種百科</a>
-      <a href="carbon-ranking.html">🏆 固碳排行</a>
-      <a href="law.html">⚖️ 法規查詢</a>
-      <a href="about.html">📖 知識庫</a>
-    </nav>
     <div id="search-row">
       <label for="search-input" class="sr-only">樹籍編號或 QR 網址</label>
       <input id="search-input" type="search"
@@ -107,6 +108,21 @@
 
       <button id="adv-submit">開始查詢</button>
       <button id="adv-reset">清除條件</button>
+    </div>
+  </div>
+
+  <!-- ── 首訪歡迎卡（localStorage 記錄，只顯示一次）──────── -->
+  <div id="welcome-overlay" hidden>
+    <div id="welcome-card" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+      <div id="welcome-emoji" aria-hidden="true">🌳</div>
+      <h2 id="welcome-title">歡迎來到台北市樹木查詢</h2>
+      <p id="welcome-desc">全市 9 萬多棵行道樹與受保護樹木，每一棵都查得到。你想從哪裡開始？</p>
+      <div id="welcome-actions">
+        <button class="welcome-act" id="welcome-search">🔍 找一棵樹<small>搜尋路段或樹籍編號</small></button>
+        <button class="welcome-act" id="welcome-scan">📷 掃碼查樹<small>掃樹牌 QR Code</small></button>
+        <a class="welcome-act" href="/green-assets.html">🌍 城市綠資產<small>全市統計圖表一頁看</small></a>
+      </div>
+      <button id="welcome-close">直接看地圖 →</button>
     </div>
   </div>
 
@@ -247,11 +263,11 @@
   <script src="js/sheet.js?v=20260609b"></script>
   <script src="js/filters.js?v=20260610b"></script>
   <script src="js/qr.js?v=20260609b"></script>
-  <script src="js/stats.js?v=20260610a"></script>
+  <script src="js/stats.js?v=20260611a"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="js/measure.js?v=20260609b"></script>
   <script src="js/export.js?v=20260609b"></script>
-  <script src="js/app.js?v=20260610a"></script>
+  <script src="js/app.js?v=20260611a"></script>
   <script src="js/risk-layer.js?v=20260610c"></script>
   <script>
     // ── 風險圖層初始化（登入員工才啟用）

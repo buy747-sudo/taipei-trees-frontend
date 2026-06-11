@@ -79,6 +79,36 @@ function onMapMoved() {
   loadTrees();
 }
 
+// ── 首訪歡迎卡：只顯示一次（localStorage 記錄）────────────
+function initWelcome() {
+  const KEY = 'tt_welcomed';
+  const overlay = document.getElementById('welcome-overlay');
+  if (!overlay) return;
+  // 已看過、帶深連結進站（?id= 分享連結）、或自動化測試環境就不打擾
+  if (localStorage.getItem(KEY) || new URLSearchParams(location.search).has('id') || navigator.webdriver) return;
+
+  overlay.hidden = false;
+  const dismiss = () => {
+    localStorage.setItem(KEY, '1');
+    overlay.hidden = true;
+  };
+
+  document.getElementById('welcome-close').addEventListener('click', dismiss);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) dismiss(); });
+  document.getElementById('welcome-search').addEventListener('click', () => {
+    dismiss();
+    document.getElementById('search-input').focus();
+  });
+  document.getElementById('welcome-scan').addEventListener('click', () => {
+    dismiss();
+    document.getElementById('scan-btn').click();
+  });
+  // 綠資產是 <a>，跳頁前記錄已看過
+  overlay.querySelector('a.welcome-act').addEventListener('click', () => {
+    localStorage.setItem(KEY, '1');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initMap();
   initSheet();
@@ -88,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initStats();
   initMeasure();
   initExport();
+  initWelcome();
 
   loadTrees();
 });

@@ -52,11 +52,11 @@ test('頁面標題正確', async ({ page }) => {
   await expect(page).toHaveTitle(/台北市樹木查詢/);
 });
 
-test('首頁保留 SEO 標題並顯示民眾導覽', async ({ page }) => {
+test('首頁保留 SEO 標題並顯示功能導覽', async ({ page }) => {
   await page.goto(BASE);
   await expect(page).toHaveTitle('台北市樹木查詢｜行道樹 & 受保護樹｜掃碼即時查詢');
-  await expect(page.locator('#public-intro')).toContainText('找一棵你身邊的樹');
-  await expect(page.locator('#public-intro')).toContainText('掃描樹牌');
+  await expect(page.locator('#page-nav-strip')).toContainText('生態效益');
+  await expect(page.locator('#page-nav-strip')).toContainText('綠資產');
   await expect(page.locator('#auth-login-btn')).toContainText('工作登入');
 });
 
@@ -95,9 +95,9 @@ test('授權聲明頁底存在且含 OGDL 字樣', async ({ page }) => {
   await expect(footer).toContainText('data.taipei');
 });
 
-test('行政區下拉選單有 12 個選項', async ({ page }) => {
+test('進階查詢行政區下拉選單有 12 個選項', async ({ page }) => {
   await page.goto(BASE);
-  const options = await page.locator('#filter-district option').count();
+  const options = await page.locator('#adv-district option').count();
   expect(options).toBe(13); // 1 empty + 12 districts
 });
 
@@ -279,12 +279,12 @@ test('report.html 送出通報後上傳照片且不需要 angle', async ({ page 
 });
 
 // ── login.html ───────────────────────────────────────────────────────────────
-test('login.html 顯示 demo 測試帳密', async ({ page }) => {
+test('login.html 不顯示 demo 測試帳密（2026-06-07 已移除）', async ({ page }) => {
   await page.goto(BASE);
   await page.evaluate(() => localStorage.clear());
   await page.goto(BASE + '/login.html');
-  await expect(page.locator('#demo-login-hint')).toContainText('demo');
-  await expect(page.locator('#demo-login-hint')).toContainText('demo / demo');
+  await expect(page.locator('#demo-login-hint')).toHaveCount(0);
+  await expect(page.locator('#login-form, form')).toBeVisible();
 });
 
 // ── tree.html ────────────────────────────────────────────────────────────────
@@ -392,7 +392,7 @@ test('risk.html 風險選項依扣分與關鍵因子顯示嚴重度色彩', asyn
       }],
     }),
   }));
-  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+  await page.route('**/api/assessment/tree/JS0750021125*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       tree: {
@@ -454,7 +454,7 @@ test('risk.html 選完一題後自動捲到下一題', async ({ page }) => {
       ],
     }),
   }));
-  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+  await page.route('**/api/assessment/tree/JS0750021125*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
   }));
@@ -490,7 +490,7 @@ test('risk.html 儲存前提示未填題目', async ({ page }) => {
       ],
     }),
   }));
-  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+  await page.route('**/api/assessment/tree/JS0750021125*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
   }));
@@ -537,7 +537,7 @@ test('risk.html 查看評級結果時未填完不得進行評估', async ({ page
       ],
     }),
   }));
-  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+  await page.route('**/api/assessment/tree/JS0750021125*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
   }));
@@ -586,7 +586,7 @@ test('risk.html 儲存時會把評估人員備注併入 notes', async ({ page })
         options: [{ value: 0, label: '正常' }] }],
     }),
   }));
-  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+  await page.route('**/api/assessment/tree/JS0750021125*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
   }));
@@ -630,7 +630,7 @@ test('risk.html 照片上傳使用 multipart/form-data 並包含 angle', async (
       items: [],
     }),
   }));
-  await page.route('**/public/tree/JS0750021125', route => route.fulfill({
+  await page.route('**/api/assessment/tree/JS0750021125*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ tree: { registry_code: 'JS0750021125', species_name: '榕樹', tree_category: 'street' } }),
   }));
@@ -653,6 +653,9 @@ test('risk.html 照片上傳使用 multipart/form-data 並包含 angle', async (
   await page.locator('#lookup-btn').click();
   await page.locator('#start-assessment-btn').click();
   await page.locator('.photo-slot[data-angle="0"]').click();
+  // 拍攝指引覆蓋層（若存在）需先按「開始拍攝」
+  const guideShoot = page.locator('#photo-guide-shoot');
+  if (await guideShoot.isVisible().catch(() => false)) await guideShoot.click();
   await page.locator('#photo-file-input').setInputFiles({
     name: 'photo.png',
     mimeType: 'image/png',
@@ -692,7 +695,7 @@ test('risk.html PDF 匯出內嵌繁中文字型避免中文亂碼', async ({ pag
       }],
     }),
   }));
-  await page.route('**/public/tree/DA0313031015', route => route.fulfill({
+  await page.route('**/api/assessment/tree/DA0313031015*', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       tree: {

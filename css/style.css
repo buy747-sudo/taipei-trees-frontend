@@ -695,3 +695,78 @@ a.btn-nav:hover { background: #dbeafe; }
   #sheet-actions { flex-wrap: wrap; }
   #sheet-actions > * { min-width: calc(50% - 4px); }
 }
+
+/* ── 首訪歡迎卡 ───────────────────────────────────────── */
+#welcome-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(18, 48, 28, 0.55); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#welcome-overlay[hidden] { display: none; }
+#welcome-card {
+  background: #fff; border-radius: 16px; max-width: 400px; width: 100%;
+  padding: 28px 24px 20px; text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  animation: welcome-pop 0.35s cubic-bezier(0.18, 1.25, 0.4, 1);
+}
+@keyframes welcome-pop {
+  from { transform: scale(0.92) translateY(14px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+#welcome-emoji { font-size: 2.6rem; margin-bottom: 6px; }
+#welcome-title { color: #1a5c2a; font-size: 1.25rem; margin: 0 0 8px; }
+#welcome-desc  { color: #4a6552; font-size: 0.9rem; line-height: 1.65; margin: 0 0 18px; }
+#welcome-actions { display: grid; gap: 10px; margin-bottom: 14px; }
+.welcome-act {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 12px 16px; border-radius: 10px; cursor: pointer;
+  background: #f0f7f1; border: 1.5px solid #cfe8d4;
+  color: #1a5c2a; font-size: 0.98rem; font-weight: 700;
+  text-decoration: none; text-align: left;
+  transition: background 0.15s, transform 0.1s;
+}
+.welcome-act:hover { background: #e3f2e6; }
+.welcome-act:active { transform: scale(0.98); }
+.welcome-act small { color: #6b8a74; font-size: 0.78rem; font-weight: 400; }
+#welcome-close {
+  background: none; border: none; color: #7a9e84; font-size: 0.88rem;
+  cursor: pointer; padding: 8px; width: 100%;
+}
+#welcome-close:hover { color: #1a5c2a; }
+
+/* ── 頂部壓縮 ─────────────────────────────────────────── */
+/* page-nav-strip 已移入 #top-title-row（flex 子元素）：
+   手機 = order:3 + flex-basis:100% 自動換到第二行；桌機 = 同行置中 */
+#top-bar { padding: 6px 12px 7px; }
+#site-title { margin-bottom: 0; }
+#top-title-row { align-items: center; }
+#top-title-row > #page-nav-strip {
+  order: 3; flex-basis: 100%;
+  margin: 3px -12px 0; padding: 0 12px;
+}
+#page-nav-strip a { padding: 5px 12px; font-size: 0.8rem; }
+#search-row { margin-bottom: 5px; }
+
+/* 桌機：功能頁導覽併入標題列同一行，省一整行 */
+@media (min-width: 900px) {
+  #top-title-row { flex-wrap: nowrap; }
+  #site-title { flex-shrink: 0; }
+  #top-title-row > #page-nav-strip {
+    order: 0; flex: 1 1 auto; flex-basis: auto;
+    margin: 0 8px; padding: 0;
+    border-top: none; justify-content: center;
+  }
+  #top-title-row .top-nav-links { flex-shrink: 0; }
+}
+
+/* 手機：隱藏資料數字橫條（數字已在統計面板與綠資產頁）
+   並覆寫舊的 display:block，讓標題與通報/登入鈕同行、導覽列換第二行 */
+@media (max-width: 640px) {
+  #data-bar { display: none; }
+  #top-title-row { display: flex; flex-wrap: wrap; }
+  #site-title { flex: 1; font-size: 0.92rem; white-space: nowrap; }
+  #version-badge { display: none; }
+  .top-nav-links { margin-bottom: 0; gap: 4px; }
+  .top-nav-links a, #auth-area a, #auth-area button { font-size: 0.74rem; padding: 4px 8px; }
+}
