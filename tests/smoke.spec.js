@@ -62,6 +62,68 @@ test('首頁保留 SEO 標題並顯示民眾探索入口', async ({ page }) => {
   await expect(page.locator('#auth-login-btn')).toContainText('工作登入');
 });
 
+test('首頁電腦版採地圖加右側資訊欄', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await page.goto(BASE);
+  const layout = await page.evaluate(() => {
+    const map = document.getElementById('map-container').getBoundingClientRect();
+    const list = document.getElementById('tree-list').getBoundingClientRect();
+    const explore = document.getElementById('explore-section').getBoundingClientRect();
+    const grid = getComputedStyle(document.getElementById('explore-section').querySelector('.explore-grid'));
+    return {
+      mapLeft: map.left,
+      mapRight: map.right,
+      listLeft: list.left,
+      exploreLeft: explore.left,
+      columns: grid.gridTemplateColumns.split(' ').length,
+    };
+  });
+  expect(layout.listLeft).toBeGreaterThan(layout.mapRight - 2);
+  expect(layout.exploreLeft).toBeGreaterThan(layout.mapRight - 2);
+  expect(layout.columns).toBe(1);
+});
+
+test('首頁平板版採堆疊地圖與雙欄探索', async ({ page }) => {
+  await page.setViewportSize({ width: 820, height: 1000 });
+  await page.goto(BASE);
+  const layout = await page.evaluate(() => {
+    const map = document.getElementById('map-container').getBoundingClientRect();
+    const list = document.getElementById('tree-list').getBoundingClientRect();
+    const grid = getComputedStyle(document.getElementById('explore-section').querySelector('.explore-grid'));
+    return {
+      listTop: list.top,
+      mapBottom: map.bottom,
+      columns: grid.gridTemplateColumns.split(' ').length,
+    };
+  });
+  expect(layout.listTop).toBeGreaterThan(layout.mapBottom - 2);
+  expect(layout.columns).toBe(2);
+});
+
+test('首頁手機版隱藏資料列並維持觸控優先', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(BASE);
+  const layout = await page.evaluate(() => {
+    const dataBar = getComputedStyle(document.getElementById('data-bar')).display;
+    const map = document.getElementById('map-container').getBoundingClientRect();
+    const search = document.getElementById('search-input').getBoundingClientRect();
+    const scan = document.getElementById('scan-btn').getBoundingClientRect();
+    const grid = getComputedStyle(document.getElementById('explore-section').querySelector('.explore-grid'));
+    return {
+      dataBar,
+      mapHeight: map.height,
+      searchHeight: search.height,
+      scanHeight: scan.height,
+      columns: grid.gridTemplateColumns.split(' ').length,
+    };
+  });
+  expect(layout.dataBar).toBe('none');
+  expect(layout.mapHeight).toBeGreaterThan(420);
+  expect(layout.searchHeight).toBeGreaterThanOrEqual(44);
+  expect(layout.scanHeight).toBeGreaterThanOrEqual(44);
+  expect(layout.columns).toBe(2);
+});
+
 test('地圖容器存在且 Leaflet 初始化', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.locator('#map-container')).toBeVisible();
