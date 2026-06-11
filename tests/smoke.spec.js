@@ -123,8 +123,9 @@ test('首頁手機版隱藏資料列並維持觸控優先', async ({ page }) => 
   expect(layout.columns).toBe(2);
 });
 
-test('首頁依裝置與 zoom 動態調整地圖載入量', async ({ page }) => {
+test('首頁依裝置與 zoom 動態調整地圖載入量', async ({ context }) => {
   async function firstLimitFor(width, zoom) {
+    const page = await context.newPage();
     const limits = [];
     await page.setViewportSize({ width, height: 820 });
     await page.route('**/public/trees**', route => {
@@ -140,8 +141,9 @@ test('首頁依裝置與 zoom 動態調整地圖載入量', async ({ page }) => 
     }, zoom);
     await page.goto(BASE);
     await expect.poll(() => limits[0]).toBeTruthy();
-    await page.unroute('**/public/trees**');
-    return Number(limits[0]);
+    const limit = Number(limits[0]);
+    await page.close();
+    return limit;
   }
 
   expect(await firstLimitFor(390, 14)).toBe(300);
@@ -340,8 +342,36 @@ test('report.html 顯示民眾通報表單與 1999 提醒', async ({ page }) => 
   await expect(page.locator('h1')).toContainText('通報樹木異常');
   await expect(page.locator('#report-notice')).toContainText('不保證個案回覆');
   await expect(page.locator('#report-emergency-note')).toContainText('1999');
+  await expect(page.locator('a[href="/typhoon-safety.html"]')).toContainText('颱風前後樹木安全');
   await expect(page.locator('#issue-type-group')).toContainText('遮擋交通號誌、路牌、民宅');
   await expect(page.locator('#urgency')).toBeVisible();
+});
+
+test('typhoon-safety.html 顯示颱風前中後樹木安全與 1999 分流', async ({ page }) => {
+  await page.goto(BASE + '/typhoon-safety.html');
+  await expect(page).toHaveTitle(/颱風前後樹木安全/);
+  await expect(page.locator('h1')).toContainText('颱風前後樹木安全');
+  await expect(page.locator('body')).toContainText('颱風前');
+  await expect(page.locator('body')).toContainText('颱風中');
+  await expect(page.locator('body')).toContainText('颱風後');
+  await expect(page.locator('body')).toContainText('1999');
+  await expect(page.locator('body')).toContainText('本站接受通報，不保證回覆、處理時程或派工結果');
+  await expect(page.locator('a[href="/report.html"]')).toBeVisible();
+  await expect(page.locator('a[href="/tree-risk-guide.html"]')).toBeVisible();
+});
+
+test('tree-risk-guide.html 以台灣通俗語言說明樹木風險三件事', async ({ page }) => {
+  await page.goto(BASE + '/tree-risk-guide.html');
+  await expect(page).toHaveTitle(/樹木風險怎麼看/);
+  await expect(page.locator('h1')).toContainText('樹木風險怎麼看');
+  await expect(page.locator('body')).toContainText('會不會斷或倒');
+  await expect(page.locator('body')).toContainText('會不會打到人車');
+  await expect(page.locator('body')).toContainText('後果嚴不嚴重');
+  await expect(page.locator('body')).toContainText('緊急狀況請聯絡 1999');
+  await expect(page.locator('body')).not.toContainText('失效可能性');
+  await expect(page.locator('body')).not.toContainText('衝擊可能性');
+  await expect(page.locator('body')).not.toContainText('International Society of Arboriculture');
+  await expect(page.locator('a[href="/report.html"]')).toBeVisible();
 });
 
 test('report.html 未填必填欄位會提示', async ({ page }) => {
