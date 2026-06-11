@@ -252,6 +252,15 @@ test('授權聲明頁底存在且含 OGDL 字樣', async ({ page }) => {
   await expect(footer).toContainText('data.taipei');
 });
 
+test('data-policy.html 標明教育部校園樹木 Open Data 來源與授權', async ({ page }) => {
+  await page.goto(BASE + '/data-policy.html');
+  await expect(page.locator('body')).toContainText('教育部校園樹木資訊平臺');
+  await expect(page.locator('body')).toContainText('School/GetTrees');
+  await expect(page.locator('body')).toContainText('Open Government Data License');
+  await expect(page.locator('a[href="https://edutreemap.moe.edu.tw/trees/#/OpenData"]')).toBeVisible();
+  await expect(page.locator('a[href="https://data.gov.tw/license"]').first()).toBeVisible();
+});
+
 test('進階查詢行政區下拉選單有 12 個選項', async ({ page }) => {
   await page.goto(BASE);
   const options = await page.locator('#adv-district option').count();

@@ -607,3 +607,9 @@ sudo /usr/local/bin/docker compose up -d --build
 npm run serve
 npx playwright test
 ```
+
+## 2026-06-11 教育部校園樹木 Open Data 授權註記
+
+- `data-policy.html` 新增「延伸開放資料來源」區塊，標明教育部「校園樹木資訊平臺」Open Data / Open API。
+- 目前可公開取得的 API 為 `School/GetTrees`，內容是校園編號、校園名稱、樹種名稱與數量統計；不是單棵樹點位、照片、胸徑、樹高或冠幅資料。
+- 頁尾補上資料來源與政府資料開放授權條款（Open Government Data License，OGDL）1.0 版連結，避免未來引用校園樹木統計時來源不清。
