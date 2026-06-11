@@ -3,7 +3,7 @@ let _map, _clusterGroup;
 
 function initMap() {
   _map = L.map('map-container', {
-    center: TAIPEI_CENTER,
+    center: INITIAL_MAP_CENTER || TAIPEI_CENTER,
     zoom: DEFAULT_ZOOM,
     zoomControl: true,
   });
@@ -190,6 +190,13 @@ function fitMapToViewport() {
   const available = vh - topBar.offsetHeight - dataBar.offsetHeight - (statsBar ? statsBar.offsetHeight : 0);
   mapEl.style.height = Math.max(available, 200) + 'px';
   if (_map) _map.invalidateSize();
+}
+
+function prepareInitialMapViewport() {
+  fitMapToViewport();
+  if (!_map) return;
+  _map.invalidateSize();
+  _map.setView(INITIAL_MAP_CENTER || TAIPEI_CENTER, DEFAULT_ZOOM, { animate: false });
 }
 
 function getMap() { return _map; }

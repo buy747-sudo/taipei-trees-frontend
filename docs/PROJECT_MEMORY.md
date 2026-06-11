@@ -1,6 +1,6 @@
 # PROJECT_MEMORY — taipei-trees.org 台北市樹木查詢平台
 
-> 最後整理：2026-06-10  
+> 最後整理：2026-06-11  
 > 來源：repo 內 Markdown、`~/.claude/projects/-Users-nash911-taipei-trees-frontend/memory/`、`.gstack` checkpoints、相關 Claude JSONL 聊天記錄、`~/MASTER_PLAN.md`、`~/API_CONTRACT.md`。  
 > 注意：原 AGENTS/CLAUDE 文件曾記錄 MarkerCluster；目前程式碼現況是 `L.layerGroup` 逐點顯示，不再使用 MarkerCluster 群集。
 
@@ -36,6 +36,10 @@ taipei-trees.org 是台北市行道樹與受保護樹木的公共查詢前台，
 - `data-policy.html`：資料來源、OGDL 授權、隱私與資料使用聲明。
 - `tree.html` 單棵樹詳情頁：基本資料、生態效益卡片、計算方式說明、分享。
 - `index.html` 保留 SEO `<title>` 不改，第一屏新增民眾導覽，但仍以搜尋、掃碼與地圖為主體。
+- **2026-06-11 公開首頁 UX 決策**：首頁改為「民眾查樹優先」資訊架構。頂部只保留站名、搜尋、掃碼、說明與「工作登入」；生態效益、樹種百科、固碳排行、受保護樹木、城市綠資產等知識型入口移到地圖下方 `#explore-section`。這是避免第一屏塞滿功能按鈕，讓一般民眾先完成「找一棵樹」。
+- **2026-06-11 專業功能入口決策**：風險評估、普查、紀錄、帳號管理等作業功能維持登入後才透過 `#auth-area` 顯示；非登入民眾不在首頁看到作業入口。固定頂部「通報異常」已移除，保留底部樹木詳情 sheet 的情境式通報入口與 `/report.html` 直接網址。
+- **2026-06-11 地圖首屏決策**：`js/map.js` 新增 `prepareInitialMapViewport()`，在第一次 `loadTrees()` 前先依實際 header / data bar / stats bar 高度設定地圖尺寸並置中；`js/config.js` 新增首頁專用 `INITIAL_MAP_CENTER = [24.9915, 121.548]`，讓首批資料點落在視窗中段，避免初始畫面看起來像樹木都從地圖下緣開始顯示。
+- **2026-06-11 列表顯示決策**：首頁樹木列表維持最多 50 棵，`count-label` 改顯示「此範圍顯示 N 棵」，不再強調共 500 棵的技術性資料列，降低民眾閱讀負擔。
 - `tree.html` 新增民眾版樹木名片摘要、樹高/胸徑/冠幅重點資訊與位置提示。
 - `daan-forest-dashboard.html` 大安森林公園周邊碳匯儀表板：參考 i-Tree 的資訊架構，但採 taipei-trees.org 自有清爽公益資料風格；包含樹種排行、碳儲存、年度吸碳、雨水截留與 Leaflet 半徑分析。
 - `manifest.json` + favicon + PWA 基本設定。

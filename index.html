@@ -37,7 +37,7 @@
   <!-- Leaflet 1.9 -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <link rel="stylesheet" href="css/style.css?v=20260611f">
+  <link rel="stylesheet" href="css/style.css?v=20260611g">
 </head>
 <body>
 
@@ -45,17 +45,7 @@
   <header id="top-bar">
     <div id="top-title-row">
       <div id="site-title"><span aria-hidden="true">🌳</span> 台北市樹木查詢 <span id="version-badge">v0.8</span></div>
-      <!-- ── 功能頁導覽列（手機自動換行橫向捲動；桌機與標題同行）── -->
-      <nav id="page-nav-strip">
-        <a href="eco-benefits.html">🌿 生態效益</a>
-        <a href="species.html">🌳 樹種百科</a>
-        <a href="carbon-ranking.html">🏆 固碳排行</a>
-        <a href="law.html">⚖️ 法規查詢</a>
-        <a href="about.html">📖 知識庫</a>
-        <a href="green-assets.html">🌍 綠資產</a>
-      </nav>
       <div class="top-nav-links">
-        <a href="report.html" id="report-nav-btn">通報異常</a>
         <a href="guide.html"  class="nav-link">說明 ？</a>
         <span id="auth-area"></span>
       </div>
@@ -169,6 +159,47 @@
   <!-- ── 樹木列表 ─────────────────────────────────────────── -->
   <ul id="tree-list" aria-label="樹木列表"></ul>
 
+  <!-- ── 公開探索入口 ─────────────────────────────────────── -->
+  <section id="explore-section" aria-label="探索台北樹木">
+    <div class="explore-heading">
+      <p class="explore-kicker">探索台北樹木</p>
+      <h2>從一棵樹，看見整座城市的綠意</h2>
+      <p>地圖負責找樹，這裡把民眾最常看的知識、統計與故事整理成入口。</p>
+    </div>
+    <div class="explore-grid">
+      <a class="explore-card explore-card--primary" href="/green-assets.html">
+        <span class="explore-icon" aria-hidden="true">🌍</span>
+        <strong>城市綠資產</strong>
+        <small>全市統計與碳匯圖表</small>
+      </a>
+      <a class="explore-card" href="/species.html">
+        <span class="explore-icon" aria-hidden="true">🌳</span>
+        <strong>樹種百科</strong>
+        <small>認識常見行道樹</small>
+      </a>
+      <a class="explore-card" href="/eco-benefits.html">
+        <span class="explore-icon" aria-hidden="true">🌿</span>
+        <strong>生態效益</strong>
+        <small>看懂樹木的城市服務</small>
+      </a>
+      <a class="explore-card" href="/carbon-ranking.html">
+        <span class="explore-icon" aria-hidden="true">🏆</span>
+        <strong>固碳排行</strong>
+        <small>哪些樹最會存碳</small>
+      </a>
+      <a class="explore-card" href="/about.html">
+        <span class="explore-icon" aria-hidden="true">★</span>
+        <strong>受保護樹木</strong>
+        <small>城市老朋友的故事</small>
+      </a>
+      <a class="explore-card" href="/guide.html">
+        <span class="explore-icon" aria-hidden="true">?</span>
+        <strong>使用說明</strong>
+        <small>掃碼、搜尋、定位教學</small>
+      </a>
+    </div>
+  </section>
+
   </main>
 
   <!-- ── 底部 Sheet（樹木詳情）───────────────────────────── -->
@@ -229,7 +260,7 @@
   <!-- ── Scripts（順序依賴：config → auth → api → map → markers → sheet → filters → qr → stats → app）── -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-  <script src="js/config.js?v=20260610b"></script>
+  <script src="js/config.js?v=20260611a"></script>
   <script src="js/auth.js"></script>
   <script>
     // 頂部登入/登出按鈕
@@ -271,7 +302,7 @@
   </script>
   <script src="js/api.js?v=20260609b"></script>
   <script src="js/species.js?v=20260609b"></script>
-  <script src="js/map.js?v=20260611c"></script>
+  <script src="js/map.js?v=20260611e"></script>
   <script src="js/markers.js?v=20260609b"></script>
   <script src="js/benefits.js?v=20260609b"></script>
   <script src="js/sheet.js?v=20260611f"></script>
@@ -281,7 +312,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="js/measure.js?v=20260609b"></script>
   <script src="js/export.js?v=20260609b"></script>
-  <script src="js/app.js?v=20260611a"></script>
+  <script src="js/app.js?v=20260611b"></script>
   <script src="js/risk-layer.js?v=20260610c"></script>
   <script>
     // ── 風險圖層初始化（登入員工才啟用）

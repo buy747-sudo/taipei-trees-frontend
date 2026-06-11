@@ -19,40 +19,12 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 #top-title-row {
-  display: flex; justify-content: space-between; align-items: flex-start;
+  display: flex; justify-content: space-between; align-items: center;
   gap: 10px; flex-wrap: wrap;
 }
 #site-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
 #version-badge { font-size: 0.65rem; font-weight: 400; opacity: 0.55; letter-spacing: 0.02em; vertical-align: middle; }
 .top-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; justify-content: flex-end; }
-
-/* ── 功能頁導覽列（title row 下方，橫向捲動）────────────── */
-#page-nav-strip {
-  display: flex; gap: 0; align-items: stretch;
-  overflow-x: auto; white-space: nowrap;
-  scrollbar-width: none;
-  margin: 6px -12px 6px;          /* 向左右出血對齊 header padding */
-  padding: 0 12px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-}
-#page-nav-strip::-webkit-scrollbar { display: none; }
-#page-nav-strip a {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 14px;
-  color: #fff;
-  text-decoration: none; font-size: 0.82rem; font-weight: 500;
-  white-space: nowrap; flex-shrink: 0;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-}
-#page-nav-strip a:hover {
-  color: #fff;
-  border-bottom-color: #7ecb94;
-}
-#page-nav-strip a.active {
-  color: #fff; font-weight: 700;
-  border-bottom-color: #7ecb94;
-}
 
 /* ── Auth area（右上角登入/登出）───────────────────────── */
 #auth-login-btn {
@@ -335,6 +307,90 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 .badge-street { background: #e3f2fd; color: #1565c0; }
 .badge-protected { background: #fce4ec; color: #b71c1c; }
 
+/* ── Public Explore Section ──────────────────────────── */
+#explore-section {
+  background: #f7fbf8;
+  border-top: 1px solid #dbe7dd;
+  padding: 18px 14px 20px;
+}
+.explore-heading {
+  max-width: 980px;
+  margin: 0 auto 12px;
+}
+.explore-kicker {
+  color: #1a5c2a;
+  font-size: 0.76rem;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.explore-heading h2 {
+  color: #173f24;
+  font-size: 1.2rem;
+  line-height: 1.28;
+  margin-bottom: 5px;
+}
+.explore-heading p:last-child {
+  color: #506657;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.explore-grid {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.explore-card {
+  min-height: 94px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-content: center;
+  background: #fff;
+  border: 1px solid #d7e6d8;
+  border-radius: 8px;
+  padding: 13px 14px;
+  color: #173f24;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(26, 92, 42, 0.06);
+}
+.explore-card:hover,
+.explore-card:focus {
+  border-color: #7ecb94;
+  background: #f0f8f1;
+  outline: none;
+}
+.explore-card--primary {
+  background: #eef8f0;
+  border-color: #9ad5aa;
+}
+.explore-icon {
+  grid-row: 1 / span 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a5c2a;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1rem;
+}
+.explore-card strong {
+  font-size: 0.96rem;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+.explore-card small {
+  color: #627668;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
 /* ── Bottom Sheet ─────────────────────────────────────── */
 #sheet-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
@@ -474,6 +530,14 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   #public-intro { grid-template-columns: 1fr; gap: 10px; }
   .intro-steps { justify-content: flex-start; }
   #map-container { height: calc(100vh - 352px); }
+  .explore-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .explore-card {
+    grid-template-columns: 30px minmax(0, 1fr);
+    min-height: 88px;
+    padding: 12px 10px;
+  }
+  .explore-icon { width: 30px; height: 30px; font-size: 0.88rem; }
+  .explore-card strong { font-size: 0.9rem; }
 }
 
 /* ── Map Legend ───────────────────────────────────────── */
@@ -513,14 +577,6 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
   padding: 3px 10px; text-decoration: none; white-space: nowrap;
 }
 .nav-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
-#report-nav-btn {
-  font-size: 0.78rem; color: #fff; background: #b45309;
-  border: 1px solid rgba(255,255,255,0.4); border-radius: 14px;
-  padding: 3px 10px; text-decoration: none; white-space: nowrap;
-  font-weight: 800;
-}
-#report-nav-btn:hover { background: #92400e; }
-
 /* ── benefit chips（底部 sheet 效益摘要）── */
 .benefit-chips {
   display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 2px;
@@ -786,32 +842,18 @@ a.btn-nav:hover { background: #dbeafe; }
 #welcome-close:hover { color: #1a5c2a; }
 
 /* ── 頂部壓縮 ─────────────────────────────────────────── */
-/* page-nav-strip 已移入 #top-title-row（flex 子元素）：
-   手機 = order:3 + flex-basis:100% 自動換到第二行；桌機 = 同行置中 */
 #top-bar { padding: 6px 12px 7px; }
 #site-title { margin-bottom: 0; }
 #top-title-row { align-items: center; }
-#top-title-row > #page-nav-strip {
-  order: 3; flex-basis: 100%;
-  margin: 3px -12px 0; padding: 0 12px;
-}
-#page-nav-strip a { padding: 5px 12px; font-size: 0.8rem; }
 #search-row { margin-bottom: 5px; }
 
-/* 桌機：功能頁導覽併入標題列同一行，省一整行 */
 @media (min-width: 900px) {
   #top-title-row { flex-wrap: nowrap; }
   #site-title { flex-shrink: 0; }
-  #top-title-row > #page-nav-strip {
-    order: 0; flex: 1 1 auto; flex-basis: auto;
-    margin: 0 8px; padding: 0;
-    border-top: none; justify-content: center;
-  }
   #top-title-row .top-nav-links { flex-shrink: 0; }
 }
 
-/* 手機：隱藏資料數字橫條（數字已在統計面板與綠資產頁）
-   並覆寫舊的 display:block，讓標題與通報/登入鈕同行、導覽列換第二行 */
+/* 手機：隱藏資料數字橫條（數字已在統計面板與綠資產頁） */
 @media (max-width: 640px) {
   #data-bar { display: none; }
   #top-title-row { display: flex; flex-wrap: wrap; }
@@ -819,4 +861,8 @@ a.btn-nav:hover { background: #dbeafe; }
   #version-badge { display: none; }
   .top-nav-links { margin-bottom: 0; gap: 4px; }
   .top-nav-links a, #auth-area a, #auth-area button { font-size: 0.74rem; padding: 4px 8px; }
+}
+
+@media (max-width: 360px) {
+  .explore-grid { grid-template-columns: 1fr; }
 }

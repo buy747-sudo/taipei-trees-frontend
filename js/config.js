@@ -1,6 +1,7 @@
 const API_BASE = 'https://office.yiren-eco.online/public';
 
 const TAIPEI_CENTER = [25.034, 121.527];
+const INITIAL_MAP_CENTER = [24.9915, 121.548];
 const DEFAULT_ZOOM = 14;
 
 const DISTRICT_CENTERS = {

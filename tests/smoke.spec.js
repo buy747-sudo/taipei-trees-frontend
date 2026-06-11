@@ -52,11 +52,13 @@ test('頁面標題正確', async ({ page }) => {
   await expect(page).toHaveTitle(/台北市樹木查詢/);
 });
 
-test('首頁保留 SEO 標題並顯示功能導覽', async ({ page }) => {
+test('首頁保留 SEO 標題並顯示民眾探索入口', async ({ page }) => {
   await page.goto(BASE);
   await expect(page).toHaveTitle('台北市樹木查詢｜行道樹 & 受保護樹｜掃碼即時查詢');
-  await expect(page.locator('#page-nav-strip')).toContainText('生態效益');
-  await expect(page.locator('#page-nav-strip')).toContainText('綠資產');
+  await expect(page.locator('#page-nav-strip')).toHaveCount(0);
+  await expect(page.locator('#explore-section')).toContainText('城市綠資產');
+  await expect(page.locator('#explore-section')).toContainText('樹種百科');
+  await expect(page.locator('#explore-section')).toContainText('受保護樹木');
   await expect(page.locator('#auth-login-btn')).toContainText('工作登入');
 });
 
@@ -125,9 +127,9 @@ test('daan-forest-dashboard.html 顯示大安森林公園碳匯儀表板', async
 });
 
 // ── report.html ─────────────────────────────────────────────────────────────
-test('首頁提供明顯的民眾通報入口', async ({ page }) => {
+test('首頁公開頂部不顯示通報大按鈕', async ({ page }) => {
   await page.goto(BASE);
-  await expect(page.locator('#report-nav-btn')).toContainText('通報異常');
+  await expect(page.locator('#report-nav-btn')).toHaveCount(0);
   await expect(page.locator('.intro-report-link')).toHaveCount(0);
 });
 

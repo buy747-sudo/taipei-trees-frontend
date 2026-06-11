@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMeasure();
   initExport();
   initWelcome();
+  prepareInitialMapViewport();
 
   loadTrees();
 });
