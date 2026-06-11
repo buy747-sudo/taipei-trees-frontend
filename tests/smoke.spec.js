@@ -290,6 +290,36 @@ test('daan-forest-dashboard.html 顯示大安森林公園碳匯儀表板', async
   await expect(page.locator('#daan-map')).toBeVisible();
 });
 
+test('green-assets.html 顯示校園樹木延伸統計來源', async ({ page }) => {
+  await page.route('**/public/stats', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      total: 100,
+      street: 96,
+      protected: 4,
+      total_carbon_tonnes: 1200,
+      total_annual_co2_tonnes: 80,
+      by_district: {
+        '大安區': { total: 60, street: 58, protected: 2, carbon_tonnes: 700 },
+        '中正區': { total: 40, street: 38, protected: 2, carbon_tonnes: 500 },
+      },
+      top_species: [
+        { name: '樟樹', count: 40 },
+        { name: '榕樹', count: 30 },
+      ],
+    }),
+  }));
+
+  await page.goto(BASE + '/green-assets.html');
+  await expect(page.locator('#campus-assets')).toBeVisible();
+  await expect(page.locator('#campus-assets')).toContainText('校園樹木延伸統計');
+  await expect(page.locator('#campus-assets')).toContainText('教育部校園樹木資訊平臺');
+  await expect(page.locator('#campus-assets')).toContainText('School/GetTrees');
+  await expect(page.locator('#campus-assets')).toContainText('校園編號、校園名稱、樹種名稱與數量統計');
+  await expect(page.locator('#campus-assets a[href="https://edutreemap.moe.edu.tw/trees/#/OpenData"]')).toBeVisible();
+  await expect(page.locator('#campus-assets a[href="https://data.gov.tw/license"]')).toBeVisible();
+});
+
 // ── report.html ─────────────────────────────────────────────────────────────
 test('首頁公開頂部不顯示通報大按鈕', async ({ page }) => {
   await page.goto(BASE);
