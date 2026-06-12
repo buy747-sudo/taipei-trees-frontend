@@ -555,6 +555,7 @@ test('首頁底部 sheet 顯示城市貢獻與公開樹的信箱', async ({ page
   await expect(page.locator('#tree-mailbox')).toContainText('城市朋友');
   await expect(page.locator('#tree-mailbox')).toContainText('謝謝你在夏天給大家一片樹蔭');
   await expect(page.locator('#tree-mailbox .mailbox-tag').first()).toHaveCSS('clip-path', /polygon/);
+  await expect(page.locator('#tree-mailbox .mailbox-tag').first()).toHaveCSS('background-image', /radial-gradient/);
   await expect(page.locator('#detail-sheet')).not.toContainText('公開維護紀錄');
 
   await page.locator('#tree-mailbox input[name="nickname"]').fill('小樹友');
