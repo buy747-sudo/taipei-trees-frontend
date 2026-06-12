@@ -70,6 +70,7 @@ const Auth = (() => {
       display_name: user.display_name,
       role: user.role,
       contractor_id: user.contractor_id,
+      features: user.features || null,  // 公司功能開關（GOVERNANCE_PLAN）
     });
     return data;
   }
