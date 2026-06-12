@@ -191,13 +191,9 @@ function openSheet(tree) {
   const benefitData = typeof calcBenefits === 'function' ? calcBenefits(tree) : null;
   renderSheetPassbook(tree, benefitData);
   renderTreeMailbox(tree);
-  const co2 = tree.annual_co2_kg || benefitData?.co2_kg;
   const carbon = document.getElementById('sheet-carbon');
-  if (co2) {
-    const km = Math.round(co2 / 0.196);
-    carbon.innerHTML = `🌿 每年固碳約 <strong>${co2} kg CO₂</strong>（等同少開車 ${km} 公里）`;
-    carbon.hidden = false;
-  } else {
+  if (carbon) {
+    carbon.innerHTML = '';
     carbon.hidden = true;
   }
 

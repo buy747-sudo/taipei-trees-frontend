@@ -488,6 +488,7 @@ test('首頁底部 sheet 顯示民眾版生態存摺與樹的信箱', async ({ p
   await expect(page.locator('#detail-sheet')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('#sheet-passbook')).toContainText('台北行道樹生態存摺');
   await expect(page.locator('#sheet-passbook')).toContainText('每年固碳量');
+  await expect(page.locator('#sheet-carbon')).toBeHidden();
   await expect(page.locator('#tree-mailbox')).toContainText('樹的信箱');
   await expect(page.locator('#tree-mailbox')).toContainText('這棵樹還沒有留言');
   await expect(page.locator('#detail-sheet')).not.toContainText('公開維護紀錄');
