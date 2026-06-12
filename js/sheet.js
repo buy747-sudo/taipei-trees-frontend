@@ -1,5 +1,151 @@
 // js/sheet.js — bottom sheet + history.pushState
 
+const TREE_MAILBOX_MOODS = ['🌿', '💚', '🌸', '🙏', '💫', '🌳', '☀️', '🌧️', '❤️', '😊'];
+
+function sheetEscapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function treeMailboxKey(treeCode) {
+  return `tt_tree_mailbox:${treeCode || 'unknown'}`;
+}
+
+function readTreeMailbox(treeCode) {
+  try {
+    const raw = localStorage.getItem(treeMailboxKey(treeCode));
+    const items = raw ? JSON.parse(raw) : [];
+    return Array.isArray(items) ? items.slice(0, 20) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeTreeMailbox(treeCode, items) {
+  try {
+    localStorage.setItem(treeMailboxKey(treeCode), JSON.stringify(items.slice(0, 20)));
+  } catch {
+    showToast('無法儲存祈福牌，請確認瀏覽器儲存設定');
+  }
+}
+
+function renderSheetPassbook(tree, benefitData) {
+  const passbook = document.getElementById('sheet-passbook');
+  if (!passbook) return;
+
+  const co2 = Number(tree.annual_co2_kg || benefitData?.co2_kg || 0);
+  const co2Text = co2 > 0 ? `${co2} kg CO₂ / 年` : '資料建置中';
+  const km = co2 > 0 ? Math.max(1, Math.round(co2 / 0.196)) : null;
+  const category = CATEGORY_LABEL[tree.tree_category] || '樹木';
+  const dbh = tree.dbh_cm != null ? `胸徑 ${tree.dbh_cm} cm` : '胸徑資料建置中';
+  const district = tree.district || '台北市';
+  const species = tree.species_name || '這棵樹';
+
+  passbook.innerHTML =
+    `<div class="passbook-cover">` +
+      `<div class="passbook-kicker">台北行道樹生態存摺</div>` +
+      `<p>這棵${sheetEscapeHtml(species)}每天站在城市裡，默默幫我們留下綠色資產。</p>` +
+      `<div class="passbook-tags">` +
+        `<span>${sheetEscapeHtml(district)}</span>` +
+        `<span>${sheetEscapeHtml(dbh)}</span>` +
+        `<span>${sheetEscapeHtml(category)}</span>` +
+      `</div>` +
+    `</div>` +
+    `<div class="passbook-carbon-card">` +
+      `<div class="passbook-carbon-icon" aria-hidden="true">♻</div>` +
+      `<div>` +
+        `<div class="passbook-carbon-label">每年固碳量</div>` +
+        `<div class="passbook-carbon-value">約 ${sheetEscapeHtml(co2Text)}</div>` +
+        `<div class="passbook-carbon-story">${km ? `每年約等同少開車 ${km} 公里` : '目前先呈現已知樹木資料，其他效益待方法學穩定後再補。'}</div>` +
+      `</div>` +
+    `</div>`;
+  passbook.hidden = false;
+}
+
+function renderTreeMailbox(tree) {
+  const mailbox = document.getElementById('tree-mailbox');
+  if (!mailbox) return;
+
+  const treeCode = tree.registry_code || '';
+  const messages = readTreeMailbox(treeCode);
+  const messageHtml = messages.length
+    ? messages.map((m) =>
+        `<article class="mailbox-tag">` +
+          `<div class="mailbox-tag-mood">${sheetEscapeHtml(m.mood || '🌿')}</div>` +
+          `<div class="mailbox-tag-text">${sheetEscapeHtml(m.message)}</div>` +
+          `<div class="mailbox-tag-footer">` +
+            `<span>${sheetEscapeHtml(m.nickname)}</span>` +
+            `<time>${sheetEscapeHtml(m.date)}</time>` +
+          `</div>` +
+        `</article>`
+      ).join('')
+    : `<div class="mailbox-empty">這棵樹還沒有留言，成為第一個留言的人吧！🌱</div>`;
+
+  mailbox.innerHTML =
+    `<div class="mailbox-header">` +
+      `<h3>🏷 樹的信箱</h3>` +
+      `<small>${messages.length ? `${messages.length} 張祈福牌` : '本機尚無祈福牌'}</small>` +
+    `</div>` +
+    `<div class="mailbox-list">${messageHtml}</div>` +
+    `<form class="mailbox-form">` +
+      `<div class="mailbox-form-title">✍ 留下你對這棵樹的話</div>` +
+      `<div class="mailbox-moods" role="group" aria-label="選擇祈福牌心情">` +
+        TREE_MAILBOX_MOODS.map((m, i) =>
+          `<button type="button" class="mailbox-mood${i === 0 ? ' active' : ''}" data-mood="${sheetEscapeHtml(m)}">${sheetEscapeHtml(m)}</button>`
+        ).join('') +
+      `</div>` +
+      `<input name="nickname" maxlength="10" autocomplete="nickname" placeholder="你的暱稱（最多10字）">` +
+      `<textarea name="message" maxlength="100" rows="3" placeholder="寫下你想對這棵樹說的話…（最多100字）"></textarea>` +
+      `<div class="mailbox-form-foot">` +
+        `<small>祈福牌目前保存在本裝置，請勿留下個資。</small>` +
+        `<span class="mailbox-count">0/100</span>` +
+      `</div>` +
+      `<button type="submit" class="mailbox-submit">掛上祈福牌 🏷</button>` +
+    `</form>`;
+  mailbox.hidden = false;
+
+  let selectedMood = TREE_MAILBOX_MOODS[0];
+  mailbox.querySelectorAll('.mailbox-mood').forEach((button) => {
+    button.addEventListener('click', () => {
+      selectedMood = button.dataset.mood || TREE_MAILBOX_MOODS[0];
+      mailbox.querySelectorAll('.mailbox-mood').forEach((b) => b.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
+
+  const textarea = mailbox.querySelector('textarea[name="message"]');
+  const counter = mailbox.querySelector('.mailbox-count');
+  textarea.addEventListener('input', () => {
+    counter.textContent = `${textarea.value.length}/100`;
+  });
+
+  mailbox.querySelector('.mailbox-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const nicknameInput = mailbox.querySelector('input[name="nickname"]');
+    const nickname = nicknameInput.value.trim().slice(0, 10);
+    const message = textarea.value.trim().slice(0, 100);
+    if (!nickname) {
+      showToast('請填寫暱稱');
+      nicknameInput.focus();
+      return;
+    }
+    if (!message) {
+      showToast('請寫下想對樹說的話');
+      textarea.focus();
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const next = [{ nickname, message, mood: selectedMood, date: today }, ...readTreeMailbox(treeCode)];
+    writeTreeMailbox(treeCode, next);
+    renderTreeMailbox(tree);
+    showToast('祈福牌已掛上');
+  });
+}
+
 function openSheet(tree) {
   const sheet = document.getElementById('detail-sheet');
   const overlay = document.getElementById('sheet-overlay');
@@ -43,6 +189,8 @@ function openSheet(tree) {
 
   // 生態效益（優先用 API 固碳值，否則用 benefits.js 計算）
   const benefitData = typeof calcBenefits === 'function' ? calcBenefits(tree) : null;
+  renderSheetPassbook(tree, benefitData);
+  renderTreeMailbox(tree);
   const co2 = tree.annual_co2_kg || benefitData?.co2_kg;
   const carbon = document.getElementById('sheet-carbon');
   if (co2) {

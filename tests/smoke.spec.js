@@ -463,6 +463,43 @@ test('首頁底部 sheet 提供帶樹籍的通報入口', async ({ page }) => {
   await expect(reportLink).toHaveAttribute('href', /species_name=/);
 });
 
+test('首頁底部 sheet 顯示民眾版生態存摺與樹的信箱', async ({ page }) => {
+  await page.route('**/public/tree/TT0000000002', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      tree: {
+        registry_code: 'TT0000000002',
+        species_name: '臺灣欒樹',
+        scientific_name: 'Koelreuteria elegans',
+        tree_category: 'street',
+        district: '大安區',
+        managing_unit: '仁愛路',
+        height_m: 8,
+        dbh_cm: 29,
+        crown_m: 5,
+        annual_co2_kg: 0.7,
+        lat: 25.03,
+        lng: 121.54,
+      },
+    }),
+  }));
+
+  await page.goto(BASE + '/?id=TT0000000002');
+  await expect(page.locator('#detail-sheet')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('#sheet-passbook')).toContainText('台北行道樹生態存摺');
+  await expect(page.locator('#sheet-passbook')).toContainText('每年固碳量');
+  await expect(page.locator('#tree-mailbox')).toContainText('樹的信箱');
+  await expect(page.locator('#tree-mailbox')).toContainText('這棵樹還沒有留言');
+  await expect(page.locator('#detail-sheet')).not.toContainText('公開維護紀錄');
+
+  await page.locator('#tree-mailbox input[name="nickname"]').fill('小樹友');
+  await page.locator('#tree-mailbox textarea[name="message"]').fill('謝謝你陪大家走路回家');
+  await page.locator('#tree-mailbox button[type="submit"]').click();
+
+  await expect(page.locator('#tree-mailbox')).toContainText('小樹友');
+  await expect(page.locator('#tree-mailbox')).toContainText('謝謝你陪大家走路回家');
+});
+
 test('report.html 送出通報後上傳照片且不需要 angle', async ({ page }) => {
   let reportPayload = null;
   let photoContentType = '';
