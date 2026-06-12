@@ -49,10 +49,15 @@ function _treeIcon(tree) {
   const group = classifyTreeVisual(tree);
   const style = TREE_MARKER_STYLES[group] || TREE_MARKER_STYLES.evergreen;
   const size = markerSize(tree);
-  const title = `${tree.species_name || '未知樹種'}｜${style.label}`;
+  const messageCount = Number(tree.message_count || 0);
+  const hasMessages = messageCount > 0;
+  const title = `${tree.species_name || '未知樹種'}｜${style.label}${hasMessages ? `｜${messageCount} 張祈福牌` : ''}`;
+  const badge = hasMessages
+    ? `<span class="tree-message-badge" aria-label="${messageCount} 張祈福牌">${messageCount}</span>`
+    : '';
   return L.divIcon({
     className: '',
-    html: `<div class="tree-marker ${group}" title="${title}" aria-label="${title}">${markerShape(style, size)}</div>`,
+    html: `<div class="tree-marker ${group}${hasMessages ? ' has-messages' : ''}" title="${title}" aria-label="${title}">${markerShape(style, size)}${badge}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });

@@ -54,7 +54,7 @@ test('頁面標題正確', async ({ page }) => {
 
 test('首頁保留 SEO 標題並顯示民眾探索入口', async ({ page }) => {
   await page.goto(BASE);
-  await expect(page).toHaveTitle('台北市樹木查詢｜行道樹 & 受保護樹｜掃碼即時查詢');
+  await expect(page).toHaveTitle('台北市樹木查詢｜掛上祈福牌給一棵樹｜掃碼即時查詢');
   await expect(page.locator('#page-nav-strip')).toHaveCount(0);
   await expect(page.locator('#tree-list')).toHaveCount(0);
   await expect(page.locator('body')).not.toContainText('此範圍顯示');
@@ -153,6 +153,35 @@ test('首頁依裝置與 zoom 動態調整地圖載入量', async ({ context }) 
   expect(await firstLimitFor(1280, 14)).toBe(800);
   expect(await firstLimitFor(1280, 12)).toBe(300);
   expect(await firstLimitFor(1280, 17)).toBe(1200);
+});
+
+test('首頁可篩選有祈福牌的樹並在地圖標示', async ({ page }) => {
+  const hasMessagesParams = [];
+  await page.route('**/public/trees**', route => {
+    const url = new URL(route.request().url());
+    hasMessagesParams.push(url.searchParams.get('has_messages'));
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        total: 1,
+        trees: [{
+          registry_code: 'TT_MSG_01',
+          species_name: '榕樹',
+          tree_category: 'street',
+          lat: 25.03,
+          lng: 121.54,
+          message_count: 3,
+        }],
+      }),
+    });
+  });
+
+  await page.goto(BASE);
+  await page.locator('#message-filter-btn').click();
+
+  await expect.poll(() => hasMessagesParams.includes('1')).toBe(true);
+  await expect(page.locator('.tree-marker.has-messages')).toHaveCount(1);
+  await expect(page.locator('.tree-message-badge')).toContainText('3');
 });
 
 test('首頁地圖樹點依樹種分類與冠幅呈現顏色形狀大小', async ({ page }) => {
@@ -463,7 +492,8 @@ test('首頁底部 sheet 提供帶樹籍的通報入口', async ({ page }) => {
   await expect(reportLink).toHaveAttribute('href', /species_name=/);
 });
 
-test('首頁底部 sheet 顯示民眾版生態存摺與樹的信箱', async ({ page }) => {
+test('首頁底部 sheet 顯示城市貢獻與公開樹的信箱', async ({ page }) => {
+  let postedMessage = null;
   await page.route('**/public/tree/TT0000000002', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
@@ -483,22 +513,92 @@ test('首頁底部 sheet 顯示民眾版生態存摺與樹的信箱', async ({ p
       },
     }),
   }));
+  await page.route('**/public/tree/TT0000000002/messages', async route => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          messages: [{
+            id: 101,
+            nickname: '城市朋友',
+            message: '謝謝你在夏天給大家一片樹蔭',
+            mood: '☀️',
+            created_at: '2026-06-12',
+          }],
+        }),
+      });
+      return;
+    }
+    postedMessage = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        message: {
+          id: 102,
+          nickname: postedMessage.nickname,
+          message: postedMessage.message,
+          mood: postedMessage.mood,
+          created_at: '2026-06-12',
+        },
+      }),
+    });
+  });
 
   await page.goto(BASE + '/?id=TT0000000002');
   await expect(page.locator('#detail-sheet')).toBeVisible({ timeout: 5000 });
-  await expect(page.locator('#sheet-passbook')).toContainText('台北行道樹生態存摺');
+  await expect(page.locator('#sheet-passbook')).toContainText('這棵樹的城市貢獻');
   await expect(page.locator('#sheet-passbook')).toContainText('每年固碳量');
   await expect(page.locator('#sheet-carbon')).toBeHidden();
   await expect(page.locator('#tree-mailbox')).toContainText('樹的信箱');
-  await expect(page.locator('#tree-mailbox')).toContainText('這棵樹還沒有留言');
+  await expect(page.locator('#tree-mailbox')).toContainText('公開顯示');
+  await expect(page.locator('#tree-mailbox')).toContainText('城市朋友');
+  await expect(page.locator('#tree-mailbox')).toContainText('謝謝你在夏天給大家一片樹蔭');
+  await expect(page.locator('#tree-mailbox .mailbox-tag').first()).toHaveCSS('clip-path', /polygon/);
   await expect(page.locator('#detail-sheet')).not.toContainText('公開維護紀錄');
 
   await page.locator('#tree-mailbox input[name="nickname"]').fill('小樹友');
   await page.locator('#tree-mailbox textarea[name="message"]').fill('謝謝你陪大家走路回家');
   await page.locator('#tree-mailbox button[type="submit"]').click();
 
+  await expect.poll(() => postedMessage).toMatchObject({
+    nickname: '小樹友',
+    message: '謝謝你陪大家走路回家',
+  });
   await expect(page.locator('#tree-mailbox')).toContainText('小樹友');
   await expect(page.locator('#tree-mailbox')).toContainText('謝謝你陪大家走路回家');
+});
+
+test('樹的信箱會擋下廣告與欺騙性留言', async ({ page }) => {
+  let postCount = 0;
+  await page.route('**/public/tree/TT0000000003', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      tree: {
+        registry_code: 'TT0000000003',
+        species_name: '樟樹',
+        tree_category: 'street',
+        district: '大安區',
+        annual_co2_kg: 12,
+      },
+    }),
+  }));
+  await page.route('**/public/tree/TT0000000003/messages', async route => {
+    if (route.request().method() === 'POST') postCount += 1;
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ messages: [] }),
+    });
+  });
+
+  await page.goto(BASE + '/?id=TT0000000003');
+  await expect(page.locator('#detail-sheet')).toBeVisible({ timeout: 5000 });
+  await page.locator('#tree-mailbox input[name="nickname"]').fill('測試');
+  await page.locator('#tree-mailbox textarea[name="message"]').fill('加LINE投資保證獲利 https://bad.example');
+  await page.locator('#tree-mailbox button[type="submit"]').click();
+
+  await expect(page.locator('#toast')).toContainText('請不要留下網址、聯絡方式或廣告內容');
+  await expect.poll(() => postCount).toBe(0);
 });
 
 test('report.html 送出通報後上傳照片且不需要 angle', async ({ page }) => {

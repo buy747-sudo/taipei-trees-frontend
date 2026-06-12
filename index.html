@@ -15,29 +15,29 @@
   <link rel="apple-touch-icon" href="/favicon.svg">
 
   <!-- ── SEO ───────────────────────────────────────────── -->
-  <title>台北市樹木查詢｜行道樹 &amp; 受保護樹｜掃碼即時查詢</title>
-  <meta name="description" content="台北市行道樹與受保護樹木查詢地圖，收錄逾 9 萬棵行道樹與 3,800 棵受保護樹木。支援 QR 掃碼、GPS 即時定位、行政區篩選，資料來源：臺北市政府開放資料平台（OGDL）。">
-  <meta name="keywords" content="台北市行道樹,受保護樹木,行道樹地圖,台北市樹木查詢,樹籍查詢,台北市行道樹分布,掃碼查樹">
+  <title>台北市樹木查詢｜掛上祈福牌給一棵樹｜掃碼即時查詢</title>
+  <meta name="description" content="台北市行道樹與受保護樹木查詢地圖，收錄逾 9 萬棵行道樹與 3,800 棵受保護樹木。支援 QR 掃碼、GPS 即時定位、行政區篩選，也能替身邊的樹掛上祈福牌留言。資料來源：臺北市政府開放資料平台（OGDL）。">
+  <meta name="keywords" content="台北市行道樹,受保護樹木,行道樹地圖,台北市樹木查詢,樹籍查詢,掃碼查樹,樹木祈福牌,掛上祈福牌">
   <meta name="google-site-verification" content="qvdlRayT2y3e9oHzvTrSABopj-PoQjbZFcddY-XaBbg">
   <link rel="canonical" href="https://taipei-trees.org/">
 
   <!-- ── Open Graph（LINE / Facebook 分享）──────────────── -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://taipei-trees.org/">
-  <meta property="og:title" content="台北市樹木查詢｜行道樹 &amp; 受保護樹｜掃碼即時查詢">
-  <meta property="og:description" content="台北市行道樹與受保護樹木查詢地圖，收錄逾 9 萬棵行道樹與 3,800 棵受保護樹木。支援 QR 掃碼、GPS 即時定位、行政區篩選。">
+  <meta property="og:title" content="台北市樹木查詢｜掛上祈福牌給一棵樹">
+  <meta property="og:description" content="掃描樹牌 QR Code，查看台北市行道樹與受保護樹木資料，也能替身邊的樹掛上一張祈福牌留言。">
   <meta property="og:locale" content="zh_TW">
   <meta property="og:site_name" content="taipei-trees.org">
 
   <!-- ── Twitter Card ───────────────────────────────────── -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="台北市樹木查詢｜行道樹 &amp; 受保護樹">
-  <meta name="twitter:description" content="台北市行道樹與受保護樹木查詢地圖，收錄逾 9 萬棵，支援掃碼即時查詢。">
+  <meta name="twitter:title" content="台北市樹木查詢｜掛上祈福牌給一棵樹">
+  <meta name="twitter:description" content="掃碼查樹、看城市貢獻，也能替身邊的樹掛上祈福牌留言。">
 
   <!-- Leaflet 1.9 -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <link rel="stylesheet" href="css/style.css?v=20260612a">
+  <link rel="stylesheet" href="css/style.css?v=20260612d">
 </head>
 <body>
 
@@ -63,6 +63,7 @@
         <button class="chip" data-cat="street">行道樹</button>
         <button class="chip" data-cat="protected">受保護樹</button>
       </div>
+      <button id="message-filter-btn" type="button" aria-pressed="false">🏷 有祈福牌的樹</button>
       <button id="adv-search-btn" aria-label="進階查詢">🔍 進階查詢</button>
       <div id="adv-active-tags" hidden></div>
     </div>
@@ -348,13 +349,13 @@
       }
     })();
   </script>
-  <script src="js/api.js?v=20260609b"></script>
+  <script src="js/api.js?v=20260612a"></script>
   <script src="js/species.js?v=20260609b"></script>
   <script src="js/map.js?v=20260611f"></script>
-  <script src="js/markers.js?v=20260611b"></script>
+  <script src="js/markers.js?v=20260612a"></script>
   <script src="js/benefits.js?v=20260611g"></script>
-  <script src="js/sheet.js?v=20260612b"></script>
-  <script src="js/filters.js?v=20260611i"></script>
+  <script src="js/sheet.js?v=20260612c"></script>
+  <script src="js/filters.js?v=20260612a"></script>
   <script src="js/qr.js?v=20260609b"></script>
   <script src="js/stats.js?v=20260611a"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

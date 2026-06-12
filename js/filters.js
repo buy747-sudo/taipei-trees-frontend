@@ -8,6 +8,7 @@ const filterState = {
   group:    '',   // 樹型：evergreen/deciduous/flowering/palm/conifer/protected
   dbh:      '',   // 胸徑區間，格式 "min-max"（max 可空 = 不設上限）
   height:   '',   // 樹高區間，格式同上
+  hasMessages: false,
 };
 
 // "15-30" → { min: 15, max: 30 }；"75-" → { min: 75 }
@@ -26,6 +27,7 @@ function getFilterParams() {
   if (filterState.species) params.species = filterState.species;
   if (filterState.category && filterState.category !== 'all') params.category = filterState.category;
   if (filterState.group) params.group = filterState.group;
+  if (filterState.hasMessages) params.has_messages = '1';
   const dbh = parseRange(filterState.dbh);
   if (dbh) {
     if (dbh.min > 0) params.min_dbh = dbh.min;
@@ -221,6 +223,16 @@ function initFilters() {
       scheduleReload();
     });
   });
+
+  const messageBtn = document.getElementById('message-filter-btn');
+  if (messageBtn) {
+    messageBtn.addEventListener('click', () => {
+      filterState.hasMessages = !filterState.hasMessages;
+      messageBtn.classList.toggle('active', filterState.hasMessages);
+      messageBtn.setAttribute('aria-pressed', String(filterState.hasMessages));
+      scheduleReload();
+    });
+  }
 
   initAdvSearch();
 }

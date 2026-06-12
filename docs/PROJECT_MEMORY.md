@@ -639,3 +639,13 @@ npx playwright test
 - `index.html` 底部樹木 sheet 新增 `#sheet-passbook` 與 `#tree-mailbox`，點選單棵樹後先呈現「台北行道樹生態存摺」摘要、每年固碳量與祈福牌留言。
 - 公開維護紀錄先不放上公開站：目前沒有完整、即時、可信的跨機關/跨廠商維護資料，避免民眾誤解「沒有資料＝沒有維護」。
 - 祈福牌第一版採本機 `localStorage`，只在使用者自己的瀏覽器保存；未來若要全站公開留言，需另做公開留言 API、審核/檢舉與個資防護機制。
+
+## 2026-06-12 公開祈福牌與防濫用
+
+- 單棵樹 sheet 的效益區標題改為「這棵樹的城市貢獻」，避免「生態存摺」被理解成正式、完整、可查帳的官方帳本。
+- `js/api.js` 預留公開祈福牌 API：`GET /public/tree/<code>/messages`、`POST /public/tree/<code>/messages`。API 回傳格式以 `{ messages: [...] }` 與 `{ message: {...} }` 為主。
+- `js/sheet.js` 會優先讀寫公開 API；若 API 尚未上線或暫時失敗，會明確顯示「暫存在本裝置」，並退回 `localStorage`，不把本機留言偽裝成已公開。
+- 前端先擋下常見廣告/欺騙性內容：網址、email、電話、LINE/Telegram/私訊、投資貸款、保證獲利、賭博、匯款、虛擬貨幣、股票群與過度重複字元。正式公開前仍建議後端做同樣檢查、頻率限制、隱藏留言與檢舉管理。
+- 首頁地圖新增「有祈福牌的樹」篩選按鈕；前端會送 `has_messages=1`，並在 marker 上以小徽章顯示 `message_count`。
+- NAS `tree-app` 已先在測試檔補上 `message_count` / `has_messages` 行為測試；實作需在 `/volume1/docker/tree-app` 補 `public_tree_messages` schema、`DB.get_public_tree_messages()`、`DB.add_public_tree_message()`、`/public/tree/<code>/messages` GET/POST，以及 `/public/trees` 的 `message_count` 與 `has_messages` 篩選。
+- 2026-06-12 12:00 嘗試用 `buy747@100.84.82.22` 直接 patch 後端時，`db.py` 與 `blueprints/public_api/routes.py` 為 root 擁有且 `buy747` 無免密 sudo，實作未能寫入；僅 `tree_public.py` 已加入 `message_count` 白名單，屬無害但尚不完整的後端準備。

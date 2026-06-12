@@ -21,6 +21,26 @@ async function apiFetchStats() {
   return res.json();
 }
 
+async function apiFetchTreeMessages(code) {
+  const res = await fetch(`${API_BASE}/tree/${encodeURIComponent(code)}/messages`);
+  if (res.status === 404) return { messages: [] };
+  if (!res.ok) throw new Error(`fetchTreeMessages HTTP ${res.status}`);
+  return res.json();
+}
+
+async function apiCreateTreeMessage(code, payload) {
+  const res = await fetch(`${API_BASE}/tree/${encodeURIComponent(code)}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `createTreeMessage HTTP ${res.status}`);
+  }
+  return data;
+}
+
 async function apiCreatePublicReport(payload) {
   const res = await fetch(`${API_BASE}/reports`, {
     method: 'POST',

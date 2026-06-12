@@ -33,6 +33,37 @@ function writeTreeMailbox(treeCode, items) {
   }
 }
 
+function normalizeTreeMessages(data) {
+  if (Array.isArray(data?.messages)) return data.messages;
+  if (Array.isArray(data)) return data;
+  return [];
+}
+
+function normalizeTreeMessage(item) {
+  return {
+    id: item.id || item.message_id || '',
+    nickname: item.nickname || '匿名',
+    message: item.message || item.content || '',
+    mood: item.mood || '🌿',
+    date: String(item.created_at || item.date || '').slice(0, 10),
+  };
+}
+
+function isLikelySpamTreeMessage(text) {
+  const value = String(text || '').toLowerCase();
+  const blockedPatterns = [
+    /https?:\/\//,
+    /www\./,
+    /\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b/,
+    /\b[a-z0-9-]+\.(com|tw|net|org|xyz|top|shop)\b/,
+    /09\d{2}[\s-]?\d{3}[\s-]?\d{3}/,
+    /line\s*id|telegram|whatsapp|加line|加賴|私訊/,
+    /投資|貸款|借錢|保證獲利|穩賺|賺錢|兼職|代辦|免費領|點擊|博彩|賭博|匯款|虛擬貨幣|股票群/,
+    /(.)\1{8,}/,
+  ];
+  return blockedPatterns.some((pattern) => pattern.test(value));
+}
+
 function renderSheetPassbook(tree, benefitData) {
   const passbook = document.getElementById('sheet-passbook');
   if (!passbook) return;
@@ -47,7 +78,7 @@ function renderSheetPassbook(tree, benefitData) {
 
   passbook.innerHTML =
     `<div class="passbook-cover">` +
-      `<div class="passbook-kicker">台北行道樹生態存摺</div>` +
+      `<div class="passbook-kicker">這棵樹的城市貢獻</div>` +
       `<p>這棵${sheetEscapeHtml(species)}每天站在城市裡，默默幫我們留下綠色資產。</p>` +
       `<div class="passbook-tags">` +
         `<span>${sheetEscapeHtml(district)}</span>` +
@@ -66,12 +97,31 @@ function renderSheetPassbook(tree, benefitData) {
   passbook.hidden = false;
 }
 
-function renderTreeMailbox(tree) {
+async function loadTreeMailboxMessages(treeCode) {
+  if (typeof apiFetchTreeMessages === 'function') {
+    const data = await apiFetchTreeMessages(treeCode);
+    return { source: 'public', messages: normalizeTreeMessages(data).map(normalizeTreeMessage).slice(0, 20) };
+  }
+  return { source: 'local', messages: readTreeMailbox(treeCode).map(normalizeTreeMessage) };
+}
+
+async function submitTreeMailboxMessage(treeCode, payload) {
+  if (typeof apiCreateTreeMessage === 'function') {
+    const data = await apiCreateTreeMessage(treeCode, payload);
+    const message = data.message ? normalizeTreeMessage(data.message) : normalizeTreeMessage(payload);
+    return { source: 'public', message };
+  }
+  const next = [{ ...payload, date: new Date().toISOString().slice(0, 10) }, ...readTreeMailbox(treeCode)];
+  writeTreeMailbox(treeCode, next);
+  return { source: 'local', message: normalizeTreeMessage(next[0]) };
+}
+
+function renderTreeMailboxContent(tree, messages, source = 'public') {
   const mailbox = document.getElementById('tree-mailbox');
   if (!mailbox) return;
 
   const treeCode = tree.registry_code || '';
-  const messages = readTreeMailbox(treeCode);
+  const isPublic = source === 'public';
   const messageHtml = messages.length
     ? messages.map((m) =>
         `<article class="mailbox-tag">` +
@@ -88,8 +138,9 @@ function renderTreeMailbox(tree) {
   mailbox.innerHTML =
     `<div class="mailbox-header">` +
       `<h3>🏷 樹的信箱</h3>` +
-      `<small>${messages.length ? `${messages.length} 張祈福牌` : '本機尚無祈福牌'}</small>` +
+      `<small>${isPublic ? '公開顯示' : '暫存在本裝置'} · ${messages.length ? `${messages.length} 張祈福牌` : '尚無祈福牌'}</small>` +
     `</div>` +
+    `<p class="mailbox-note">${isPublic ? '看看大家寫給這棵樹的話，也可以留下一張祈福牌。' : '公開祈福牌服務暫時無法同步，這裡先保存在你的裝置。'} 請不要留下個資、網址、聯絡方式或廣告內容；不適當內容可能會被隱藏。</p>` +
     `<div class="mailbox-list">${messageHtml}</div>` +
     `<form class="mailbox-form">` +
       `<div class="mailbox-form-title">✍ 留下你對這棵樹的話</div>` +
@@ -101,7 +152,7 @@ function renderTreeMailbox(tree) {
       `<input name="nickname" maxlength="10" autocomplete="nickname" placeholder="你的暱稱（最多10字）">` +
       `<textarea name="message" maxlength="100" rows="3" placeholder="寫下你想對這棵樹說的話…（最多100字）"></textarea>` +
       `<div class="mailbox-form-foot">` +
-        `<small>祈福牌目前保存在本裝置，請勿留下個資。</small>` +
+        `<small>${isPublic ? '送出後會公開顯示，請勿留下個資。' : '目前先保存在本裝置，請勿留下個資。'}</small>` +
         `<span class="mailbox-count">0/100</span>` +
       `</div>` +
       `<button type="submit" class="mailbox-submit">掛上祈福牌 🏷</button>` +
@@ -123,7 +174,7 @@ function renderTreeMailbox(tree) {
     counter.textContent = `${textarea.value.length}/100`;
   });
 
-  mailbox.querySelector('.mailbox-form').addEventListener('submit', (event) => {
+  mailbox.querySelector('.mailbox-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const nicknameInput = mailbox.querySelector('input[name="nickname"]');
     const nickname = nicknameInput.value.trim().slice(0, 10);
@@ -138,12 +189,47 @@ function renderTreeMailbox(tree) {
       textarea.focus();
       return;
     }
-    const today = new Date().toISOString().slice(0, 10);
-    const next = [{ nickname, message, mood: selectedMood, date: today }, ...readTreeMailbox(treeCode)];
-    writeTreeMailbox(treeCode, next);
-    renderTreeMailbox(tree);
-    showToast('祈福牌已掛上');
+    const combinedText = `${nickname} ${message}`;
+    if (isLikelySpamTreeMessage(combinedText)) {
+      showToast('請不要留下網址、聯絡方式或廣告內容');
+      textarea.focus();
+      return;
+    }
+    const submit = mailbox.querySelector('.mailbox-submit');
+    submit.disabled = true;
+    try {
+      const result = await submitTreeMailboxMessage(treeCode, { nickname, message, mood: selectedMood });
+      const nextMessages = [result.message, ...messages].slice(0, 20);
+      renderTreeMailboxContent(tree, nextMessages, result.source);
+      showToast(result.source === 'public' ? '祈福牌已公開掛上' : '祈福牌已暫存在本裝置');
+    } catch (error) {
+      const localNext = [{ nickname, message, mood: selectedMood, date: new Date().toISOString().slice(0, 10) }, ...readTreeMailbox(treeCode)];
+      writeTreeMailbox(treeCode, localNext);
+      renderTreeMailboxContent(tree, localNext.map(normalizeTreeMessage), 'local');
+      showToast('公開祈福牌暫時無法同步，已先保存在本裝置');
+      console.error(error);
+    }
   });
+}
+
+function renderTreeMailbox(tree) {
+  const mailbox = document.getElementById('tree-mailbox');
+  if (!mailbox) return;
+  mailbox.innerHTML =
+    `<div class="mailbox-header">` +
+      `<h3>🏷 樹的信箱</h3>` +
+      `<small>載入中</small>` +
+    `</div>` +
+    `<div class="mailbox-empty">正在讀取大家的祈福牌…</div>`;
+  mailbox.hidden = false;
+
+  const treeCode = tree.registry_code || '';
+  loadTreeMailboxMessages(treeCode)
+    .then(({ messages, source }) => renderTreeMailboxContent(tree, messages, source))
+    .catch((error) => {
+      console.error(error);
+      renderTreeMailboxContent(tree, readTreeMailbox(treeCode).map(normalizeTreeMessage), 'local');
+    });
 }
 
 function openSheet(tree) {
