@@ -647,5 +647,6 @@ npx playwright test
 - `js/sheet.js` 會優先讀寫公開 API；若 API 尚未上線或暫時失敗，會明確顯示「暫存在本裝置」，並退回 `localStorage`，不把本機留言偽裝成已公開。
 - 前端先擋下常見廣告/欺騙性內容：網址、email、電話、LINE/Telegram/私訊、投資貸款、保證獲利、賭博、匯款、虛擬貨幣、股票群與過度重複字元。正式公開前仍建議後端做同樣檢查、頻率限制、隱藏留言與檢舉管理。
 - 首頁地圖新增「有祈福牌的樹」篩選按鈕；前端會送 `has_messages=1`，並在 marker 上以小徽章顯示 `message_count`。
-- NAS `tree-app` 已先在測試檔補上 `message_count` / `has_messages` 行為測試；實作需在 `/volume1/docker/tree-app` 補 `public_tree_messages` schema、`DB.get_public_tree_messages()`、`DB.add_public_tree_message()`、`/public/tree/<code>/messages` GET/POST，以及 `/public/trees` 的 `message_count` 與 `has_messages` 篩選。
-- 2026-06-12 12:00 嘗試用 `buy747@100.84.82.22` 直接 patch 後端時，`db.py` 與 `blueprints/public_api/routes.py` 為 root 擁有且 `buy747` 無免密 sudo，實作未能寫入；僅 `tree_public.py` 已加入 `message_count` 白名單，屬無害但尚不完整的後端準備。
+- NAS `tree-app` 已完成公開祈福牌後端：`public_tree_messages` schema、`DB.get_public_tree_messages()`、`DB.add_public_tree_message()`、`/public/tree/<code>/messages` GET/POST，以及 `/public/trees` 的 `message_count` 與 `has_messages` 篩選。
+- 後端 commit `e64ca9c feat: add public tree prayer messages` 已推到 `buy747-sudo/tree-trimming-app`；後續另一個 AI 補上 commit `c6598e4`，讓 `/public/tree/<code>/messages` POST 通過 CSRF 窄範圍豁免。
+- 2026-06-12 12:56 NAS root 排程 `tree-app` auto-update 已部署 `c6598e4`（v2.25.2）。正式 API 驗證：GET messages 200、POST messages 201、`/public/trees?has_messages=1` 可回傳 `message_count`、廣告/詐騙留言回 400。端到端測試用留言已從正式 DB 刪除。
