@@ -10,6 +10,13 @@ async function loginAsTester(page) {
       role: 'inspector', contractor_id: 'YR001'
     }));
   });
+  await page.route('**/api/assessment/weekly-summary', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      personal: { submitted: 0, high_or_tilt: 0, week_start: '2026-06-08', week_end: '2026-06-14' },
+      team: [],
+    }),
+  }));
 }
 
 async function installPdfFontMocks(page) {
@@ -658,7 +665,7 @@ test('login.html 不顯示 demo 測試帳密（2026-06-07 已移除）', async (
   await page.evaluate(() => localStorage.clear());
   await page.goto(BASE + '/login.html');
   await expect(page.locator('#demo-login-hint')).toHaveCount(0);
-  await expect(page.locator('#login-form, form')).toBeVisible();
+  await expect(page.locator('#login-form')).toBeVisible();
 });
 
 // ── tree.html ────────────────────────────────────────────────────────────────
@@ -777,6 +784,8 @@ test('risk-list.html 顯示本週統計並送出進階篩選參數', async ({ pa
   await expect(page.locator('#workload-panel')).toContainText('我本週完成');
   await expect(page.locator('#workload-panel')).toContainText('7 棵');
   await expect(page.locator('#workload-panel')).toContainText('阿明');
+  await expect(page.locator('#workload-panel')).toContainText('每人目標');
+  await expect(page.locator('#workload-panel')).toContainText('4 棵需優先');
   await expect(page.locator('#assess-list')).toContainText('傾斜 > 30 度');
 
   await page.locator('#filter-q').fill('TT0000000088');
@@ -785,7 +794,7 @@ test('risk-list.html 顯示本週統計並送出進階篩選參數', async ({ pa
   await page.locator('#filter-district').fill('大安區');
   await page.locator('#filter-species').fill('榕樹');
   await page.locator('#filter-grade').selectOption('A');
-  await page.locator('#filter-assessor').fill('2');
+  await page.locator('#filter-assessor').selectOption('2');
   await page.locator('#filter-tilt').selectOption('1');
   await page.locator('#apply-advanced').click();
 
@@ -1158,6 +1167,13 @@ test('risk.html PDF 匯出內嵌繁中文字型避免中文亂碼', async ({ pag
         no: 5, key: 'q5', section: 'trunk', title: '生物性危害', type: 'checkbox',
         options: [{ value: -10, key: 'q5g', label: '菇菌類（真菌子實體）', hint: '樹幹出現蕈類', cf: true }],
       }],
+    }),
+  }));
+  await page.route('**/api/assessment/weekly-summary', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      personal: { submitted: 0, high_or_tilt: 0, week_start: '2026-06-08', week_end: '2026-06-14' },
+      team: [],
     }),
   }));
   await page.route('**/api/assessment/tree/DA0313031015*', route => route.fulfill({

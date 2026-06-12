@@ -20,7 +20,7 @@
     .rl-header h1 { font-size: 1rem; font-weight: 700; flex: 1; }
     .rl-header .huser { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
 
-    .rl-body { max-width: 680px; margin: 0 auto; padding: 16px; }
+    .rl-body { max-width: 960px; margin: 0 auto; padding: 16px; }
 
     /* ── 統計摘要 ── */
     .summary-bar {
@@ -52,13 +52,38 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #e6eee8;
     }
     .workload-panel[hidden] { display: none !important; }
-    .workload-title { color: #173f24; font-weight: 900; font-size: 0.95rem; margin-bottom: 8px; }
+    .workload-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .workload-title { color: #173f24; font-weight: 900; font-size: 0.95rem; }
+    .workload-sub { color: #718277; font-size: 0.76rem; margin-top: 2px; }
+    .workload-target { display: flex; align-items: center; gap: 6px; color: #52685a; font-size: 0.78rem; font-weight: 800; }
+    .workload-target input {
+      width: 62px; border: 1.5px solid #d8e1da; border-radius: 8px; padding: 7px 8px;
+      font: inherit; font-weight: 800; color: #173f24; background: #fbfdfb;
+    }
+    .workload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .workload-metric { background: #f7faf7; border: 1px solid #e6eee8; border-radius: 10px; padding: 10px; }
+    .workload-metric span { display: block; color: #718277; font-size: 0.74rem; font-weight: 800; }
+    .workload-metric strong { display: block; color: #173f24; font-size: 1.18rem; margin-top: 3px; }
     .workload-row {
-      display: flex; justify-content: space-between; gap: 12px;
-      font-size: 0.84rem; color: #52685a; padding: 6px 0; border-top: 1px solid #f0f4f1;
+      display: grid; grid-template-columns: minmax(120px, 1fr) 80px 90px 76px;
+      align-items: center; gap: 10px;
+      font-size: 0.84rem; color: #52685a; padding: 9px 0; border-top: 1px solid #f0f4f1;
     }
     .workload-row:first-of-type { border-top: 0; }
     .workload-row strong { color: #1a5c2a; }
+    .workload-row .person { min-width: 0; font-weight: 800; color: #34483a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .workload-row .risk-count { color: #b45309; font-weight: 800; }
+    .workload-progress { display: grid; gap: 4px; }
+    .workload-row .workload-progress { grid-column: 1 / -1; }
+    .progress-track { height: 7px; border-radius: 999px; background: #e5ece7; overflow: hidden; }
+    .progress-bar { height: 100%; width: var(--pct, 0%); background: #1a5c2a; border-radius: inherit; }
+    .progress-bar.low { background: #d97706; }
+    .progress-label { color: #718277; font-size: 0.7rem; font-weight: 800; }
+    .workload-row button {
+      border: 0; border-radius: 9px; background: #eef3ef; color: #38513f;
+      padding: 7px 8px; font-weight: 900; cursor: pointer;
+    }
+    .workload-empty { color: #718277; font-size: 0.82rem; line-height: 1.6; padding: 8px 0 2px; }
     .advanced-filters {
       background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e6eee8;
@@ -77,6 +102,10 @@
     #apply-advanced { background: #1a5c2a; color: #fff; }
     #reset-advanced { background: #eef3ef; color: #38513f; }
     @media (max-width: 640px) {
+      .workload-head { display: grid; }
+      .workload-grid { grid-template-columns: 1fr; }
+      .workload-row { grid-template-columns: 1fr 76px; }
+      .workload-row .workload-progress { grid-column: 1 / -1; }
       .advanced-grid { grid-template-columns: 1fr 1fr; }
       .advanced-grid label:first-child { grid-column: 1 / -1; }
     }
@@ -328,8 +357,10 @@
             <option value="D">D 級</option>
           </select>
         </label>
-        <label>評估人員 ID
-          <input id="filter-assessor" inputmode="numeric" placeholder="可選填">
+        <label>評估人員
+          <select id="filter-assessor">
+            <option value="">全部人員</option>
+          </select>
         </label>
         <label>傾斜狀況
           <select id="filter-tilt">
@@ -408,6 +439,36 @@
       }[c]));
     }
 
+    function getWeeklyTarget() {
+      const stored = Number(localStorage.getItem('risk_weekly_target') || 20);
+      return Number.isFinite(stored) && stored > 0 ? stored : 20;
+    }
+
+    function progressHtml(done, target) {
+      const total = Math.max(Number(target) || 1, 1);
+      const count = Number(done) || 0;
+      const pct = Math.min(100, Math.round((count / total) * 100));
+      return `
+        <div class="workload-progress">
+          <div class="progress-track"><div class="progress-bar ${pct < 60 ? 'low' : ''}" style="--pct:${pct}%"></div></div>
+          <div class="progress-label">${pct}% / 目標 ${total} 棵</div>
+        </div>
+      `;
+    }
+
+    function populateAssessorFilter(team) {
+      const select = document.getElementById('filter-assessor');
+      if (!select) return;
+      const current = select.value;
+      const options = ['<option value="">全部人員</option>'];
+      (team || []).forEach(r => {
+        if (!r.assessor_id) return;
+        options.push(`<option value="${String(r.assessor_id)}">${esc(r.assessor_name || '未命名')}</option>`);
+      });
+      select.innerHTML = options.join('');
+      select.value = [...select.options].some(o => o.value === current) ? current : '';
+    }
+
     // ── auth guard ────────────────────────────────────────────────────────────
     (function init() {
       if (!Auth.isLoggedIn()) {
@@ -444,18 +505,67 @@
         if (!res || !res.ok) return;
         const data = await res.json();
         const personal = data.personal || {};
-        const rows = [];
-        rows.push(`<div class="workload-row"><span>我本週完成</span><strong>${personal.submitted || 0} 棵</strong></div>`);
-        if ((personal.high_or_tilt || 0) > 0) {
-          rows.push(`<div class="workload-row"><span>其中 A/B 級或傾斜 > 30 度</span><strong>${personal.high_or_tilt} 棵</strong></div>`);
-        }
         const team = data.team || [];
+        const target = getWeeklyTarget();
+        populateAssessorFilter(team);
+
+        const weekText = personal.week_start && personal.week_end
+          ? `${personal.week_start} 至 ${personal.week_end}`
+          : '本週';
+        let html = `
+          <div class="workload-head">
+            <div>
+              <div class="workload-title">本週評估進度</div>
+              <div class="workload-sub">${weekText}，優先追蹤 A/B 級與傾斜超過 30 度</div>
+            </div>
+            <label class="workload-target">每人目標
+              <input id="weekly-target-input" type="number" min="1" max="200" value="${target}">
+              棵
+            </label>
+          </div>
+          <div class="workload-grid">
+            <div class="workload-metric">
+              <span>我本週完成</span>
+              <strong>${Number(personal.submitted || 0)} 棵</strong>
+              ${progressHtml(personal.submitted, target)}
+            </div>
+            <div class="workload-metric">
+              <span>A/B 級或傾斜 > 30 度</span>
+              <strong>${Number(personal.high_or_tilt || 0)} 棵</strong>
+            </div>
+          </div>
+        `;
         if (team.length) {
-          rows.push(...team.slice(0, 8).map(r =>
-            `<div class="workload-row"><span>${esc(r.assessor_name || '未命名')}</span><strong>${r.submitted || 0} 棵</strong></div>`
-          ));
+          html += team.slice(0, 12).map(r => {
+            const submitted = Number(r.submitted || 0);
+            const risk = Number(r.high_or_tilt || 0);
+            const shortfall = Math.max(target - submitted, 0);
+            return `
+              <div class="workload-row">
+                <div class="person" title="${esc(r.assessor_name || '未命名')}">${esc(r.assessor_name || '未命名')}</div>
+                <strong>${submitted} 棵</strong>
+                <span class="risk-count">${risk} 棵需優先</span>
+                <button type="button" data-assessor-id="${String(r.assessor_id || '')}">${shortfall ? '查看' : '完成'}</button>
+                ${progressHtml(submitted, target)}
+              </div>
+            `;
+          }).join('');
+        } else {
+          html += '<div class="workload-empty">目前沒有團隊排行資料；一般評估人員會顯示自己的本週進度。</div>';
         }
-        content.innerHTML = rows.join('');
+        content.innerHTML = html;
+        document.getElementById('weekly-target-input')?.addEventListener('change', e => {
+          const next = Math.max(1, Math.min(200, Number(e.target.value) || 20));
+          localStorage.setItem('risk_weekly_target', String(next));
+          loadWeeklySummary();
+        });
+        content.querySelectorAll('[data-assessor-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (!btn.dataset.assessorId) return;
+            document.getElementById('filter-assessor').value = btn.dataset.assessorId;
+            document.getElementById('apply-advanced').click();
+          });
+        });
         panel.hidden = false;
       } catch { /* non-critical */ }
     }
@@ -501,9 +611,10 @@
         loadAssessments(true);
       });
       document.getElementById('reset-advanced').addEventListener('click', () => {
-        ['filter-q','filter-date-from','filter-date-to','filter-district','filter-species','filter-assessor'].forEach(id => {
+        ['filter-q','filter-date-from','filter-date-to','filter-district','filter-species'].forEach(id => {
           document.getElementById(id).value = '';
         });
+        document.getElementById('filter-assessor').value = '';
         document.getElementById('filter-grade').value = '';
         document.getElementById('filter-tilt').value = '';
         offset = 0;
