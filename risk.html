@@ -23,6 +23,18 @@
 
     .risk-body { max-width: 680px; margin: 0 auto; padding: 16px; }
 
+    .weekly-card {
+      background: linear-gradient(135deg, #e8f5e9 0%, #fff 72%);
+      border: 1px solid #cfe8d2; border-radius: 14px;
+      padding: 14px 16px; margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+    .weekly-card[hidden] { display: none !important; }
+    .weekly-kicker { color: #4f7a5b; font-size: 0.78rem; font-weight: 800; }
+    .weekly-main { color: #173f24; font-size: 1rem; font-weight: 900; margin-top: 4px; }
+    .weekly-main strong { color: #0f7a3a; font-size: 1.18rem; }
+    .weekly-note { color: #52685a; font-size: 0.82rem; line-height: 1.55; margin-top: 5px; }
+
     /* ── 步驟指示 ────────────────────────────────── */
     .step-bar {
       display: flex; gap: 0; margin-bottom: 20px;
@@ -388,6 +400,12 @@
   </header>
 
   <div class="risk-body">
+
+    <div class="weekly-card" id="weekly-card" hidden>
+      <div class="weekly-kicker">本週進度</div>
+      <div class="weekly-main" id="weekly-main"></div>
+      <div class="weekly-note" id="weekly-note"></div>
+    </div>
 
     <!-- 步驟指示 -->
     <div class="step-bar" id="step-bar">

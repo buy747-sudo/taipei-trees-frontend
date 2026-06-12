@@ -34,6 +34,7 @@ let _qrStream    = null;   // 相機 MediaStream
   const user = Auth.getUser();
   const el = document.getElementById('header-user');
   if (el) el.textContent = user.display_name || user.username;
+  loadWeeklySummary();
 
   // 預先載入評估表題目
   await loadFormData();
@@ -41,6 +42,26 @@ let _qrStream    = null;   // 相機 MediaStream
   bindLookup();
   bindQrScanner();
 })();
+
+async function loadWeeklySummary() {
+  const card = document.getElementById('weekly-card');
+  if (!card) return;
+  try {
+    const res = await Auth.authFetch(`${RISK_API}/weekly-summary`);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    const submitted = Number(data.personal?.submitted || 0);
+    const highOrTilt = Number(data.personal?.high_or_tilt || 0);
+    document.getElementById('weekly-main').innerHTML =
+      `本週你已完成 <strong>${submitted}</strong> 棵風險評估`;
+    document.getElementById('weekly-note').textContent = highOrTilt > 0
+      ? `其中 ${highOrTilt} 棵屬於 A/B 級或傾斜超過 30 度，謝謝你優先處理需要關注的樹。`
+      : '辛苦了。請優先評估高風險，以及傾斜角度超過 30 度的樹木。';
+    card.hidden = false;
+  } catch (e) {
+    console.warn('無法載入本週評估統計', e);
+  }
+}
 
 // ── 載入評估表題目 ─────────────────────────────────────────────────────────
 async function loadFormData() {

@@ -731,7 +731,98 @@ test('survey.html 登入後顯示步驟列', async ({ page }) => {
   await expect(page.locator('#qr-btn')).toBeVisible();
 });
 
+// ── risk-list.html ───────────────────────────────────────────────────────────
+test('risk-list.html 顯示本週統計並送出進階篩選參數', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('tt_token', 'fake-token');
+    localStorage.setItem('tt_user', JSON.stringify({
+      id: 7, username: 'boss', display_name: '廠商主管',
+      role: 'contractor_admin', contractor_id: 'YR001'
+    }));
+  });
+
+  const listUrls = [];
+  await page.route('**/api/assessment/weekly-summary', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      personal: { submitted: 7, high_or_tilt: 3, week_start: '2026-06-08', week_end: '2026-06-14' },
+      team: [{ assessor_id: 2, assessor_name: '阿明', submitted: 12, high_or_tilt: 4 }],
+    }),
+  }));
+  await page.route('**/api/assessment/list**', route => {
+    listUrls.push(route.request().url());
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        total: 1,
+        grade_a_count: 1,
+        needs_review_count: 1,
+        assessments: [{
+          id: 88,
+          status: 'submitted',
+          final_grade: 'A',
+          tree_id: 'TT0000000088',
+          species_name: '榕樹',
+          district: '大安區',
+          managing_unit: '仁愛路',
+          assessor_name: '阿明',
+          tilt_over30: 1,
+          created_at: '2026-06-10 09:00:00',
+        }],
+      }),
+    });
+  });
+
+  await page.goto(BASE + '/risk-list.html');
+  await expect(page.locator('#workload-panel')).toContainText('我本週完成');
+  await expect(page.locator('#workload-panel')).toContainText('7 棵');
+  await expect(page.locator('#workload-panel')).toContainText('阿明');
+  await expect(page.locator('#assess-list')).toContainText('傾斜 > 30 度');
+
+  await page.locator('#filter-q').fill('TT0000000088');
+  await page.locator('#filter-date-from').fill('2026-06-01');
+  await page.locator('#filter-date-to').fill('2026-06-12');
+  await page.locator('#filter-district').fill('大安區');
+  await page.locator('#filter-species').fill('榕樹');
+  await page.locator('#filter-grade').selectOption('A');
+  await page.locator('#filter-assessor').fill('2');
+  await page.locator('#filter-tilt').selectOption('1');
+  await page.locator('#apply-advanced').click();
+
+  await expect.poll(() => listUrls.some(url => {
+    const params = new URL(url).searchParams;
+    return params.get('q') === 'TT0000000088'
+      && params.get('date_from') === '2026-06-01'
+      && params.get('date_to') === '2026-06-12'
+      && params.get('district') === '大安區'
+      && params.get('species') === '榕樹'
+      && params.get('grade') === 'A'
+      && params.get('assessor_id') === '2'
+      && params.get('tilt_over30') === '1';
+  })).toBe(true);
+});
+
 // ── risk.html ────────────────────────────────────────────────────────────────
+test('risk.html 登入後顯示本週評估鼓勵訊息', async ({ page }) => {
+  await loginAsTester(page);
+  await page.route('**/api/assessment/weekly-summary', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      personal: { submitted: 5, high_or_tilt: 2, week_start: '2026-06-08', week_end: '2026-06-14' },
+      team: [],
+    }),
+  }));
+  await page.route('**/api/assessment/form-data', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ grade_a_items: [], section_labels: {}, env_risk_options: [], angle_labels: {}, items: [] }),
+  }));
+
+  await page.goto(BASE + '/risk.html');
+  await expect(page.locator('#weekly-card')).toContainText('本週你已完成');
+  await expect(page.locator('#weekly-card')).toContainText('5');
+  await expect(page.locator('#weekly-card')).toContainText('傾斜超過 30 度');
+});
+
 test('risk.html 風險選項依扣分與關鍵因子顯示嚴重度色彩', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('tt_token', 'fake-token');
