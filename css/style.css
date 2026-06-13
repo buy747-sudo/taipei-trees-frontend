@@ -1,4 +1,4 @@
-@import "design-tokens.css?v=20260613";
+@import "design-tokens.css?v=20260614";
 
 /* ── Reset & Base ─────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -871,6 +871,14 @@ a.btn-nav {
   border: 1.5px solid var(--blue-400); flex: 1.15;
 }
 a.btn-nav:hover { background: var(--zone-code-bg); }
+
+a.btn-wish {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; font-weight: 800;
+  background: #f0fdf4; color: #1a5c2a; text-decoration: none;
+  border: 1.5px solid #6ee7a4; flex: 1.2;
+}
+a.btn-wish:hover { background: #dcfce7; }
 
 .bchip-note { font-size: 0.68rem; color: var(--grey-400); margin-top: 3px; }
 

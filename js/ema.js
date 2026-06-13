@@ -258,56 +258,153 @@
     refreshSuggs(); refreshPreview();
   }
 
+  /* ── Canvas share-image helpers ─────────────────────────── */
+  function roundRectPath(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+  function wrapTextForCanvas(c, text, maxW) {
+    var chars = text.split(""), lines = [], line = "";
+    chars.forEach(function(ch) {
+      var test = line + ch;
+      if (c.measureText(test).width > maxW && line.length > 0) { lines.push(line); line = ch; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+  function generateShareCanvas(data) {
+    var DPR = 2, W = 540, H = 540;
+    var canvas = document.createElement("canvas");
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    var c = canvas.getContext("2d");
+    c.scale(DPR, DPR);
+    var TC = {
+      sakura:    { bg1:"#fdf0f5", bg2:"#edadc6", ink:"#8a2150", card:"rgba(255,255,255,0.90)", badge:"#c14b7c", dec:["🌸","🌸","❀"], dark:false },
+      evergreen: { bg1:"#1a3d28", bg2:"#091f14",  ink:"#fbf3da", card:"rgba(0,0,0,0.28)",      badge:"#caa24a", dec:["🍃","🌿","🍃"], dark:true  },
+      amber:     { bg1:"#fce8bc", bg2:"#d9870e",  ink:"#7a3608", card:"rgba(255,255,255,0.88)", badge:"#bd5410", dec:["🍁","🍂","🍁"], dark:false },
+      sky:       { bg1:"#deeeff", bg2:"#5d9fd6",  ink:"#0f3d6e", card:"rgba(255,255,255,0.87)", badge:"#2563c4", dec:["☁️","⭐","☁️"], dark:false }
+    };
+    var tc = TC[data.theme] || TC.sakura;
+    var t = THEMES[data.theme] || THEMES.sakura;
+    // Background
+    var grd = c.createLinearGradient(0, 0, W * 0.4, H);
+    grd.addColorStop(0, tc.bg1); grd.addColorStop(1, tc.bg2);
+    c.fillStyle = grd; c.fillRect(0, 0, W, H);
+    // Decorative scatter (fixed positions)
+    c.font = "22px sans-serif"; c.globalAlpha = 0.10;
+    [[42,78],[488,56],[76,468],[496,446],[108,218],[468,206],[252,36],[280,498],[26,298],[516,318],[160,120],[390,410]].forEach(function(p, i) {
+      c.fillText(tc.dec[i % 3], p[0], p[1]);
+    });
+    c.globalAlpha = 1;
+    // Card
+    var cx = 28, cy = 70, cw = W - 56, ch = H - 134;
+    c.fillStyle = tc.card;
+    roundRectPath(c, cx, cy, cw, ch, 20); c.fill();
+    c.strokeStyle = tc.dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)";
+    c.lineWidth = 1; roundRectPath(c, cx, cy, cw, ch, 20); c.stroke();
+    // Theme badge
+    var bw = 116;
+    c.fillStyle = tc.badge;
+    roundRectPath(c, W/2 - bw/2, cy + 16, bw, 28, 14); c.fill();
+    c.fillStyle = "#fff"; c.font = "bold 12px \'Noto Sans TC\', sans-serif"; c.textAlign = "center";
+    c.fillText(t.emoji + " " + t.focus, W/2, cy + 34);
+    // To line
+    var bodyTop = cy + 58;
+    if (data.to) {
+      c.fillStyle = tc.ink; c.globalAlpha = 0.82;
+      c.font = "500 15px \'Noto Serif TC\', serif"; c.textAlign = "center";
+      c.fillText("敬祝　" + data.to, W/2, bodyTop + 12);
+      c.globalAlpha = 1; bodyTop += 36;
+    }
+    // Wish text
+    var wish = data.wish || "";
+    var wpx = wish.length <= 10 ? 36 : wish.length <= 18 ? 30 : wish.length <= 28 ? 25 : 20;
+    c.font = "700 " + wpx + "px \'Noto Serif TC\', serif";
+    c.fillStyle = tc.ink; c.textAlign = "center";
+    var wlines = wrapTextForCanvas(c, wish, cw - 60);
+    var wlh = wpx * 1.65;
+    var avail = (cy + ch - 30) - bodyTop;
+    var sy = bodyTop + avail / 2 - (wlines.length * wlh) / 2 + wpx * 0.5;
+    wlines.forEach(function(ln, i) { c.fillText(ln, W/2, sy + i * wlh); });
+    // Signature
+    c.font = "400 13px \'Noto Sans TC\', sans-serif"; c.fillStyle = tc.ink; c.globalAlpha = 0.55; c.textAlign = "center";
+    c.fillText("— " + (data.from || "匿名的祝福") + "　" + data.date, W/2, cy + ch - 11);
+    c.globalAlpha = 1;
+    // Header
+    c.fillStyle = tc.dark ? "rgba(255,255,255,0.90)" : "rgba(20,55,30,0.82)";
+    c.font = "bold 14px \'Noto Sans TC\', sans-serif"; c.textAlign = "center";
+    c.fillText("🌳 台北市樹木查詢", W/2, 26);
+    c.font = "11px \'Noto Sans TC\', sans-serif"; c.globalAlpha = 0.68;
+    c.fillText(data.tree.species + "　" + data.tree.district + data.tree.road, W/2, 48);
+    c.globalAlpha = 1;
+    // Footer
+    c.fillStyle = tc.dark ? "rgba(255,255,255,0.80)" : "rgba(20,55,30,0.74)";
+    c.font = "bold 13px \'Noto Sans TC\', sans-serif"; c.textAlign = "center";
+    c.fillText("一起在台北的樹上掛一張祈福卡 🎐", W/2, H - 32);
+    c.font = "11px monospace"; c.globalAlpha = 0.50;
+    c.fillText("taipei-trees.org", W/2, H - 13);
+    c.globalAlpha = 1;
+    return canvas;
+  }
+
   /* ── Share sheet ────────────────────────────────────────── */
   function openShare(root, data) {
     var t = THEMES[data.theme];
-    var url = "https://taipei-trees.org/wish.html?code=" + encodeURIComponent(data.tree.code) + (data.wish_id ? "&wish_id=" + encodeURIComponent(data.wish_id) : "") + "&style=" + t.alias;
-    var text = "我在台北的一棵" + data.tree.species + "上掛了一張祈福卡 🎐：「" + (data.to ? "敬祝" + data.to + "，" : "") + data.wish + "」一起來為城市的樹祈福吧！";
-    var E = encodeURIComponent;
-    var channels = [
-      { k: "line", label: "LINE", emoji: "💬", bg: "#06C755", href: "https://line.me/R/msg/text/?" + E(text + "\n" + url) },
-      { k: "fb", label: "Facebook", emoji: "📘", bg: "#1877F2", href: "https://www.facebook.com/sharer/sharer.php?u=" + E(url) + "&quote=" + E(text) },
-      { k: "th", label: "Threads", emoji: "🧵", bg: "#000", href: "https://www.threads.net/intent/post?text=" + E(text + " " + url) },
-      { k: "ig", label: "Instagram", emoji: "📸", bg: "linear-gradient(45deg,#f09433,#dc2743,#bc1888)", ig: true }
-    ];
+    var url = "https://taipei-trees.org/wish.html?code=" + encodeURIComponent(data.tree.code) +
+      (data.wish_id ? "&wish_id=" + encodeURIComponent(data.wish_id) : "") + "&style=" + t.alias;
+    var text = "我在台北的一棵" + data.tree.species + "上掛了一張祈福卡 🎐：「" +
+      (data.to ? "敬祝" + data.to + "，" : "") + data.wish + "」一起來為城市的樹祈福吧！";
+
+    var shareCanvas = generateShareCanvas(data);
+    var previewUrl = shareCanvas.toDataURL("image/jpeg", 0.88);
+
+    function doSaveImage() {
+      shareCanvas.toBlob(function(blob) {
+        var file = new File([blob], "taipei-tree-wish.jpg", { type: "image/jpeg" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: "台北市樹木祈福卡", text: text }).catch(function() {});
+        } else {
+          var a = document.createElement("a"), objUrl = URL.createObjectURL(blob);
+          a.href = objUrl; a.download = "taipei-tree-wish.jpg";
+          document.body.appendChild(a); a.click();
+          setTimeout(function() { a.remove(); URL.revokeObjectURL(objUrl); }, 1000);
+          toast("圖片已下載！直接貼到 LINE、IG 等任何地方分享 🎐");
+        }
+      }, "image/jpeg", 0.88);
+    }
 
     var scrim = el('<div class="sheet__scrim"></div>');
     var sheet = el('<div class="sheet" role="dialog" aria-label="分享祈福卡"></div>');
-    sheet.innerHTML = '' +
+    sheet.innerHTML =
       '<div class="sheet__grab"></div>' +
       '<div class="sheet__in">' +
-        '<div class="sheet__kick" style="color:var(--focus, #1a5c2a)">WISH HUNG 🎐</div>' +
-        '<h2>祝福掛上了！</h2><p class="sub">分享給親友，邀他們一起為這棵樹寫下祝福</p>' +
-        '<div style="display:flex;justify-content:center;margin-bottom:16px">' + emaHTML({ theme: data.theme, to: data.to, wish: data.wish, from: data.from, date: data.date, swing: "idle", width: 188 }) + '</div>' +
-        '<div class="sheet__channels">' + channels.map(function (c) {
-          return '<button class="chn" data-k="' + c.k + '" type="button"><i style="background:' + c.bg + '">' + c.emoji + '</i><span>' + c.label + '</span></button>'; }).join("") + '</div>' +
-        '<div class="sheet__url"><code>' + esc(url) + '</code><button class="btn-copy" type="button">複製</button></div>' +
-        '<div class="sheet__row"><button class="btn-preview" type="button">👀 預覽朋友看到的畫面</button><button class="btn-more" type="button">更多…</button></div>' +
+        '<div class="sheet__kick" style="color:' + (t.alias === "green" ? "#caa24a" : "#c14b7c") + '">WISH HUNG 🎐</div>' +
+        '<h2>祝福掛上了！</h2>' +
+        '<p class="sub">存下這張圖片，貼到 LINE、IG、Threads 任何地方都可以分享！</p>' +
+        '<div class="sheet__img-wrap"><img src="' + previewUrl + '" class="sheet__img-preview" alt="祈福卡分享圖"></div>' +
+        '<button class="btn-save-img" type="button">💾 存圖分享</button>' +
+        '<p class="share-hint">在 iOS 上會直接開啟分享選單；在電腦上會下載圖片檔</p>' +
+        '<div class="sheet__url"><code>' + esc(url) + '</code><button class="btn-copy" type="button">複製連結</button></div>' +
+        '<div class="sheet__row"><button class="btn-preview" type="button">👀 預覽朋友看到的畫面</button><button class="btn-more" type="button">📱 更多…</button></div>' +
         '<button class="btn-again" type="button">完成，再掛一張</button>' +
       '</div>';
 
     function close() { scrim.remove(); sheet.remove(); }
-    function toast(msg) { var x = el('<div class="tt-toast">' + esc(msg) + '</div>'); document.body.appendChild(x); setTimeout(function () { x.remove(); }, 2200); }
+    function toast(msg) { var x = el('<div class="tt-toast">' + esc(msg) + '</div>'); document.body.appendChild(x); setTimeout(function() { x.remove(); }, 3000); }
     function copy() { if (navigator.clipboard) navigator.clipboard.writeText(url); }
 
     scrim.onclick = close;
-    sheet.querySelectorAll(".chn").forEach(function (b) {
-      b.onclick = function () {
-        var c = channels.filter(function (x) { return x.k === b.getAttribute("data-k"); })[0];
-        if (c.ig) { copy(); toast("已複製連結，貼到限時動態或私訊吧！"); return; }
-        window.open(c.href, "_blank", "noopener");
-      };
-    });
-    sheet.querySelector(".btn-copy").onclick = function () { copy(); toast("已複製連結 ✓"); };
-    sheet.querySelector(".btn-more").onclick = function () {
-      if (navigator.share) navigator.share({ title: "台北市樹木祈福卡", text: text, url: url }).catch(function () {}); else { copy(); toast("已複製連結 ✓"); }
+    sheet.querySelector(".btn-save-img").onclick = doSaveImage;
+    sheet.querySelector(".btn-copy").onclick = function() { copy(); toast("已複製連結 ✓"); };
+    sheet.querySelector(".btn-more").onclick = function() {
+      if (navigator.share) navigator.share({ title: "台北市樹木祈福卡", text: text, url: url }).catch(function() {});
+      else { copy(); toast("已複製連結 ✓"); }
     };
-    sheet.querySelector(".btn-again").onclick = function () { close(); mountComposer(root, data.tree); };
-    sheet.querySelector(".btn-preview").onclick = function () { close(); mountLanding(root, data); };
-    setTimeout(function () {
-      var fc = getComputedStyle(sheet.querySelector(".ema")).getPropertyValue("--focus");
-      sheet.querySelector(".sheet__kick").style.color = fc;
-    }, 0);
+    sheet.querySelector(".btn-again").onclick = function() { close(); mountComposer(root, data.tree); };
+    sheet.querySelector(".btn-preview").onclick = function() { close(); mountLanding(root, data); };
 
     root.appendChild(scrim); root.appendChild(sheet);
   }

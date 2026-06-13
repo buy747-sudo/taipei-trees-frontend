@@ -162,6 +162,17 @@ textarea.cmp__input { min-height: 76px; resize: vertical; font-family: var(--fon
 .btn-preview { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--green-600); background: var(--green-050); color: var(--green-600); font-weight: 700; cursor: pointer; font-size: 1rem; }
 .btn-more { flex: none; padding: 12px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-mint); background: #fff; color: var(--text-muted); cursor: pointer; font-size: 1rem; }
 .btn-again { margin-top: 12px; background: none; border: none; color: var(--text-faint); font-size: .85rem; cursor: pointer; }
+
+/* ── Canvas share image preview ─────────────────────────── */
+.sheet__img-wrap { margin: 0 -4px 14px; }
+.sheet__img-preview { width: 100%; border-radius: 14px; display: block; box-shadow: 0 4px 18px rgba(0,0,0,0.14); }
+.btn-save-img {
+  width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm);
+  background: var(--green-600); color: #fff; font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; letter-spacing: .04em; margin-bottom: 6px;
+}
+.btn-save-img:hover { background: #14491f; }
+.share-hint { font-size: .7rem; color: var(--text-faint); text-align: center; margin: 0 0 12px; line-height: 1.55; }
 .tt-toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); background: rgba(20,40,28,.92); color: #fff;
   padding: 10px 18px; border-radius: 999px; font-size: .85rem; z-index: 4000; animation: ttFadeUp .3s ease; }
 

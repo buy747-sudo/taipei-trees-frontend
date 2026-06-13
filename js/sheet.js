@@ -339,6 +339,16 @@ function openSheet(tree) {
     }
   }
 
+  const wishBtn = document.getElementById('sheet-wish-btn');
+  if (wishBtn) {
+    if (tree.registry_code) {
+      wishBtn.href = `/wish.html?code=${encodeURIComponent(tree.registry_code)}`;
+      wishBtn.hidden = false;
+    } else {
+      wishBtn.hidden = true;
+    }
+  }
+
   // 樹種生態說明
   const eco = document.getElementById('sheet-eco');
   const speciesInfo = typeof getSpeciesInfo === 'function' ? getSpeciesInfo(tree.species_name) : null;
