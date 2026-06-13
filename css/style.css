@@ -1140,3 +1140,27 @@ a.btn-nav:hover { background: var(--zone-code-bg); }
 }
 #wish-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(180,83,9,0.45); }
 #wish-fab:active { transform: translateY(0); }
+
+/* ── 全齡模式 explore cards ─────────────────────────────── */
+.explore-card--senior {
+  background: #f0f9f4;
+  border-color: #a5d6a7;
+}
+.explore-card--senior:hover, .explore-card--senior:focus {
+  background: #e1f5e8;
+  border-color: #66bb6a;
+}
+.explore-card--senior .explore-icon {
+  background: #2e7d32;
+}
+.explore-card--kids {
+  background: #f9fbe7;
+  border-color: #c5e1a5;
+}
+.explore-card--kids:hover, .explore-card--kids:focus {
+  background: #f0f7da;
+  border-color: #9ccc65;
+}
+.explore-card--kids .explore-icon {
+  background: #558b2f;
+}

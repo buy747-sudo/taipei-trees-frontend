@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>長輩模式 — 台北市樹木查詢</title>
+  <meta name="description" content="大字體、語音朗讀、簡易操作。專為長輩設計的台北市樹木查詢頁面。">
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/senior.css">
+</head>
+<body class="fs-md">
+
+<header id="sr-bar">
+  <h1>🌳 樹木查詢</h1>
+  <a href="guide.html#elder" class="tbar-btn">說明</a>
+  <a href="index.html" class="tbar-btn">地圖</a>
+</header>
+
+<div id="sr-ctl">
+  <label>字體大小：</label>
+  <button class="fs-btn on" data-fs="fs-md">A</button>
+  <button class="fs-btn" data-fs="fs-lg">A+</button>
+  <button class="fs-btn" data-fs="fs-xl">A++</button>
+  <button class="hc-btn" id="hc-toggle">🌙 高對比</button>
+</div>
+
+<nav id="sr-steps">
+  <div class="sr-step active" id="step-lbl-1">① 找樹</div>
+  <div class="sr-step" id="step-lbl-2">② 認識</div>
+  <div class="sr-step" id="step-lbl-3">③ 行動</div>
+</nav>
+
+<main id="sr-body">
+
+  <!-- Step 1: Find tree -->
+  <div id="view-find">
+    <div class="gap"></div>
+    <button class="big-btn" id="btn-locate">
+      <span class="ico">📍</span> 找我附近的樹
+    </button>
+    <div class="gap"></div>
+    <div class="or-line">或輸入地址 / 樹籍號碼</div>
+    <div class="gap"></div>
+    <div class="search-wrap">
+      <input type="search" id="sr-q" placeholder="例：仁愛路四段 或 PA-001234" autocomplete="off" inputmode="search">
+      <button id="sr-go" aria-label="搜尋">🔍</button>
+    </div>
+    <div class="gap"></div>
+    <p class="sr-hint">也可以掃描路邊樹牌上的 QR Code</p>
+    <div class="gap"></div>
+    <button class="big-btn outline" id="btn-scan">
+      <span class="ico">📷</span> 掃描 QR Code
+    </button>
+  </div>
+
+  <!-- Step 2: Tree detail -->
+  <div id="view-detail" style="display:none">
+    <button class="back-btn" id="back-to-find">← 重新找樹</button>
+    <div class="gap"></div>
+    <div id="tree-card"></div>
+  </div>
+
+</main>
+
+<div id="sr-toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── State ──────────────────────────────────────────── */
+  var currentTree = null;
+  var speaking = false;
+
+  /* ── Util ───────────────────────────────────────────── */
+  function $(id) { return document.getElementById(id); }
+  function show(id) { $(id).style.display = ''; }
+  function hide(id) { $(id).style.display = 'none'; }
+  function toast(msg) {
+    var t = $('sr-toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+  function setStep(n) {
+    [1, 2, 3].forEach(function (i) {
+      var el = $('step-lbl-' + i);
+      el.className = 'sr-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    });
+  }
+
+  /* ── Font size ──────────────────────────────────────── */
+  document.querySelectorAll('.fs-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var cls = btn.dataset.fs;
+      document.body.className = document.body.className.replace(/fs-\w+/, '') + ' ' + cls;
+      if (document.body.classList.contains('hc-dark')) document.body.classList.add('hc-dark');
+      document.querySelectorAll('.fs-btn').forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+    });
+  });
+
+  /* ── High contrast ──────────────────────────────────── */
+  $('hc-toggle').addEventListener('click', function () {
+    document.body.classList.toggle('hc-dark');
+    this.textContent = document.body.classList.contains('hc-dark') ? '☀️ 一般模式' : '🌙 高對比';
+  });
+
+  /* ── Back ───────────────────────────────────────────── */
+  $('back-to-find').addEventListener('click', function () {
+    cancelSpeak();
+    show('view-find'); hide('view-detail');
+    setStep(1);
+  });
+
+  /* ── Locate nearby ──────────────────────────────────── */
+  $('btn-locate').addEventListener('click', function () {
+    var btn = this;
+    btn.textContent = '⏳ 定位中…';
+    btn.disabled = true;
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.innerHTML = '<span class="ico">📍</span> 找我附近的樹';
+      btn.disabled = false;
+      findNearby(pos.coords.latitude, pos.coords.longitude);
+    }, function () {
+      btn.innerHTML = '<span class="ico">📍</span> 找我附近的樹';
+      btn.disabled = false;
+      toast('無法取得位置，請手動輸入地址');
+    }, { timeout: 8000 });
+  });
+
+  function findNearby(lat, lng) {
+    var d = 0.003;
+    showLoading();
+    apiFetchTrees({
+      min_lat: lat - d, max_lat: lat + d,
+      min_lng: lng - d, max_lng: lng + d,
+      limit: 1,
+    }).then(function (data) {
+      var trees = data && data.trees;
+      if (!trees || !trees.length) { showError('附近找不到樹木資料'); return; }
+      loadTree(trees[0].registry_code);
+    }).catch(function () { showError('網路錯誤，請稍後再試'); });
+  }
+
+  /* ── Search ─────────────────────────────────────────── */
+  function doSearch() {
+    var q = ($('sr-q').value || '').trim();
+    if (!q) { toast('請輸入地址或樹籍號碼'); return; }
+    showLoading();
+    /* If looks like a code, fetch directly */
+    if (/^[A-Za-z]{2}-?\d{4,}$/i.test(q)) {
+      loadTree(q.replace('-', ''));
+    } else {
+      toast('請輸入樹籍號碼（例：PA-001234）或掃描 QR Code');
+      show('view-find'); hide('view-detail');
+    }
+  }
+  $('sr-go').addEventListener('click', doSearch);
+  $('sr-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+
+  /* ── Scan ───────────────────────────────────────────── */
+  $('btn-scan').addEventListener('click', function () {
+    location.href = 'index.html?qr=1';
+  });
+
+  /* ── Load tree ──────────────────────────────────────── */
+  function showLoading() {
+    hide('view-find');
+    $('tree-card').innerHTML = '<div class="sr-center"><div class="spinner"></div><p>載入中…</p></div>';
+    show('view-detail');
+    setStep(2);
+  }
+
+  function showError(msg) {
+    $('tree-card').innerHTML = '<div class="sr-center sr-err">⚠️ ' + msg + '</div>';
+    show('view-detail'); hide('view-find');
+  }
+
+  function loadTree(code) {
+    apiFetchTree(code).then(function (data) {
+      if (!data || !data.tree) { showError('找不到這棵樹'); return; }
+      currentTree = data.tree;
+      renderTree(data.tree);
+      setStep(2);
+    }).catch(function () { showError('網路錯誤，請稍後再試'); });
+  }
+
+  function renderTree(t) {
+    var prot = t.tree_category === 'protected';
+    var age  = t.age_years   ? t.age_years + ' 年' : '—';
+    var h    = t.height_m    ? t.height_m + ' 公尺' : '—';
+    var dbh  = t.dbh_cm      ? t.dbh_cm  + ' 公分' : '—';
+    var co2  = t.annual_co2_kg ? (t.annual_co2_kg / 1000).toFixed(2) + ' 公斤/年' : '—';
+
+    $('tree-card').innerHTML =
+      (prot ? '<div style="margin-bottom:10px"><span class="prot-badge">⭐ 受保護老樹</span></div>' : '') +
+      '<div class="sr-name">' + (t.species_name || '樹木') + '</div>' +
+      (t.scientific_name ? '<div class="sr-sci">' + t.scientific_name + '</div>' : '') +
+      '<div class="gap"></div>' +
+      '<button class="speak-btn" id="speak-btn"><span class="speak-ico">🔊</span> 念給我聽</button>' +
+      '<div class="gap"></div>' +
+      '<div class="info-grid">' +
+        '<div class="info-card"><div class="info-lbl">地點</div><div class="info-val" style="font-size:calc(var(--sr-fs)*.9)">' + (t.managing_unit || t.district || '—') + '</div></div>' +
+        '<div class="info-card"><div class="info-lbl">樹齡</div><div class="info-val">' + age + '</div></div>' +
+        '<div class="info-card"><div class="info-lbl">高度</div><div class="info-val">' + h + '</div></div>' +
+        '<div class="info-card"><div class="info-lbl">胸徑</div><div class="info-val">' + dbh + '</div></div>' +
+      '</div>' +
+      '<div class="gap"></div>' +
+      '<div class="act-row">' +
+        (t.lat && t.lng ? '<a href="https://www.google.com/maps/dir/?api=1&destination=' + t.lat + ',' + t.lng + '" target="_blank" rel="noopener" class="big-btn">🗺️ 帶我去</a>' : '') +
+        '<a href="wish.html?code=' + encodeURIComponent(t.registry_code || '') + '" class="big-btn amber">🎐 祈福</a>' +
+      '</div>' +
+      '<div class="gap"></div>' +
+      '<button class="back-btn" id="back2" style="width:100%;justify-content:center;border:2px solid var(--sr-border);border-radius:var(--sr-r);min-height:var(--sr-tap);background:var(--sr-card)">🔁 看別棵樹</button>';
+
+    document.getElementById('speak-btn').addEventListener('click', toggleSpeak);
+    document.getElementById('back2').addEventListener('click', function () {
+      cancelSpeak();
+      show('view-find'); hide('view-detail'); setStep(1);
+    });
+
+    setStep(3);
+  }
+
+  /* ── TTS ────────────────────────────────────────────── */
+  function treeToSpeech(t) {
+    var prot = t.tree_category === 'protected' ? '這是一棵受保護的老樹。' : '';
+    var age  = t.age_years ? '樹齡大約' + t.age_years + '年。' : '';
+    var h    = t.height_m  ? '高度大約' + t.height_m + '公尺。' : '';
+    var loc  = t.managing_unit ? '位於' + t.managing_unit + '。' : (t.district ? '位於' + t.district + '。' : '');
+    return '這棵樹叫做' + (t.species_name || '樹木') + '。' + prot + loc + age + h + '你可以為它掛上一張祈福卡。';
+  }
+
+  function toggleSpeak() {
+    if (!window.speechSynthesis) { toast('您的裝置不支援語音功能'); return; }
+    var btn = document.getElementById('speak-btn');
+    if (speaking) {
+      cancelSpeak(); return;
+    }
+    var utter = new SpeechSynthesisUtterance(treeToSpeech(currentTree));
+    utter.lang = 'zh-TW'; utter.rate = 0.85;
+    utter.onstart = function () { speaking = true; btn && (btn.innerHTML = '<span class="speak-ico">⏹️</span> 停止播放'); btn && btn.classList.add('going'); };
+    utter.onend = utter.onerror = function () { speaking = false; btn && (btn.innerHTML = '<span class="speak-ico">🔊</span> 念給我聽'); btn && btn.classList.remove('going'); };
+    window.speechSynthesis.speak(utter);
+  }
+
+  function cancelSpeak() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    speaking = false;
+    var btn = document.getElementById('speak-btn');
+    if (btn) { btn.innerHTML = '<span class="speak-ico">🔊</span> 念給我聽'; btn.classList.remove('going'); }
+  }
+
+  /* ── URL param ──────────────────────────────────────── */
+  var urlCode = new URLSearchParams(location.search).get('code');
+  if (urlCode) { showLoading(); loadTree(urlCode); }
+
+})();
+</script>
+</body>
+</html>

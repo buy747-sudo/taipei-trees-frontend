@@ -1,0 +1,162 @@
+/* kids.css — 兒童/教師模式 */
+
+:root {
+  --kids-green: #2e7d32; --kids-bg: #f1f8e9; --kids-card: #ffffff;
+  --kids-border: #c8e6c9; --kids-ink: #1b5e20; --kids-muted: #558b2f;
+  --kids-amber: #f59e0b; --kids-amber-ink: #4b321c;
+  --kids-quiz-ok: #43a047; --kids-quiz-err: #e53935;
+  --kids-teacher: #1565c0; --kids-teacher-bg: #e3f2fd;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+  background: var(--kids-bg); color: var(--kids-ink); min-height: 100vh; font-size: 1rem;
+}
+
+/* ── Top bar ──────────────────────────────────────────── */
+#kb-bar {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: var(--kids-green); color: #fff; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+#kb-bar h1 { flex: 1; font-size: 1.1rem; font-weight: 700; }
+.kb-tbar-btn {
+  background: rgba(255,255,255,.2); border: none; color: #fff; border-radius: 8px;
+  padding: 7px 12px; cursor: pointer; font-weight: 700; min-height: 44px;
+  font-family: inherit; font-size: .85rem; white-space: nowrap;
+}
+.kb-tbar-btn.teacher-on { background: #fbc02d; color: #1a1a1a; }
+
+/* ── Teacher banner ───────────────────────────────────── */
+#teacher-banner {
+  display: none; background: var(--kids-teacher-bg); color: var(--kids-teacher);
+  padding: 8px 16px; font-size: .82rem; font-weight: 600; text-align: center;
+  border-bottom: 2px solid #bbdefb;
+}
+body.teacher-mode #teacher-banner { display: block; }
+
+/* ── Content ──────────────────────────────────────────── */
+#kb-body { padding: 16px; max-width: 540px; margin: 0 auto; }
+.gap { height: 12px; }
+.gap-lg { height: 20px; }
+
+/* ── Grandpa tree avatar ──────────────────────────────── */
+#grandpa-wrap { display: flex; align-items: flex-end; gap: 14px; margin-bottom: 4px; }
+#grandpa-face {
+  font-size: 4.5rem; line-height: 1; flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.15));
+  transition: transform .3s;
+}
+#grandpa-face.bounce { animation: bounce .4s ease; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-12px)} }
+
+.bubble {
+  background: var(--kids-card); border: 2px solid var(--kids-border);
+  border-radius: 18px 18px 18px 4px; padding: 14px 16px;
+  font-size: 1.05rem; line-height: 1.6; color: var(--kids-ink);
+  box-shadow: 0 2px 8px rgba(46,125,50,.1); flex: 1;
+  position: relative;
+}
+.bubble::before {
+  content:""; position: absolute; left:-10px; bottom:14px;
+  border: 6px solid transparent; border-right-color: var(--kids-border);
+}
+.bubble::after {
+  content:""; position: absolute; left:-7px; bottom:15px;
+  border: 5px solid transparent; border-right-color: var(--kids-card);
+}
+
+/* ── Teacher note ─────────────────────────────────────── */
+.teacher-note {
+  display: none; background: var(--kids-teacher-bg); color: var(--kids-teacher);
+  border-left: 4px solid var(--kids-teacher); border-radius: 0 8px 8px 0;
+  padding: 10px 14px; font-size: .82rem; margin-top: 8px; line-height: 1.5;
+}
+body.teacher-mode .teacher-note { display: block; }
+
+/* ── Big action btns ──────────────────────────────────── */
+.k-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-height: 52px; padding: 14px 18px;
+  background: var(--kids-green); color: #fff;
+  border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; font-family: inherit; box-shadow: 0 3px 10px rgba(46,125,50,.25);
+  transition: transform .12s; text-decoration: none; text-align: center;
+}
+.k-btn:active { transform: scale(.97); }
+.k-btn.outline {
+  background: #fff; color: var(--kids-green); border: 2px solid var(--kids-green); box-shadow: none;
+}
+.k-btn.amber { background: var(--kids-amber); color: var(--kids-amber-ink); box-shadow: 0 3px 10px rgba(180,83,9,.2); }
+.k-btn .ico { font-size: 1.4rem; }
+
+/* ── Info chips ───────────────────────────────────────── */
+.info-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: #fff; border: 1.5px solid var(--kids-border); border-radius: 999px;
+  padding: 6px 14px; font-size: .88rem; color: var(--kids-muted); font-weight: 600;
+}
+.chip strong { color: var(--kids-ink); }
+
+/* ── Quiz ─────────────────────────────────────────────── */
+#quiz-section { background: var(--kids-card); border: 2px solid var(--kids-border); border-radius: 16px; padding: 18px 16px; }
+.quiz-q { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; line-height: 1.5; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  background: var(--kids-bg); border: 2px solid var(--kids-border); border-radius: 10px;
+  padding: 12px 16px; font-size: 1rem; cursor: pointer; font-family: inherit;
+  text-align: left; font-weight: 600; color: var(--kids-ink);
+  transition: border-color .15s, background .15s;
+}
+.quiz-opt:hover { border-color: var(--kids-green); background: #f9fbe7; }
+.quiz-opt.correct { background: #e8f5e9; border-color: var(--kids-quiz-ok); color: var(--kids-quiz-ok); }
+.quiz-opt.wrong   { background: #ffebee; border-color: var(--kids-quiz-err); color: var(--kids-quiz-err); }
+.quiz-result { margin-top: 10px; font-weight: 700; font-size: 1rem; min-height: 24px; }
+.quiz-result.ok  { color: var(--kids-quiz-ok); }
+.quiz-result.err { color: var(--kids-quiz-err); }
+.quiz-progress { font-size: .82rem; color: var(--kids-muted); margin-bottom: 10px; }
+#quiz-next {
+  margin-top: 12px; display: none;
+  background: var(--kids-green); color: #fff; border: none; border-radius: 10px;
+  padding: 12px 24px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+  width: 100%;
+}
+
+/* ── Badge ────────────────────────────────────────────── */
+#badge-section {
+  display: none; text-align: center;
+  background: linear-gradient(135deg, #fff8e1, #fce4ec);
+  border: 2px solid #ffcc02; border-radius: 20px; padding: 28px 20px;
+}
+.badge-icon { font-size: 5rem; line-height: 1; margin-bottom: 8px; }
+.badge-title { font-size: 1.6rem; font-weight: 900; color: #e65100; }
+.badge-sub { color: var(--kids-muted); margin-top: 6px; font-size: .95rem; }
+
+/* ── Confetti ─────────────────────────────────────────── */
+.confetti-piece {
+  position: fixed; top: -10px; pointer-events: none; z-index: 9999;
+  border-radius: 3px; animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Loading / Error ──────────────────────────────────── */
+.kb-center { text-align: center; padding: 40px 20px; color: var(--kids-muted); }
+.kb-spinner {
+  width: 44px; height: 44px; border: 4px solid var(--kids-border);
+  border-top-color: var(--kids-green); border-radius: 50%;
+  animation: spin .8s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Search ───────────────────────────────────────────── */
+.k-search-wrap { position: relative; }
+#kb-q {
+  width: 100%; padding: 14px 50px 14px 16px; font-size: 1.05rem;
+  border: 2px solid var(--kids-green); border-radius: 14px;
+  background: #fff; color: var(--kids-ink); outline: none; font-family: inherit;
+}
+#kb-go { position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 1.6rem; cursor: pointer; }

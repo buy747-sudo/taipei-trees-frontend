@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>樹爺爺帶你認識台北的樹 🌳</title>
+  <meta name="description" content="和樹爺爺一起認識台北市的行道樹！小測驗、徽章獎勵，老師模式包含自然課教學提示。">
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/kids.css">
+</head>
+<body>
+
+<header id="kb-bar">
+  <h1>🌳 樹爺爺帶你看樹</h1>
+  <button class="kb-tbar-btn" id="teacher-toggle">👩‍🏫 老師版</button>
+  <a href="index.html" class="kb-tbar-btn">地圖</a>
+</header>
+
+<div id="teacher-banner">📚 教師模式已開啟 — 每段對話下方有自然課教學提示</div>
+
+<main id="kb-body">
+
+  <!-- Start / Search view -->
+  <div id="view-start">
+    <div class="gap-lg"></div>
+    <div id="grandpa-wrap">
+      <div id="grandpa-face">🌳</div>
+      <div class="bubble" id="intro-bubble">
+        嗨！我是<strong>樹爺爺</strong>，台北市最老的那棵樹🌲<br>
+        你想認識哪棵樹？掃描路邊的 QR Code，或是輸入樹籍號碼！
+      </div>
+    </div>
+    <div class="teacher-note">
+      📖 <strong>教學提示</strong>：台北市有超過 9 萬棵行道樹，每棵都有獨一無二的樹籍號碼，就像人的身分證。引導學生觀察路邊樹牌，找出樹的「身分證號碼」。
+    </div>
+    <div class="gap-lg"></div>
+    <button class="k-btn" id="kb-locate"><span class="ico">📍</span> 找我附近的樹</button>
+    <div class="gap"></div>
+    <div class="k-search-wrap">
+      <input type="search" id="kb-q" placeholder="輸入樹籍號碼，例：PA-001234" autocomplete="off">
+      <button id="kb-go">🔍</button>
+    </div>
+    <div class="gap"></div>
+    <button class="k-btn outline" id="kb-scan"><span class="ico">📷</span> 掃描 QR Code</button>
+  </div>
+
+  <!-- Tree detail + quiz view -->
+  <div id="view-tree" style="display:none">
+    <div id="grandpa-wrap2">
+      <div id="grandpa-face2" style="font-size:4.5rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))">🌳</div>
+      <div class="bubble" id="tree-bubble">載入中…</div>
+    </div>
+    <div id="tree-teacher-note" class="teacher-note" style="margin-top:8px"></div>
+    <div class="gap"></div>
+    <div id="tree-chips" class="info-chips"></div>
+    <div class="gap-lg"></div>
+
+    <!-- Quiz -->
+    <div id="quiz-section">
+      <div class="quiz-progress" id="quiz-prog"></div>
+      <div class="quiz-q" id="quiz-q"></div>
+      <div class="quiz-opts" id="quiz-opts"></div>
+      <div class="quiz-result" id="quiz-result"></div>
+      <div id="quiz-teacher-note" class="teacher-note" style="margin-top:8px"></div>
+      <button id="quiz-next">下一題 →</button>
+    </div>
+    <div class="gap-lg"></div>
+
+    <!-- Badge (hidden until all quiz done) -->
+    <div id="badge-section">
+      <div class="badge-icon">🏅</div>
+      <div class="badge-title">小小護樹員</div>
+      <div class="badge-sub" id="badge-name"></div>
+      <div class="gap"></div>
+      <button class="k-btn amber" onclick="location.href='wish.html?code='+encodeURIComponent(window._treeCode||'')">🎐 幫這棵樹掛祈福卡</button>
+      <div class="gap"></div>
+      <button class="k-btn outline" id="try-another">🔄 再看別棵樹</button>
+    </div>
+
+    <div class="gap-lg"></div>
+    <div class="k-search-wrap" style="display:none" id="kb-search2">
+      <input type="search" id="kb-q2" placeholder="輸入其他樹籍號碼" autocomplete="off">
+      <button id="kb-go2">🔍</button>
+    </div>
+    <div class="gap"></div>
+    <a href="index.html" class="k-btn outline">🗺️ 回到地圖</a>
+  </div>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── State ──────────────────────────────────────────── */
+  window._treeCode = '';
+  var quizQuestions = [];
+  var quizIdx = 0;
+  var quizScore = 0;
+
+  /* ── Faces ──────────────────────────────────────────── */
+  var FACES = { idle: '🌳', happy: '🌲', wow: '🎉', think: '🤔', sad: '😢' };
+
+  function setFace(id, mood) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = FACES[mood] || FACES.idle;
+    el.classList.remove('bounce');
+    void el.offsetWidth;
+    el.classList.add('bounce');
+  }
+
+  /* ── Teacher toggle ─────────────────────────────────── */
+  document.getElementById('teacher-toggle').addEventListener('click', function () {
+    document.body.classList.toggle('teacher-mode');
+    this.classList.toggle('teacher-on');
+    this.textContent = document.body.classList.contains('teacher-mode') ? '✅ 老師版開啟' : '👩‍🏫 老師版';
+  });
+
+  /* ── Locate ─────────────────────────────────────────── */
+  document.getElementById('kb-locate').addEventListener('click', function () {
+    var btn = this; btn.textContent = '⏳ 定位中…'; btn.disabled = true;
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.innerHTML = '<span class="ico">📍</span> 找我附近的樹'; btn.disabled = false;
+      findNearby(pos.coords.latitude, pos.coords.longitude);
+    }, function () {
+      btn.innerHTML = '<span class="ico">📍</span> 找我附近的樹'; btn.disabled = false;
+      bubbleSay('intro-bubble', '哎呀，我找不到你在哪裡！請輸入樹籍號碼或掃描 QR Code 試試！', 'sad');
+    }, { timeout: 8000 });
+  });
+
+  function findNearby(lat, lng) {
+    var d = 0.003;
+    bubbleSay('intro-bubble', '讓我幫你找找附近的樹…🔍', 'think');
+    apiFetchTrees({
+      min_lat: lat - d, max_lat: lat + d,
+      min_lng: lng - d, max_lng: lng + d,
+      limit: 1
+    }).then(function (data) {
+      var trees = data && data.trees;
+      if (!trees || !trees.length) {
+        bubbleSay('intro-bubble', '這附近我找不到樹木資料，換個地方試試？', 'sad'); return;
+      }
+      loadTree(trees[0].registry_code);
+    }).catch(function () {
+      bubbleSay('intro-bubble', '網路好像有問題，稍後再試試！', 'sad');
+    });
+  }
+
+  /* ── Search ─────────────────────────────────────────── */
+  document.getElementById('kb-go').addEventListener('click', doSearch);
+  document.getElementById('kb-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+  document.getElementById('kb-scan').addEventListener('click', function () { location.href = 'index.html?qr=1'; });
+
+  function doSearch() {
+    var q = (document.getElementById('kb-q').value || '').trim();
+    if (!q) { bubbleSay('intro-bubble', '請輸入樹籍號碼喔！', 'think'); return; }
+    loadTree(q);
+  }
+
+  /* ── Load tree ──────────────────────────────────────── */
+  function loadTree(code) {
+    apiFetchTree(code).then(function (data) {
+      if (!data || !data.tree) {
+        bubbleSay('intro-bubble', '找不到這棵樹，號碼確認一下喔！', 'sad'); return;
+      }
+      window._treeCode = data.tree.registry_code || code;
+      renderTree(data.tree);
+    }).catch(function () {
+      bubbleSay('intro-bubble', '網路有點問題，稍後再試試！', 'sad');
+    });
+  }
+
+  /* ── Render tree ────────────────────────────────────── */
+  function renderTree(t) {
+    var name = t.species_name || '這棵樹';
+    var prot = t.tree_category === 'protected';
+    var age  = t.age_years ? t.age_years + '歲' : null;
+    var h    = t.height_m  ? t.height_m + '公尺高' : null;
+    var dbh  = t.dbh_cm    ? '胸徑' + t.dbh_cm + '公分' : null;
+    var loc  = t.managing_unit || t.district || '';
+
+    /* Speech bubble */
+    var intro = prot
+      ? '哇！這棵<strong>' + name + '</strong>是受保護的老樹⭐！' + (age ? '它已經' + age + '囉！' : '') + '好厲害！'
+      : '你好！我的名字叫做<strong>' + name + '</strong>！' + (loc ? '我住在' + loc + '。' : '') + (age ? '我今年' + age + '了！' : '');
+
+    document.getElementById('tree-bubble').innerHTML = intro;
+
+    var teacherNote = prot
+      ? '📖 <strong>教學提示</strong>：受保護樹木（老樹）是具有特殊生態、景觀或文化價值的樹木，台北市政府立法保護。可帶學生討論：為什麼有些樹需要特別保護？'
+      : '📖 <strong>教學提示</strong>：' + name + '是台北市常見的行道樹。行道樹的功能包括：製造氧氣、降溫、美化環境、提供動物棲地。可請學生觀察葉片形狀、樹皮紋理。';
+
+    document.getElementById('tree-teacher-note').innerHTML = teacherNote;
+    setFace('grandpa-face2', prot ? 'wow' : 'happy');
+
+    /* Chips */
+    var chips = [];
+    if (age) chips.push('🌱 樹齡 <strong>' + age + '</strong>');
+    if (h)   chips.push('📏 <strong>' + h + '</strong>');
+    if (dbh) chips.push('🪵 <strong>' + dbh + '</strong>');
+    if (t.carbon_kg) chips.push('🌿 固碳 <strong>' + t.carbon_kg + ' kg</strong>');
+    document.getElementById('tree-chips').innerHTML = chips.map(function (c) { return '<div class="chip">' + c + '</div>'; }).join('');
+
+    /* Build quiz */
+    quizQuestions = buildQuiz(t);
+    quizIdx = 0; quizScore = 0;
+    document.getElementById('badge-section').style.display = 'none';
+    showQuizQ();
+
+    document.getElementById('view-start').style.display = 'none';
+    document.getElementById('view-tree').style.display = '';
+
+    document.getElementById('try-another').addEventListener('click', function () {
+      document.getElementById('view-start').style.display = '';
+      document.getElementById('view-tree').style.display = 'none';
+      document.getElementById('badge-section').style.display = 'none';
+    });
+  }
+
+  /* ── Quiz ───────────────────────────────────────────── */
+  function buildQuiz(t) {
+    var name = t.species_name || '這棵樹';
+    var age  = t.age_years || null;
+    var h    = t.height_m || null;
+    var qs = [];
+
+    /* Q1: species */
+    qs.push({
+      q: '這棵樹叫什麼名字？',
+      opts: shuffle([name, '楓香', '臺灣欒樹', '樟樹'].filter(function(x,i,a){return a.indexOf(x)===i;}).slice(0,4)),
+      ans: name,
+      ok: '答對了！🎉 它就叫做' + name + '！',
+      err: '再想想！這棵樹叫做' + name + '哦！',
+      note: '📖 認識樹木從名字開始！台北常見行道樹有：茄苳、黑板樹、大葉欖仁、樟樹等。可讓學生翻樹木圖鑑。'
+    });
+
+    /* Q2: age or height */
+    if (age && age > 0) {
+      var fakeAges = [age + 10, Math.max(1, age - 15), age * 2].map(Math.round);
+      qs.push({
+        q: '你猜這棵樹幾歲了？',
+        opts: shuffle([age + '歲'].concat(fakeAges.slice(0,3).map(function(a){return a+'歲';}))),
+        ans: age + '歲',
+        ok: '厲害！它真的' + age + '歲了！🎂',
+        err: '哎！它其實' + age + '歲了，比你以為的還' + (age > fakeAges[0] ? '老' : '年輕') + '！',
+        note: '📖 樹木年齡可透過「年輪」或學術文獻估算。每一年樹幹會長出一圈年輪。'
+      });
+    } else if (h && h > 0) {
+      var fakeHs = [h + 3, Math.max(1, h - 4), h + 7].map(function(x){return Math.round(x*10)/10;});
+      qs.push({
+        q: '這棵樹大概有幾公尺高？',
+        opts: shuffle([h + '公尺'].concat(fakeHs.slice(0,3).map(function(a){return a+'公尺';}))),
+        ans: h + '公尺',
+        ok: '答對！它' + h + '公尺高，像幾層樓那麼高！🏢',
+        err: '不對哦！它其實' + h + '公尺高！',
+        note: '📖 行道樹的高度影響遮蔭效果與行人安全。高大的樹在夏天可讓路面降溫3-5度！'
+      });
+    }
+
+    /* Q3: function */
+    qs.push({
+      q: '樹木對城市最重要的功能是什麼？',
+      opts: shuffle(['製造氧氣、固碳降溫', '讓路更好看而已', '給車子停放', '擋住太陽讓人不熱']),
+      ans: '製造氧氣、固碳降溫',
+      ok: '太棒了！樹木是城市的綠肺！🌿',
+      err: '其實樹木最重要的功能是製造氧氣和固碳降溫！',
+      note: '📖 行道樹每年可固碳數十至數百公斤，相當於少開幾公里的車。可引導學生計算班級碳足跡。'
+    });
+
+    return qs.slice(0, 3);
+  }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function showQuizQ() {
+    var q = quizQuestions[quizIdx];
+    if (!q) { showBadge(); return; }
+    document.getElementById('quiz-prog').textContent = '第 ' + (quizIdx + 1) + ' 題，共 ' + quizQuestions.length + ' 題';
+    document.getElementById('quiz-q').textContent = q.q;
+    document.getElementById('quiz-result').textContent = '';
+    document.getElementById('quiz-result').className = 'quiz-result';
+    document.getElementById('quiz-next').style.display = 'none';
+    document.getElementById('quiz-teacher-note').innerHTML = '';
+
+    var optsEl = document.getElementById('quiz-opts');
+    optsEl.innerHTML = '';
+    q.opts.forEach(function (opt) {
+      var btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', function () { answerQuiz(opt, q); });
+      optsEl.appendChild(btn);
+    });
+  }
+
+  function answerQuiz(chosen, q) {
+    var correct = chosen === q.ans;
+    if (correct) quizScore++;
+
+    document.querySelectorAll('.quiz-opt').forEach(function (btn) {
+      btn.disabled = true;
+      if (btn.textContent === q.ans) btn.classList.add('correct');
+      else if (btn.textContent === chosen && !correct) btn.classList.add('wrong');
+    });
+
+    var res = document.getElementById('quiz-result');
+    res.textContent = correct ? q.ok : q.err;
+    res.className = 'quiz-result ' + (correct ? 'ok' : 'err');
+    setFace('grandpa-face2', correct ? 'happy' : 'sad');
+    if (correct) confetti();
+
+    document.getElementById('quiz-teacher-note').innerHTML = q.note || '';
+    document.getElementById('quiz-next').style.display = '';
+  }
+
+  document.getElementById('quiz-next').addEventListener('click', function () {
+    quizIdx++;
+    this.style.display = 'none';
+    if (quizIdx >= quizQuestions.length) { showBadge(); } else { showQuizQ(); }
+  });
+
+  function showBadge() {
+    setFace('grandpa-face2', 'wow');
+    document.getElementById('quiz-section').style.display = 'none';
+    var badge = document.getElementById('badge-section');
+    var name  = document.getElementById('badge-name');
+    badge.style.display = '';
+    if (quizScore >= quizQuestions.length) {
+      name.textContent = '全部答對！你是真正的護樹英雄！🌟';
+    } else {
+      name.textContent = '答對了 ' + quizScore + ' / ' + quizQuestions.length + ' 題，繼續加油！';
+    }
+    confetti(true);
+  }
+
+  /* ── Confetti ───────────────────────────────────────── */
+  function confetti(big) {
+    var colors = ['#f59e0b','#2e7d32','#1565c0','#e53935','#8e24aa','#00acc1'];
+    var count = big ? 60 : 20;
+    for (var i = 0; i < count; i++) {
+      (function () {
+        var el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.cssText = [
+          'left:' + Math.random()*100 + 'vw',
+          'width:' + (6 + Math.random()*8) + 'px',
+          'height:' + (10 + Math.random()*8) + 'px',
+          'background:' + colors[Math.floor(Math.random()*colors.length)],
+          'animation-duration:' + (1.5 + Math.random()*1.5) + 's',
+          'animation-delay:' + Math.random()*0.5 + 's',
+          'transform:rotate(' + Math.random()*360 + 'deg)',
+          'opacity:0.9',
+        ].join(';');
+        document.body.appendChild(el);
+        setTimeout(function () { el.remove(); }, 3000);
+      })();
+    }
+  }
+
+  function bubbleSay(id, html, mood) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+    if (mood) setFace('grandpa-face', mood);
+  }
+
+  /* ── URL param ──────────────────────────────────────── */
+  var urlCode = new URLSearchParams(location.search).get('code');
+  if (urlCode) loadTree(urlCode);
+
+})();
+</script>
+</body>
+</html>
