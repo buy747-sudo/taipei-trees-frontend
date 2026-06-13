@@ -1127,7 +1127,7 @@ a.btn-nav:hover { background: var(--zone-code-bg); }
 
 /* ── 祈福卡浮動按鈕（地圖頁 FAB）────────────────────────── */
 #wish-fab {
-  position: fixed; bottom: 80px; right: 16px; z-index: 900;
+  position: fixed; bottom: 80px; right: 16px; z-index: 1050;
   display: flex; align-items: center; gap: 7px;
   padding: 11px 16px; border-radius: var(--radius-pill);
   background: var(--amber-400); color: var(--wish-ink);
