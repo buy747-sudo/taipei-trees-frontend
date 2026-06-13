@@ -1,0 +1,175 @@
+/* ============================================================
+   taipei-trees.org — Design Tokens (single drop-in file)
+   ------------------------------------------------------------
+   HOW TO ADOPT (the "half-day, whole-site-benefits" path):
+   1. Drop this file in /css/ and link it BEFORE style.css:
+        <link rel="stylesheet" href="css/design-tokens.css">
+        <link rel="stylesheet" href="css/style.css">
+      (or @import "design-tokens.css"; on line 1 of style.css)
+   2. Nothing breaks yet — these are just variables.
+   3. Incrementally replace hard-coded values in style.css with
+      var(--token), using MAPPING.md. Do it section by section;
+      the page keeps working throughout.
+   ------------------------------------------------------------
+   Generated from the Taipei Trees Design System. Values verified
+   against the current css/style.css.
+   ============================================================ */
+
+:root {
+  /* ── Brand greens ───────────────────────────────────── */
+  --green-900: #0f3f2e;   /* conifer marker / deepest ink-green */
+  --green-800: #144821;   /* primary pressed (#adv-submit:active) */
+  --green-700: #14491f;   /* primary hover (a.btn-detail:hover) */
+  --green-600: #1a5c2a;   /* PRIMARY — top bar, buttons, links, theme-color */
+  --green-500: #2d7a3a;   /* hero gradient mid */
+  --green-400: #2f7d4a;   /* kickers / secondary headings */
+  --green-300: #5fa777;
+  --green-200: #7ecb94;   /* focus ring, active chip fill */
+  --green-100: #a3d9b1;
+  --green-050: #e8f5e9;   /* light fill (badges, callouts) */
+
+  /* ── Teals (carbon / eco accents) ───────────────────── */
+  --teal-700: #13816f;
+  --teal-600: #1f8a64;
+  --teal-500: #2cb5a5;
+
+  /* ── Material-green legacy success (used for eco/success text) ──
+     Your file uses #2e7d32 in several "success / eco" spots. Keep
+     this alias so those reads stay literal, or migrate to --green-500. */
+  --green-success: #2e7d32;
+
+  /* ── Ink & text ─────────────────────────────────────── */
+  --ink-900: #1a1a1a;     /* default body text */
+  --ink-green: #173f24;   /* dark-green headings */
+  --text-body: #3f5948;   /* green-tinted long-form body */
+  --text-muted: #607468;  /* captions, labels */
+  --text-faint: #7a9e84;  /* hints (.data-stat--hint) */
+  --text-grey: #888888;   /* meta, registry codes (.tree-code, #sheet-code) */
+
+  /* Truly-neutral greys already in the chrome (not brand colours) */
+  --grey-700: #333333;    /* legend-label, sheet-close text, stats th */
+  --grey-600: #555555;    /* count-label, bm-name */
+  --grey-500: #999999;    /* notes, clear-btn */
+  --grey-400: #aaaaaa;    /* input placeholder */
+  --grey-line: #e0e0e0;   /* generic hairlines */
+  --grey-line-soft: #eeeeee;
+  --grey-line-faint: #f0f0f0;
+
+  /* ── Surfaces ───────────────────────────────────────── */
+  --surface-page: #f5f5f5;     /* app background; also close-btn / stats-th bg */
+  --surface-mint: #f7fbf8;     /* data bar / explore section */
+  --surface-mist: #f4faf5;     /* dashboard background */
+  --surface-card: #ffffff;     /* card / sheet / white */
+  --surface-soft: #f0f7f1;     /* hover / carbon callout */
+  --surface-fill: #edf8ef;     /* explore-card primary fill */
+  --surface-input: #f8fdf9;    /* input idle (.adv-input, .adv-select) */
+
+  /* ── Borders ────────────────────────────────────────── */
+  --border-card: #d7e6d8;      /* default card border */
+  --border-soft: #dbe7dd;      /* hairline divider (#data-bar) */
+  --border-mint: #cfe8d4;      /* pill / input border (≈ legacy #cde8d0) */
+  --border-strong: #9ad5aa;    /* emphasised card border */
+
+  /* ── Wishing-tag / report amber ─────────────────────── */
+  --amber-700: #92400e;        /* story-why / rules text */
+  --amber-600: #b45309;        /* report button bg, story-note */
+  --amber-500: #d97706;
+  --amber-400: #f59e0b;        /* protected gold (.story-badge, legend star) */
+  --amber-300: #f8c978;        /* wishing-tag mid (#message-filter active) */
+  --amber-200: #ffe4b5;        /* wishing-tag light */
+  --amber-050: #fff8ed;        /* explore report fill */
+  --report-ink: #9a3412;
+  --report-border: #fb923c;
+  --wish-ink: #4b321c;         /* .tag-msg text on gold */
+  --wish-edge: #d99b4c;        /* tag border */
+
+  /* ── Safety blue (土地脈絡 / zone) ──────────────────── */
+  --blue-700: #1e40af;
+  --blue-600: #2563eb;         /* .nav-btn navigate */
+  --blue-500: #3b82f6;         /* .zone-card accent */
+  --blue-400: #60a5fa;
+  --blue-050: #eff6ff;
+  --zone-bg: #eef4fb;
+  --zone-code-bg: #dbeafe;
+
+  /* ── Risk red / orange (staff layer) ────────────────── */
+  --risk-high: #dc2626;
+  --risk-mid: #ea580c;
+  --risk-green-btn: #2f6b1f;   /* .risk-guide button */
+
+  /* ── Six-colour tree-type system (map legend) ───────── */
+  --tree-evergreen: #1a5c2a;   /* 常綠 */
+  --tree-deciduous: #9a5a2f;   /* 落葉 */
+  --tree-flowering: #e879a7;   /* 開花 */
+  --tree-palm: #7cc7d8;        /* 棕櫚 */
+  --tree-conifer: #0f3f2e;     /* 針葉 */
+  --tree-protected: #f59e0b;   /* 受保護 ⭐ */
+  --tree-park: #fbcfe8;        /* 公園樹 */
+  --tree-park-edge: #f9a8d4;
+  --cluster-bg: #f0c040;       /* 群聚標記 */
+  --cluster-edge: #e8a800;
+
+  /* ── Tree badges ────────────────────────────────────── */
+  --badge-street-bg: #e3f2fd;
+  --badge-street-ink: #1565c0;
+  --badge-protected-bg: #fce4ec;
+  --badge-protected-ink: #b71c1c;
+
+  /* ── Gradients (reusable) ───────────────────────────── */
+  --grad-hero: linear-gradient(135deg, #1a5c2a 0%, #2e7d32 100%);   /* #welcome-card, carbon block */
+  --grad-wish: linear-gradient(135deg, #ffe4b5 0%, #f8c978 45%, #efb35f 100%); /* 祈福牌 */
+  --grad-story: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);  /* protected story card */
+
+  /* ── Semantic aliases ───────────────────────────────── */
+  --color-primary: var(--green-600);
+  --color-primary-hover: var(--green-700);
+  --color-primary-press: var(--green-800);
+  --color-focus: var(--green-200);
+  --color-link: var(--green-600);
+  --top-bar-bg: var(--green-600);
+  --on-primary: #ffffff;
+
+  /* ── Type ───────────────────────────────────────────── */
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-brush: "Noto Serif TC", "PingFang TC", serif; /* 祈福卡 wish text (load Noto Serif TC if you adopt the ema card) */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;   /* your file uses 600 widely */
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+  --fw-black: 900;      /* big numbers, kickers, mailbox titles */
+
+  /* ── Radius (matches your current usage) ────────────── */
+  --radius-xs: 4px;     /* .zone-code */
+  --radius-sm: 8px;     /* buttons, inputs */
+  --radius-md: 10px;    /* cards, callouts */
+  --radius-lg: 12px;    /* feature cards */
+  --radius-xl: 16px;    /* bottom sheet (#tree-sheet) */
+  --radius-2xl: 20px;   /* #adv-drawer */
+  --radius-pill: 999px;
+  --radius-badge: 14px; /* auth buttons */
+  --radius-chip: 16px;  /* count/export chips, 20px adv chips */
+
+  /* ── Borders widths ─────────────────────────────────── */
+  --bw-hairline: 1px;
+  --bw-control: 1.5px;  /* the platform's signature control border */
+  --bw-emphasis: 2px;   /* search input, scan btn */
+
+  /* ── Shadows ────────────────────────────────────────── */
+  --shadow-bar: 0 2px 6px rgba(0, 0, 0, 0.3);          /* #top-bar */
+  --shadow-card: 0 1px 4px rgba(26, 92, 42, 0.06);
+  --shadow-raise: 0 10px 26px rgba(21, 83, 43, 0.08);
+  --shadow-sheet: 0 -4px 24px rgba(0, 0, 0, 0.18);     /* #adv-drawer, #tree-sheet */
+  --shadow-inset-active: inset 0 0 0 1px var(--green-600); /* selected chip */
+
+  /* ── Motion ─────────────────────────────────────────── */
+  --dur-fast: 0.12s;
+  --dur-base: 0.15s;
+  --dur-slow: 0.25s;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Layout ─────────────────────────────────────────── */
+  --tap-target: 44px;
+}
