@@ -209,6 +209,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── Map ──────────────────────────────────────────────── */
 #map-container { height: calc(100vh - 230px); min-height: 300px; width: 100%; z-index: 0; position: relative; }
+#stats-bar, #stats-panel { display: none !important; }
 
 /* ── 自訂底圖縮圖控制器 ────────────────────────────────── */
 .bm-ctrl { position: relative !important; }
@@ -731,32 +732,33 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── 電腦：地圖左側，列表與探索入口右側 ───────────────── */
 @media (min-width: 1024px) {
+  /* Make body fill viewport so map+explore fill remaining height */
+  body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  #top-bar { flex: none; }
+
   #main-content {
+    flex: 1;
+    min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-rows: auto 1fr;
     grid-template-areas:
       "data data"
-      "map explore"
-      "stats explore";
+      "map explore";
     align-items: stretch;
     background: var(--surface-card);
   }
   #data-bar { grid-area: data; }
   #map-container {
     grid-area: map;
-    min-height: 560px;
+    height: 100%;
+    min-height: 0;
     border-right: 1px solid var(--border-soft);
-  }
-  #stats-bar {
-    grid-area: stats;
-    border-right: 1px solid var(--grey-line);
-  }
-  #stats-panel {
-    grid-column: 1 / -1;
-    grid-row: auto;
   }
   #explore-section {
     grid-area: explore;
+    height: 100%;
+    overflow-y: auto;
     border-top: 0;
     border-left: 1px solid var(--border-soft);
     padding: 14px 12px 16px;
