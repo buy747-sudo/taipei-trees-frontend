@@ -390,6 +390,10 @@
         '<div class="sheet__url"><code>' + esc(url) + '</code><button class="btn-copy" type="button">複製連結</button></div>' +
         '<div class="sheet__row"><button class="btn-preview" type="button">👀 預覽朋友看到的畫面</button><button class="btn-more" type="button">📱 更多…</button></div>' +
         '<button class="btn-again" type="button">完成，再掛一張</button>' +
+        '<div class="wish-gallery" style="margin-top:18px;border-top:1px solid var(--border-mint);padding-top:14px">' +
+          '<div class="wg-header"><b>🌳 這棵樹上的祈福卡</b><span class="wg-count"></span></div>' +
+          '<div class="wg-strip"></div>' +
+        '</div>' +
       '</div>';
 
     function close() { scrim.remove(); sheet.remove(); }
@@ -407,6 +411,48 @@
     sheet.querySelector(".btn-preview").onclick = function() { close(); mountLanding(root, data); };
 
     root.appendChild(scrim); root.appendChild(sheet);
+    loadWishGallery(data.tree.code, sheet.querySelector(".wg-strip"), sheet.querySelector(".wg-count"), data.wish_id);
+  }
+
+  /* ── Wish gallery ──────────────────────────────────────── */
+  function loadWishGallery(treeCode, stripEl, countEl, excludeId) {
+    stripEl.innerHTML = '<span class="wg-loading">載入中…</span>';
+    fetch(API_BASE + "/tree/" + encodeURIComponent(treeCode) + "/wishes")
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(j) {
+        if (!j || !j.wishes) return;
+        var all = j.wishes;
+        if (countEl && all.length) countEl.textContent = "已有 " + all.length + " 張";
+        var wishes = all.filter(function(w) { return String(w.id) !== String(excludeId); });
+        if (!wishes.length) {
+          stripEl.innerHTML = '<span class="wg-empty">你是第一個！成為大家的榜樣 🌱</span>';
+          return;
+        }
+        stripEl.innerHTML = "";
+        wishes.forEach(function(w) {
+          var theme = resolveTheme(w.style);
+          var card = document.createElement("div");
+          card.className = "wg-card";
+          card.innerHTML = emaHTML({ theme: theme, wish: w.wish_text, from: w.nickname, date: (w.created_at || "").slice(0, 10), width: 108, motif: false, to: "" });
+          card.onclick = function() { showWishPopup(w, theme); };
+          stripEl.appendChild(card);
+        });
+      })
+      .catch(function() { stripEl.innerHTML = '<span class="wg-empty">無法載入</span>'; });
+  }
+
+  function showWishPopup(wish, theme) {
+    var scrim = el('<div class="wg-scrim"></div>');
+    var popup = el('<div class="wg-popup" role="dialog"></div>');
+    popup.innerHTML =
+      '<div style="display:flex;justify-content:center;margin-bottom:12px">' +
+        emaHTML({ theme: theme, wish: wish.wish_text, from: wish.nickname, date: (wish.created_at || "").slice(0, 10), swing: "idle", width: 220 }) +
+      '</div>' +
+      '<button class="wg-close" type="button">✕ 關閉</button>';
+    function dismiss() { scrim.remove(); popup.remove(); }
+    scrim.onclick = dismiss;
+    popup.querySelector(".wg-close").onclick = dismiss;
+    document.body.appendChild(scrim); document.body.appendChild(popup);
   }
 
   /* ── Landing (friend's view) ────────────────────────────── */
@@ -427,6 +473,10 @@
           '<button class="land__cta" type="button">✍️ 我也要掛一張祈福卡</button>' +
           '<div class="land__links"><a href="tree.html?code=' + encodeURIComponent(tree.code) + '">🌳 查看這棵樹</a><a href="/">🗺 城市樹木地圖</a></div>' +
           '<p class="land__foot">台北市樹木查詢平台・公益服務　|　緊急狀況請聯絡 1999</p>' +
+          '<div class="wish-gallery" style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.15);padding-top:12px">' +
+            '<div class="wg-header"><b style="font-size:.82rem;color:var(--ink-green)">🌳 這棵樹上還有</b><span class="wg-count" style="font-size:.78rem;color:var(--text-muted)"></span></div>' +
+            '<div class="wg-strip"></div>' +
+          '</div>' +
         '</div>' +
         petalsHTML(data.theme) +
       '</div>';
@@ -444,6 +494,8 @@
       L.marker([tree.lat, tree.lng], { icon: L.divIcon({ className: "tt-marker", html: iconHtml, iconSize: [34, 34], iconAnchor: [17, 17] }) }).addTo(map);
       setTimeout(function () { map.invalidateSize(); }, 150);
     }
+    var lgStrip = root.querySelector('.wg-strip'), lgCount = root.querySelector('.wg-count');
+    if (lgStrip) loadWishGallery(tree.code, lgStrip, lgCount, data.wish_id);
   }
   function petalsHTML(theme) { var d = document.createElement("div"); d.appendChild(petals(theme, 14, false)); return d.innerHTML; }
 

@@ -205,3 +205,44 @@ textarea.cmp__input { min-height: 76px; resize: vertical; font-family: var(--fon
 @keyframes ttSlideUp { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
 @keyframes ttFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .leaflet-container { font-family: var(--font-sans); background: #cfe0d4; }
+
+/* ============================================================
+   Wish Gallery（祈福卡牆）
+   ============================================================ */
+.wish-gallery { }
+.wg-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.wg-header b { font-size: .82rem; color: var(--ink-green); }
+.wg-count { font-size: .72rem; color: var(--text-muted); }
+
+.wg-strip {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+}
+.wg-strip::-webkit-scrollbar { height: 4px; }
+.wg-strip::-webkit-scrollbar-thumb { background: var(--border-mint); border-radius: 2px; }
+
+.wg-card {
+  flex: none; scroll-snap-align: start; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  transition: transform .12s;
+}
+.wg-card:hover { transform: scale(1.04); }
+.wg-card:active { transform: scale(0.97); }
+
+.wg-loading { color: var(--text-faint); font-size: .78rem; padding: 8px 0; }
+.wg-empty { color: var(--text-faint); font-size: .78rem; padding: 8px 0; line-height: 1.6; }
+
+/* Popup overlay */
+.wg-scrim { position: fixed; inset: 0; background: rgba(10,24,16,.6); backdrop-filter: blur(3px); z-index: 6000; }
+.wg-popup {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 6001; background: #fff; border-radius: var(--radius-xl); padding: 20px 20px 16px;
+  max-width: 320px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  animation: ttFadeUp .25s ease;
+}
+.wg-close {
+  display: block; width: 100%; padding: 11px; border: 1.5px solid var(--border-mint);
+  border-radius: var(--radius-sm); background: #fff; color: var(--text-muted);
+  font-size: .9rem; cursor: pointer; margin-top: 8px;
+}
+.wg-close:hover { background: var(--surface-soft); }
