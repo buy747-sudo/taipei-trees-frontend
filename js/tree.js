@@ -132,12 +132,6 @@ function render(tree) {
   }
 
 
-  // 祈福卡
-  const wishBtn = document.getElementById('tr-wish');
-  if (wishBtn && tree.registry_code) {
-    wishBtn.href = 'wish.html?code=' + encodeURIComponent(tree.registry_code);
-  }
-
   // 分享
   document.getElementById('tr-share').addEventListener('click', () => {
     const url = location.href;

@@ -213,6 +213,7 @@ function renderTreeMailboxContent(tree, messages, source = 'public') {
 }
 
 function renderTreeMailbox(tree) {
+  return; /* mailbox hidden by product decision 2026-06-13 */
   const mailbox = document.getElementById('tree-mailbox');
   if (!mailbox) return;
   mailbox.innerHTML =
