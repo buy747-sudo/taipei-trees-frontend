@@ -133,6 +133,14 @@
       display: flex; align-items: center; justify-content: center;
     }
     .btn-back:hover { background: #e8f5e9; }
+    .btn-wish {
+      flex: 1; padding: 12px; font-size: 0.9rem; font-weight: 600;
+      background: var(--amber-400); color: var(--wish-ink); border: none;
+      border-radius: 10px; cursor: pointer; text-align: center; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-family: var(--font-brush, serif);
+    }
+    .btn-wish:hover { filter: brightness(1.08); }
 
     .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 0.95rem; }
     .error-msg { background: #fce8e8; color: #c00; border-radius: 10px; padding: 16px; text-align: center; }
@@ -269,6 +277,7 @@
       <!-- 操作 -->
       <div class="share-row">
         <a href="/" class="btn-back">&#8592; 回地圖</a>
+        <a href="#" class="btn-wish" id="tr-wish">🎐 祈福</a>
         <a href="/report.html" class="btn-report-tree" id="tr-report">通報異常</a>
         <button class="btn-share" id="tr-share">分享此樹 &#128279;</button>
       </div>
