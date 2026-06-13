@@ -603,7 +603,7 @@
     root.addEventListener('click', leave);
     setTimeout(chime, 780);
     setTimeout(chime, 1700);
-    setTimeout(leave, 3000);
+    setTimeout(leave, 4500);
   }
 
   /* ── Router ─────────────────────────────────────────────── */
