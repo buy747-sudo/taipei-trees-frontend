@@ -161,7 +161,7 @@
     root.innerHTML = '' +
       '<div class="cmp__head">' +
         '<span style="font-size:1.4rem" aria-hidden="true">🌳</span>' +
-        '<div><div class="t">為這棵' + esc(tree.species) + '祈福</div>' +
+        '<div><div class="t">在這棵' + esc(tree.species) + '上掛一張祈福卡</div>' +
         '<div class="s">' + esc(tree.district) + "・" + esc(tree.road) + '　<span class="mono">' + esc(tree.code) + '</span></div></div>' +
         '<button class="cmp__mute" type="button" title="音效">' + (isMuted() ? "🔇" : "🎐") + '</button>' +
       '</div>' +
@@ -171,12 +171,12 @@
         '<div class="cmp__hung" style="display:none">🎐 掛上樹梢了…</div>' +
       '</div>' +
       '<div class="cmp__body">' +
-        '<div><div class="cmp__labelrow"><span class="cmp__steplabel">① 選一張版型</span>' +
+        '<div><div class="cmp__labelrow"><span class="cmp__steplabel">① 這次想為什麼祈福？</span>' +
           '<span class="cmp__rec" data-rec>為' + esc(tree.species) + '推薦</span></div>' +
           '<div class="cmp__themes">' + themesHTML + '</div></div>' +
         '<div class="cmp__form">' +
-          '<span class="cmp__steplabel">② 寫下你的祈福</span>' +
-          '<input class="cmp__input" data-to maxlength="20" placeholder="想為誰祈福？如：大安區王奶奶（可留白）">' +
+          '<span class="cmp__steplabel">② 寫下祝福</span>' +
+          '<input class="cmp__input" data-to maxlength="20" placeholder="這張卡送給誰？如：阿嬤、台灣加油（可留白）">' +
           '<textarea class="cmp__input" data-wish maxlength="40" placeholder="寫一句願望或感謝…"></textarea>' +
           '<div class="cmp__suggs"></div>' +
           '<input class="cmp__input" data-from maxlength="16" placeholder="署名（可留白）">' +
@@ -201,7 +201,7 @@
     function refreshSuggs() {
       var th = THEMES[cur.theme];
       suggs.innerHTML = th.suggestions.map(function (s) {
-        return '<button class="cmp__sugg ' + th.cls + '" type="button" style="border-color:var(--frame);color:var(--ink)">' + esc(s) + '</button>'; }).join("");
+        return '<button class="cmp__sugg ' + th.cls + '" type="button" style="border-color:var(--focus);color:var(--focus)">' + esc(s) + '</button>'; }).join("");
       suggs.querySelectorAll(".cmp__sugg").forEach(function (b) {
         b.onclick = function () { cur.wish = b.textContent; inWish.value = b.textContent; sync(); };
       });
@@ -526,6 +526,46 @@
       '<a href="/" style="color:var(--green-600);font-weight:700">← 回地圖</a></div>';
   }
 
+  /* ── Intro splash ── 3s golden tree animation ───────────── */
+  function showIntro(onDone) {
+    var cards = [
+      { l:'4%',  t:'60%', bg:'#fdeef4', d:0.75 },
+      { l:'10%', t:'36%', bg:'#d4f8d4', d:0.90 },
+      { l:'40%', t:'16%', bg:'#e0f0ff', d:1.00 },
+      { l:'68%', t:'34%', bg:'#fff3cd', d:1.05 },
+      { l:'80%', t:'56%', bg:'#fdeef4', d:1.10 },
+      { l:'48%', t:'46%', bg:'#ffe5cc', d:1.15 }
+    ];
+    var sparks = [[6,26],[91,18],[8,66],[89,60],[46,4],[26,84],[71,80],[2,46],[96,42],[52,90],[20,12],[72,8]];
+
+    var cardsH = cards.map(function(c) {
+      return '<span class="ttintro__card" style="left:' + c.l + ';top:' + c.t + ';background:' + c.bg + ';animation-delay:' + c.d + 's,' + c.d + 's"></span>';
+    }).join('');
+    var sparksH = sparks.map(function(s, i) {
+      return '<span class="ttintro__spark" style="left:' + s[0] + '%;top:' + s[1] + '%;animation-delay:' + (0.9 + i * 0.12) + 's"></span>';
+    }).join('');
+
+    var ov = document.createElement('div');
+    ov.id = 'ttintro'; ov.className = 'ttintro';
+    ov.innerHTML =
+      '<div class="ttintro__stage">' +
+        sparksH +
+        '<div class="ttintro__treewrap">' + cardsH + '<span class="ttintro__tree">🌳</span></div>' +
+        '<p class="ttintro__title">台北市樹木祈福</p>' +
+        '<p class="ttintro__sub">在城市的樹梢，掛一張屬於你的祈福卡</p>' +
+      '</div>';
+
+    function dismiss() {
+      clearTimeout(timer);
+      ov.removeEventListener('click', dismiss);
+      ov.classList.add('ttintro--out');
+      setTimeout(function() { if (ov.parentNode) ov.parentNode.removeChild(ov); onDone(); }, 440);
+    }
+    ov.addEventListener('click', dismiss);
+    document.body.appendChild(ov);
+    var timer = setTimeout(dismiss, 3000);
+  }
+
   /* ── Router ─────────────────────────────────────────────── */
   function start() {
     var root = document.getElementById("app");
@@ -536,31 +576,37 @@
     var wishId = qp("wish_id");
     var styleParam = qp("style");
 
-    if (!code) {
-      showPickTree(root);
-      return;
-    }
+    if (!code) { showPickTree(root); return; }
 
-    showLoading(root);
+    // fetch tree + intro animation run in parallel
+    var fetchResult = null, fetchError = false, introDone = false;
 
-    // apiFetchTree is defined in api.js (loaded before ema.js)
-    apiFetchTree(code).then(function (data) {
-      if (!data || !data.tree) { showError(root, "找不到這棵樹（" + code + "）。"); return; }
-      var tree = treeApiToEma(data.tree);
+    apiFetchTree(code).then(function(data) {
+      fetchResult = data; if (introDone) mount();
+    }).catch(function() {
+      fetchError = true; if (introDone) showError(root, "載入失敗，請稍後再試。");
+    });
 
+    showIntro(function() {
+      introDone = true;
+      if (fetchError) { showError(root, "載入失敗，請稍後再試。"); return; }
+      if (fetchResult) { mount(); return; }
+      showLoading(root);
+    });
+
+    function mount() {
+      if (!fetchResult || !fetchResult.tree) { showError(root, "找不到這棵樹（" + code + "）。"); return; }
+      var tree = treeApiToEma(fetchResult.tree);
       if (wishId) {
         fetch(API_BASE + "/wishes/" + encodeURIComponent(wishId))
           .then(function(r) { return r.ok ? r.json() : null; })
           .then(function(j) {
             var w = j && j.wish;
             mountLanding(root, {
-              tree: tree,
-              theme: w ? resolveTheme(w.style) : resolveTheme(styleParam),
-              to:   "",
-              wish: w ? w.wish_text : "祝這棵樹長長久久、城市永遠蒼翠",
+              tree: tree, theme: w ? resolveTheme(w.style) : resolveTheme(styleParam),
+              to: "", wish: w ? w.wish_text : "祝這棵樹長長久久、城市永遠蒼翠",
               from: w ? w.nickname : "匿名的祝福",
-              date: w ? w.created_at.slice(0, 10) : today(),
-              wish_id: wishId
+              date: w ? w.created_at.slice(0, 10) : today(), wish_id: wishId
             });
           })
           .catch(function() {
@@ -573,9 +619,7 @@
       } else {
         mountComposer(root, tree);
       }
-    }).catch(function (err) {
-      showError(root, "載入失敗，請稍後再試。");
-    });
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
