@@ -526,44 +526,84 @@
       '<a href="/" style="color:var(--green-600);font-weight:700">← 回地圖</a></div>';
   }
 
-  /* ── Intro splash ── 3s golden tree animation ───────────── */
+  /* ── Intro splash ── 3s golden tree animation (Design v2) ── */
   function showIntro(onDone) {
-    var cards = [
-      { l:'4%',  t:'60%', bg:'#fdeef4', d:0.75 },
-      { l:'10%', t:'36%', bg:'#d4f8d4', d:0.90 },
-      { l:'40%', t:'16%', bg:'#e0f0ff', d:1.00 },
-      { l:'68%', t:'34%', bg:'#fff3cd', d:1.05 },
-      { l:'80%', t:'56%', bg:'#fdeef4', d:1.10 },
-      { l:'48%', t:'46%', bg:'#ffe5cc', d:1.15 }
-    ];
-    var sparks = [[6,26],[91,18],[8,66],[89,60],[46,4],[26,84],[71,80],[2,46],[96,42],[52,90],[20,12],[72,8]];
+    var root = document.createElement('div');
+    root.id = 'ttintro'; root.className = 'ttintro';
+    var stage = document.createElement('div');
+    stage.className = 'ttintro__stage';
+    root.appendChild(stage);
+    document.body.appendChild(root);
 
-    var cardsH = cards.map(function(c) {
-      return '<span class="ttintro__card" style="left:' + c.l + ';top:' + c.t + ';background:' + c.bg + ';animation-delay:' + c.d + 's,' + c.d + 's"></span>';
-    }).join('');
-    var sparksH = sparks.map(function(s, i) {
-      return '<span class="ttintro__spark" style="left:' + s[0] + '%;top:' + s[1] + '%;animation-delay:' + (0.9 + i * 0.12) + 's"></span>';
-    }).join('');
+    stage.innerHTML =
+      '<span class="ttintro__glow"></span>' +
+      '<svg class="ttintro__tree" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<defs><linearGradient id="ttGold" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="#FFD700"/><stop offset="1" stop-color="#FFA500"/>' +
+        '</linearGradient></defs>' +
+        '<path d="M93 240 C 95 206 96 180 97 156 L103 156 C 104 180 105 206 107 240 Z" fill="url(#ttGold)"/>' +
+        '<path d="M100 240 C 84 232 70 234 58 242 C 76 232 90 232 99 238 Z M100 240 C 116 232 130 234 142 242 C 124 232 110 232 101 238 Z" fill="url(#ttGold)"/>' +
+        '<g stroke="url(#ttGold)" stroke-width="7" stroke-linecap="round" fill="none">' +
+          '<path d="M100 162 C 96 146 84 136 74 130"/>' +
+          '<path d="M100 162 C 104 146 116 136 126 130"/>' +
+          '<path d="M100 158 C 100 144 100 134 100 124"/>' +
+        '</g>' +
+        '<path d="M48 118 C 40 96 50 72 72 66 C 76 46 98 38 112 48 C 124 36 146 44 150 64 C 170 70 176 96 162 118 C 170 134 152 150 130 144 C 114 152 86 152 70 144 C 48 150 40 134 48 118 Z" fill="url(#ttGold)"/>' +
+        '<g fill="#FFE680" opacity=".5"><circle cx="84" cy="84" r="16"/><circle cx="118" cy="92" r="13"/><circle cx="104" cy="66" r="11"/></g>' +
+      '</svg>' +
+      '<span class="ttintro__card ttintro__card--1"></span>' +
+      '<span class="ttintro__card ttintro__card--2"></span>' +
+      '<span class="ttintro__card ttintro__card--3"></span>' +
+      '<span class="ttintro__card ttintro__card--4"></span>' +
+      '<span class="ttintro__card ttintro__card--5"></span>' +
+      '<span class="ttintro__card ttintro__card--6"></span>' +
+      '<span class="ttintro__spark ttintro__spark--1"></span>' +
+      '<span class="ttintro__spark ttintro__spark--2"></span>' +
+      '<span class="ttintro__spark ttintro__spark--3"></span>' +
+      '<span class="ttintro__spark ttintro__spark--4"></span>' +
+      '<span class="ttintro__spark ttintro__spark--5"></span>' +
+      '<span class="ttintro__spark ttintro__spark--6"></span>' +
+      '<span class="ttintro__spark ttintro__spark--7"></span>' +
+      '<span class="ttintro__spark ttintro__spark--8"></span>' +
+      '<span class="ttintro__spark ttintro__spark--9"></span>' +
+      '<span class="ttintro__spark ttintro__spark--10"></span>' +
+      '<span class="ttintro__spark ttintro__spark--11"></span>' +
+      '<span class="ttintro__spark ttintro__spark--12"></span>' +
+      '<span class="ttintro__spark ttintro__spark--13"></span>' +
+      '<p class="ttintro__sub">在城市的樹梢，掛一張屬於你的祈福卡</p>';
 
-    var ov = document.createElement('div');
-    ov.id = 'ttintro'; ov.className = 'ttintro';
-    ov.innerHTML =
-      '<div class="ttintro__stage">' +
-        sparksH +
-        '<div class="ttintro__treewrap">' + cardsH + '<span class="ttintro__tree">🌳</span></div>' +
-        '<p class="ttintro__title">台北市樹木祈福</p>' +
-        '<p class="ttintro__sub">在城市的樹梢，掛一張屬於你的祈福卡</p>' +
-      '</div>';
-
-    function dismiss() {
-      clearTimeout(timer);
-      ov.removeEventListener('click', dismiss);
-      ov.classList.add('ttintro--out');
-      setTimeout(function() { if (ov.parentNode) ov.parentNode.removeChild(ov); onDone(); }, 440);
+    function chime() {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        var c = window.__ttCtx || (window.__ttCtx = new AC());
+        if (c.state === 'suspended') c.resume();
+        var t0 = c.currentTime + 0.02;
+        [[2093,.26,0],[3139,.12,.13],[2087,.06,.34]].forEach(function(s) {
+          [[1,1,2],[2.76,.42,1.4],[5.18,.2,.9]].forEach(function(p) {
+            var o = c.createOscillator(); o.type = 'sine'; o.frequency.value = s[0] * p[0];
+            var g = c.createGain(); g.gain.setValueAtTime(.0001, t0+s[2]);
+            g.gain.exponentialRampToValueAtTime(s[1]*p[1], t0+s[2]+.006);
+            g.gain.exponentialRampToValueAtTime(.0001, t0+s[2]+p[2]);
+            o.connect(g).connect(c.destination); o.start(t0+s[2]); o.stop(t0+s[2]+p[2]+.05);
+          });
+        });
+      } catch(e) {}
     }
-    ov.addEventListener('click', dismiss);
-    document.body.appendChild(ov);
-    var timer = setTimeout(dismiss, 3000);
+    document.addEventListener('pointerdown', function u() {
+      try { (window.__ttCtx || (window.__ttCtx = new (window.AudioContext||window.webkitAudioContext)())).resume(); } catch(e) {}
+    }, { once: true });
+
+    var done = false;
+    function leave() {
+      if (done) return; done = true;
+      root.classList.add('is-leaving');
+      setTimeout(function() { if (root.parentNode) root.parentNode.removeChild(root); if (onDone) onDone(); }, 440);
+    }
+    root.addEventListener('click', leave);
+    setTimeout(chime, 780);
+    setTimeout(chime, 1700);
+    setTimeout(leave, 3000);
   }
 
   /* ── Router ─────────────────────────────────────────────── */
