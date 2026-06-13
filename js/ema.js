@@ -234,10 +234,23 @@
       root.querySelector(".cmp__body").style.opacity = ".4";
       root.querySelector(".cmp__body").style.pointerEvents = "none";
       setTimeout(function () {
-        openShare(root, {
+        var wishData = {
           tree: tree, theme: cur.theme, to: cur.to.trim(), wish: cur.wish.trim(),
-          from: cur.from.trim() || "匿名的祝福", date: today(), wish_id: Math.floor(100 + Math.random() * 900)
-        });
+          from: cur.from.trim() || "匿名的祝福", date: today(), wish_id: null
+        };
+        fetch(API_BASE + "/wishes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tree_code: tree.code,
+            wish_text: wishData.wish || "祝這棵樹長長久久",
+            style: THEMES[cur.theme] ? THEMES[cur.theme].alias : "sakura",
+            nickname: wishData.from
+          })
+        }).then(function(r) { return r.json(); })
+          .then(function(j) { wishData.wish_id = j.wish_id || null; })
+          .catch(function() { /* share still works without wish_id */ })
+          .finally(function() { openShare(root, wishData); });
       }, 1900);
     };
 
@@ -248,7 +261,7 @@
   /* ── Share sheet ────────────────────────────────────────── */
   function openShare(root, data) {
     var t = THEMES[data.theme];
-    var url = "https://taipei-trees.org/wish.html?code=" + encodeURIComponent(data.tree.code) + "&wish_id=" + data.wish_id + "&style=" + t.alias;
+    var url = "https://taipei-trees.org/wish.html?code=" + encodeURIComponent(data.tree.code) + (data.wish_id ? "&wish_id=" + encodeURIComponent(data.wish_id) : "") + "&style=" + t.alias;
     var text = "我在台北的一棵" + data.tree.species + "上掛了一張祈福卡 🎐：「" + (data.to ? "敬祝" + data.to + "，" : "") + data.wish + "」一起來為城市的樹祈福吧！";
     var E = encodeURIComponent;
     var channels = [
@@ -387,18 +400,27 @@
       var tree = treeApiToEma(data.tree);
 
       if (wishId) {
-        // TODO: fetch wish content from GET /public/wishes/:id
-        // For now fall back to URL params for demo; replace with real API call:
-        // apiFetchWish(wishId).then(function(w) { mountLanding(root, {...}); });
-        mountLanding(root, {
-          tree: tree,
-          theme: resolveTheme(styleParam),
-          to:   qp("to")   || "",
-          wish: qp("wish") || "祝這棵樹長長久久、城市永遠蒼翠",
-          from: qp("from") || "匿名的祝福",
-          date: today(),
-          wish_id: wishId
-        });
+        fetch(API_BASE + "/wishes/" + encodeURIComponent(wishId))
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(j) {
+            var w = j && j.wish;
+            mountLanding(root, {
+              tree: tree,
+              theme: w ? resolveTheme(w.style) : resolveTheme(styleParam),
+              to:   "",
+              wish: w ? w.wish_text : "祝這棵樹長長久久、城市永遠蒼翠",
+              from: w ? w.nickname : "匿名的祝福",
+              date: w ? w.created_at.slice(0, 10) : today(),
+              wish_id: wishId
+            });
+          })
+          .catch(function() {
+            mountLanding(root, {
+              tree: tree, theme: resolveTheme(styleParam),
+              to: "", wish: "祝這棵樹長長久久、城市永遠蒼翠",
+              from: "匿名的祝福", date: today(), wish_id: wishId
+            });
+          });
       } else {
         mountComposer(root, tree);
       }
