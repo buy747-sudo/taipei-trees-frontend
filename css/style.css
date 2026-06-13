@@ -732,13 +732,9 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Noto
 
 /* ── 電腦：地圖左側，列表與探索入口右側 ───────────────── */
 @media (min-width: 1024px) {
-  /* Make body fill viewport so map+explore fill remaining height */
-  body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-  #top-bar { flex: none; }
-
+  /* Body flows normally — footer remains visible below the fold via page scroll */
   #main-content {
-    flex: 1;
-    min-height: 0;
+    height: calc(100vh - 122px); /* viewport minus sticky top-bar height */
     display: grid;
     grid-template-columns: minmax(0, 1fr) 360px;
     grid-template-rows: auto 1fr;
