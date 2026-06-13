@@ -172,4 +172,35 @@
 
   /* ── Layout ─────────────────────────────────────────── */
   --tap-target: 44px;
+  /* ── Typography scale ──────────────────────────────────── */
+  --fs-micro: 0.68rem;
+  --fs-2xs:   0.72rem;
+  --fs-xs:    0.78rem;
+  --fs-sm:    0.85rem;
+  --fs-base:  0.95rem;
+  --fs-md:    1rem;
+  --fs-lg:    1.2rem;
+  --fs-xl:    1.4rem;
+  --fs-2xl:   1.7rem;
+  --fs-3xl:   2.4rem;
+  --fs-display: clamp(1.9rem, 4.5vw, 3.4rem);
+  --fs-counter: clamp(3.2rem, 9vw, 6rem);
+
+  --lh-tight:   1.2;
+  --lh-snug:    1.45;
+  --lh-normal:  1.6;
+  --lh-relaxed: 1.8;
+
+  --ls-kicker: 0.08em;
+  --ls-tight:  -1px;
+
+  /* ── Spacing scale ──────────────────────────────────────── */
+  --space-1: 4px;  --space-2: 6px;  --space-3: 8px;  --space-4: 10px;
+  --space-5: 12px; --space-6: 14px; --space-7: 16px; --space-8: 20px;
+  --space-9: 24px; --space-10: 32px; --space-12: 40px;
+
+  --pad-card:    16px;
+  --pad-card-lg: 20px;
+  --pad-control: 8px 14px;
+  --pad-pill:    5px 12px;
 }

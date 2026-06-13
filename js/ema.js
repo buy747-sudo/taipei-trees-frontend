@@ -341,6 +341,22 @@
   function showLoading(root) {
     root.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted)">🌳 載入中…</div>';
   }
+
+  function showPickTree(root) {
+    root.innerHTML =
+      '<div style="text-align:center;padding:48px 20px 32px;max-width:420px;margin:0 auto">' +
+        '<div style="font-size:3rem;margin-bottom:12px">🌳</div>' +
+        '<h2 style="color:var(--ink-green);font-size:var(--fs-xl,1.4rem);margin:0 0 8px">為台北的樹掛一張祈福卡</h2>' +
+        '<p style="color:var(--text-muted);font-size:var(--fs-sm,0.85rem);line-height:1.7;margin:0 0 28px">' +
+          '在地圖上點選任何一棵樹，進入詳情頁後點「🎐 祈福」，就可以為那棵樹寫下祝福。' +
+        '</p>' +
+        '<a href="/" style="display:inline-block;padding:13px 28px;background:var(--green-600);color:#fff;' +
+          'border-radius:var(--radius-sm,8px);text-decoration:none;font-size:var(--fs-md,1rem);font-weight:700;' +
+          'margin-bottom:14px">🗺 去地圖上選一棵樹</a>' +
+        '<br><a href="guide.html" style="color:var(--green-600);font-size:var(--fs-xs,0.78rem)">怎麼使用？看使用說明</a>' +
+      '</div>';
+  }
+
   function showError(root, msg) {
     root.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted)">' +
       '<div style="font-size:2rem;margin-bottom:12px">🌿</div>' +
@@ -359,7 +375,7 @@
     var styleParam = qp("style");
 
     if (!code) {
-      showError(root, "找不到樹木編號，請從樹木頁面進入。");
+      showPickTree(root);
       return;
     }
 

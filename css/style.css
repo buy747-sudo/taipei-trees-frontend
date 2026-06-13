@@ -1124,3 +1124,19 @@ a.btn-nav:hover { background: var(--zone-code-bg); }
 @media (max-width: 360px) {
   .explore-grid { grid-template-columns: 1fr; }
 }
+
+/* ── 祈福卡浮動按鈕（地圖頁 FAB）────────────────────────── */
+#wish-fab {
+  position: fixed; bottom: 80px; right: 16px; z-index: 900;
+  display: flex; align-items: center; gap: 7px;
+  padding: 11px 16px; border-radius: var(--radius-pill);
+  background: var(--amber-400); color: var(--wish-ink);
+  border: none; cursor: pointer;
+  font-size: var(--fs-sm, 0.85rem); font-weight: 700;
+  font-family: var(--font-brush, serif);
+  box-shadow: 0 4px 16px rgba(180, 83, 9, 0.35);
+  transition: transform var(--dur-base) var(--ease-standard), box-shadow var(--dur-base);
+  white-space: nowrap;
+}
+#wish-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(180,83,9,0.45); }
+#wish-fab:active { transform: translateY(0); }
