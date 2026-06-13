@@ -510,7 +510,7 @@
         '<div style="font-size:3rem;margin-bottom:12px">🌳</div>' +
         '<h2 style="color:var(--ink-green);font-size:var(--fs-xl,1.4rem);margin:0 0 8px">為台北的樹掛一張祈福卡</h2>' +
         '<p style="color:var(--text-muted);font-size:var(--fs-sm,0.85rem);line-height:1.7;margin:0 0 28px">' +
-          '在地圖上點選任何一棵樹，進入詳情頁後點「🎐 祈福」，就可以為那棵樹寫下祝福。' +
+          '在地圖上點選任何一棵樹，進入詳情頁後點「🎐 掛上祈福卡」，就可以為那棵樹寫下祝福。' +
         '</p>' +
         '<a href="/" style="display:inline-block;padding:13px 28px;background:var(--green-600);color:#fff;' +
           'border-radius:var(--radius-sm,8px);text-decoration:none;font-size:var(--fs-md,1rem);font-weight:700;' +
@@ -576,7 +576,7 @@
     var wishId = qp("wish_id");
     var styleParam = qp("style");
 
-    if (!code) { showPickTree(root); return; }
+    if (!code) { showIntro(function() { showPickTree(root); }); return; }
 
     // fetch tree + intro animation run in parallel
     var fetchResult = null, fetchError = false, introDone = false;
