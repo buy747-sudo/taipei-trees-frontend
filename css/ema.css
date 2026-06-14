@@ -292,3 +292,23 @@ textarea.cmp__input { min-height: 76px; resize: vertical; font-family: var(--fon
 @media (min-width:768px) and (max-width:1023px){.ttintro__stage{width:300px}}
 @media (max-width:767px){.ttintro__stage{width:90vw;max-width:300px}.ttintro__tree{max-width:180px}.ttintro__sub{font-size:1rem}}
 @media (prefers-reduced-motion:reduce){.ttintro,.ttintro__tree,.ttintro__card,.ttintro__spark,.ttintro__sub,.ttintro__glow{animation-duration:.01ms!important;animation-iteration-count:1!important;opacity:1!important;transform:none!important}}
+
+
+/* CTA button inside intro (no-code route only) */
+.ttintro__cta{
+  position:absolute;left:50%;bottom:52px;transform:translateX(-50%);
+  display:inline-block;padding:13px 32px;
+  background:#FFD700;color:#122817;
+  border-radius:100px;text-decoration:none;
+  font-family:"Noto Sans TC",sans-serif;font-weight:700;font-size:.95rem;
+  white-space:nowrap;letter-spacing:.04em;
+  box-shadow:0 4px 24px rgba(255,215,0,.5),0 1px 4px rgba(0,0,0,.2);
+  opacity:0;animation:ttintroTextIn .6s ease 3.5s forwards;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.ttintro__cta:hover,.ttintro__cta:active{background:#FFE44D}
+
+/* Wish char counter */
+.cmp__counter{font-size:.72rem;color:var(--text-muted);text-align:right;margin-top:-6px;margin-bottom:6px;opacity:.6;transition:color .2s,opacity .2s}
+.cmp__counter.is-near{color:#d97706;opacity:1}
+.cmp__counter.is-full{color:#dc2626;opacity:1}

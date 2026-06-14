@@ -178,6 +178,7 @@
           '<span class="cmp__steplabel">② 寫下祝福</span>' +
           '<input class="cmp__input" data-to maxlength="20" placeholder="這張卡送給誰？如：阿嬤、台灣加油（可留白）">' +
           '<textarea class="cmp__input" data-wish maxlength="40" placeholder="寫一句願望或感謝…"></textarea>' +
+          '<div class="cmp__counter" data-wish-count>0 / 40 字</div>' +
           '<div class="cmp__suggs"></div>' +
           '<input class="cmp__input" data-from maxlength="16" placeholder="署名（可留白）">' +
         '</div>' +
@@ -217,7 +218,16 @@
       };
     });
     inTo.oninput = function () { cur.to = inTo.value; refreshPreview(); };
-    inWish.oninput = function () { cur.wish = inWish.value; sync(); };
+    var wishCount = root.querySelector('[data-wish-count]');
+    inWish.oninput = function () {
+      cur.wish = inWish.value;
+      var n = inWish.value.length;
+      if (wishCount) {
+        wishCount.textContent = n + ' / 40 字';
+        wishCount.className = 'cmp__counter' + (n >= 40 ? ' is-full' : n >= 30 ? ' is-near' : '');
+      }
+      sync();
+    };
     inFrom.oninput = function () { cur.from = inFrom.value; refreshPreview(); };
 
     root.querySelector(".cmp__mute").onclick = function () {
@@ -299,8 +309,8 @@
       c.fillText(tc.dec[i % 3], p[0], p[1]);
     });
     c.globalAlpha = 1;
-    // Card
-    var cx = 28, cy = 70, cw = W - 56, ch = H - 134;
+    // Card — full bleed, MUJI minimal
+    var cx = 14, cy = 14, cw = W - 28, ch = H - 58;
     c.fillStyle = tc.card;
     roundRectPath(c, cx, cy, cw, ch, 20); c.fill();
     c.strokeStyle = tc.dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)";
@@ -309,43 +319,43 @@
     var bw = 116;
     c.fillStyle = tc.badge;
     roundRectPath(c, W/2 - bw/2, cy + 16, bw, 28, 14); c.fill();
-    c.fillStyle = "#fff"; c.font = "bold 12px \'Noto Sans TC\', sans-serif"; c.textAlign = "center";
+    c.fillStyle = "#fff"; c.font = "bold 12px 'Noto Sans TC', sans-serif"; c.textAlign = "center";
     c.fillText(t.emoji + " " + t.focus, W/2, cy + 34);
     // To line
     var bodyTop = cy + 58;
     if (data.to) {
       c.fillStyle = tc.ink; c.globalAlpha = 0.82;
-      c.font = "500 15px \'Noto Serif TC\', serif"; c.textAlign = "center";
-      c.fillText("敬祝　" + data.to, W/2, bodyTop + 12);
+      c.font = "500 15px 'Noto Serif TC', serif"; c.textAlign = "center";
+      c.fillText("\u656c\u795d\u3000" + data.to, W/2, bodyTop + 12);
       c.globalAlpha = 1; bodyTop += 36;
     }
     // Wish text
     var wish = data.wish || "";
     var wpx = wish.length <= 10 ? 36 : wish.length <= 18 ? 30 : wish.length <= 28 ? 25 : 20;
-    c.font = "700 " + wpx + "px \'Noto Serif TC\', serif";
+    c.font = "700 " + wpx + "px 'Noto Serif TC', serif";
     c.fillStyle = tc.ink; c.textAlign = "center";
     var wlines = wrapTextForCanvas(c, wish, cw - 60);
     var wlh = wpx * 1.65;
-    var avail = (cy + ch - 30) - bodyTop;
+    var cardBottom = cy + ch;
+    var avail = (cardBottom - 78) - bodyTop;
     var sy = bodyTop + avail / 2 - (wlines.length * wlh) / 2 + wpx * 0.5;
     wlines.forEach(function(ln, i) { c.fillText(ln, W/2, sy + i * wlh); });
-    // Signature
-    c.font = "400 13px \'Noto Sans TC\', sans-serif"; c.fillStyle = tc.ink; c.globalAlpha = 0.55; c.textAlign = "center";
-    c.fillText("— " + (data.from || "匿名的祝福") + "　" + data.date, W/2, cy + ch - 11);
+    // Thin separator inside card
+    c.strokeStyle = tc.dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)";
+    c.lineWidth = 0.5;
+    c.beginPath(); c.moveTo(cx + 32, cardBottom - 72); c.lineTo(cx + cw - 32, cardBottom - 72); c.stroke();
+    // Signature (from + date)
+    c.font = "400 13px 'Noto Sans TC', sans-serif"; c.fillStyle = tc.ink; c.globalAlpha = 0.50; c.textAlign = "center";
+    c.fillText("\u2014 " + (data.from || "\u533f\u540d\u7684\u795d\u798f") + "\u3000" + data.date, W/2, cardBottom - 48);
     c.globalAlpha = 1;
-    // Header
-    c.fillStyle = tc.dark ? "rgba(255,255,255,0.90)" : "rgba(20,55,30,0.82)";
-    c.font = "bold 14px \'Noto Sans TC\', sans-serif"; c.textAlign = "center";
-    c.fillText("🌳 台北市樹木查詢", W/2, 26);
-    c.font = "11px \'Noto Sans TC\', sans-serif"; c.globalAlpha = 0.68;
-    c.fillText(data.tree.species + "　" + data.tree.district + data.tree.road, W/2, 48);
+    // Tree info — very subtle inside card
+    c.font = "10px 'Noto Sans TC', sans-serif"; c.fillStyle = tc.ink; c.globalAlpha = 0.30; c.textAlign = "center";
+    c.fillText(data.tree.species + "\u3000" + data.tree.district + data.tree.road, W/2, cardBottom - 28);
     c.globalAlpha = 1;
-    // Footer
-    c.fillStyle = tc.dark ? "rgba(255,255,255,0.80)" : "rgba(20,55,30,0.74)";
-    c.font = "bold 13px \'Noto Sans TC\', sans-serif"; c.textAlign = "center";
-    c.fillText("一起在台北的樹上掛一張祈福卡 🎐", W/2, H - 32);
-    c.font = "11px monospace"; c.globalAlpha = 0.50;
-    c.fillText("taipei-trees.org", W/2, H - 13);
+    // Footer — MUJI: just the URL, quiet
+    c.fillStyle = tc.dark ? "rgba(255,255,255,0.45)" : "rgba(20,55,30,0.45)";
+    c.font = "10px 'Noto Sans TC', sans-serif"; c.globalAlpha = 0.45; c.textAlign = "center";
+    c.fillText("taipei-trees.org", W/2, H - 18);
     c.globalAlpha = 1;
     return canvas;
   }
@@ -504,20 +514,6 @@
     root.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted)">🌳 載入中…</div>';
   }
 
-  function showPickTree(root) {
-    root.innerHTML =
-      '<div style="text-align:center;padding:48px 20px 32px;max-width:420px;margin:0 auto">' +
-        '<div style="font-size:3rem;margin-bottom:12px">🌳</div>' +
-        '<h2 style="color:var(--ink-green);font-size:var(--fs-xl,1.4rem);margin:0 0 8px">為台北的樹掛一張祈福卡</h2>' +
-        '<p style="color:var(--text-muted);font-size:var(--fs-sm,0.85rem);line-height:1.7;margin:0 0 28px">' +
-          '在地圖上點選任何一棵樹，進入詳情頁後點「🎐 掛上祈福卡」，就可以為那棵樹寫下祝福。' +
-        '</p>' +
-        '<a href="/" style="display:inline-block;padding:13px 28px;background:var(--green-600);color:#fff;' +
-          'border-radius:var(--radius-sm,8px);text-decoration:none;font-size:var(--fs-md,1rem);font-weight:700;' +
-          'margin-bottom:14px">🗺 去地圖上選一棵樹</a>' +
-        '<br><a href="guide.html" style="color:var(--green-600);font-size:var(--fs-xs,0.78rem)">怎麼使用？看使用說明</a>' +
-      '</div>';
-  }
 
   function showError(root, msg) {
     root.innerHTML = '<div style="text-align:center;padding:80px 20px;color:var(--text-muted)">' +
@@ -527,7 +523,7 @@
   }
 
   /* ── Intro splash ── 3s golden tree animation (Design v2) ── */
-  function showIntro(onDone) {
+  function showIntro(onDone, opts) {
     var root = document.createElement('div');
     root.id = 'ttintro'; root.className = 'ttintro';
     var stage = document.createElement('div');
@@ -570,7 +566,8 @@
       '<span class="ttintro__spark ttintro__spark--11"></span>' +
       '<span class="ttintro__spark ttintro__spark--12"></span>' +
       '<span class="ttintro__spark ttintro__spark--13"></span>' +
-      '<p class="ttintro__sub">在城市的樹梢，掛一張屬於你的祈福卡</p>';
+      '<p class="ttintro__sub">在城市的樹梢，掛一張屬於你的祈福卡</p>' +
+      (opts && opts.cta ? '<a class="ttintro__cta">去找一棵屬於你的樹 🌳</a>' : '');
 
     function chime() {
       try {
@@ -601,6 +598,17 @@
       setTimeout(function() { if (root.parentNode) root.parentNode.removeChild(root); if (onDone) onDone(); }, 440);
     }
     root.addEventListener('click', leave);
+    if (opts && opts.cta) {
+      var ctaEl = stage.querySelector('.ttintro__cta');
+      if (ctaEl) {
+        ctaEl.addEventListener('click', function(e) {
+          e.stopPropagation(); e.preventDefault();
+          if (done) return; done = true;
+          root.classList.add('is-leaving');
+          setTimeout(function() { if (root.parentNode) root.parentNode.removeChild(root); window.location.href = '/'; }, 440);
+        });
+      }
+    }
     setTimeout(chime, 780);
     setTimeout(chime, 1700);
     setTimeout(leave, 4500);
@@ -616,7 +624,7 @@
     var wishId = qp("wish_id");
     var styleParam = qp("style");
 
-    if (!code) { showIntro(function() { showPickTree(root); }); return; }
+    if (!code) { showIntro(function() { window.location.href = '/'; }, { cta: true }); return; }
 
     // fetch tree + intro animation run in parallel
     var fetchResult = null, fetchError = false, introDone = false;
