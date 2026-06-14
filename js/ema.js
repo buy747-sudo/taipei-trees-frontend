@@ -371,17 +371,43 @@
     var shareCanvas = generateShareCanvas(data);
     var previewUrl = shareCanvas.toDataURL("image/jpeg", 0.88);
 
+    var _hasNativeShare = (function() {
+      try { return !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.jpg", { type: "image/jpeg" })] })); }
+      catch (e) { return false; }
+    })();
+    var _hasClipImg = !!(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write);
+    var _shareHint = _hasNativeShare
+      ? "iOS / Android：直接開啟系統分享選單，選 LINE、IG、訊息等"
+      : _hasClipImg
+        ? "電腦版：圖片複製到剪貼簿＋下載，按 Ctrl+V（Mac 用 ⌘V）貼到 LINE 網頁、Threads、IG 分享"
+        : "電腦版：下載圖片後，開啟 LINE / IG 選圖上傳分享";
+
     function doSaveImage() {
       shareCanvas.toBlob(function(blob) {
         var file = new File([blob], "taipei-tree-wish.jpg", { type: "image/jpeg" });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // iOS / Android: native system share sheet with image file
+        if (_hasNativeShare) {
           navigator.share({ files: [file], title: "台北市樹木祈福卡", text: text }).catch(function() {});
+          return;
+        }
+        // Desktop: download JPEG first
+        var a = document.createElement("a"), objUrl = URL.createObjectURL(blob);
+        a.href = objUrl; a.download = "taipei-tree-wish.jpg";
+        document.body.appendChild(a); a.click();
+        setTimeout(function() { a.remove(); URL.revokeObjectURL(objUrl); }, 1000);
+        // Desktop Chrome / Edge: also copy PNG to clipboard so user can Ctrl+V anywhere
+        if (_hasClipImg) {
+          shareCanvas.toBlob(function(pngBlob) {
+            navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })])
+              .then(function() {
+                toast("圖片已複製＋下載！按 Ctrl+V（⌘V）直接貼到 LINE 網頁版、Threads、IG 分享 🎐");
+              })
+              .catch(function() {
+                toast("圖片已下載！開啟 LINE 或 IG 後選圖分享 🎐");
+              });
+          }, "image/png");
         } else {
-          var a = document.createElement("a"), objUrl = URL.createObjectURL(blob);
-          a.href = objUrl; a.download = "taipei-tree-wish.jpg";
-          document.body.appendChild(a); a.click();
-          setTimeout(function() { a.remove(); URL.revokeObjectURL(objUrl); }, 1000);
-          toast("圖片已下載！直接貼到 LINE、IG 等任何地方分享 🎐");
+          toast("圖片已下載！開啟 LINE 或 IG 後選這張圖分享 🎐");
         }
       }, "image/jpeg", 0.88);
     }
@@ -396,7 +422,7 @@
         '<p class="sub">存下這張圖片，貼到 LINE、IG、Threads 任何地方都可以分享！</p>' +
         '<div class="sheet__img-wrap"><img src="' + previewUrl + '" class="sheet__img-preview" alt="祈福卡分享圖"></div>' +
         '<button class="btn-save-img" type="button">💾 存圖分享</button>' +
-        '<p class="share-hint">在 iOS 上會直接開啟分享選單；在電腦上會下載圖片檔</p>' +
+        '<p class="share-hint">' + esc(_shareHint) + '</p>' +
         '<div class="sheet__url"><code>' + esc(url) + '</code><button class="btn-copy" type="button">複製連結</button></div>' +
         '<div class="sheet__row"><button class="btn-preview" type="button">👀 預覽朋友看到的畫面</button><button class="btn-more" type="button">📱 更多…</button></div>' +
         '<button class="btn-again" type="button">完成，再掛一張</button>' +
