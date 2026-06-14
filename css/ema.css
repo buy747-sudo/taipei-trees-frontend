@@ -280,7 +280,7 @@ textarea.cmp__input { min-height: 76px; resize: vertical; font-family: var(--fon
 .ttintro__spark--11{left:62%;top:62%;animation-delay:2.10s}
 .ttintro__spark--12{left:12%;top:32%;animation-delay:2.22s}
 .ttintro__spark--13{left:88%;top:30%;animation-delay:2.30s}
-.ttintro__sub{position:absolute;left:0;right:0;bottom:78px;margin:0;text-align:center;font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:1.12rem;letter-spacing:.05em;color:#FFD700;text-shadow:0 0 16px rgba(255,215,0,.6),0 2px 4px rgba(0,0,0,.4);opacity:0;transform:translateY(8px);animation:ttintroTextIn .6s ease 2s forwards}
+.ttintro__sub{position:absolute;left:0;right:0;bottom:130px;margin:0;text-align:center;font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:1.12rem;letter-spacing:.05em;color:#FFD700;text-shadow:0 0 16px rgba(255,215,0,.6),0 2px 4px rgba(0,0,0,.4);opacity:0;transform:translateY(8px);animation:ttintroTextIn .6s ease 2s forwards}
 @keyframes ttintroFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes ttintroFadeOut{from{opacity:1}to{opacity:0}}
 @keyframes ttintroRise{0%{opacity:0;transform:translateY(70px) scale(.9)}60%{opacity:1}100%{opacity:1;transform:translateY(0) scale(1)}}
@@ -312,3 +312,13 @@ textarea.cmp__input { min-height: 76px; resize: vertical; font-family: var(--fon
 .cmp__counter{font-size:.72rem;color:var(--text-muted);text-align:right;margin-top:-6px;margin-bottom:6px;opacity:.6;transition:color .2s,opacity .2s}
 .cmp__counter.is-near{color:#d97706;opacity:1}
 .cmp__counter.is-full{color:#dc2626;opacity:1}
+.ttintro__quote{
+  position:absolute;top:28px;left:50%;transform:translateX(-50%);
+  width:min(340px,88vw);text-align:center;
+  color:rgba(255,215,0,.82);
+  font-family:"Noto Serif TC",serif;font-size:.82rem;font-weight:500;
+  line-height:1.9;letter-spacing:.05em;white-space:pre-line;
+  opacity:0;animation:ttintroTextIn .9s ease .25s forwards;
+  margin:0;padding:0 4px;pointer-events:none;user-select:none;
+}
+@media (max-width:767px){.ttintro__quote{font-size:.78rem;top:18px}}

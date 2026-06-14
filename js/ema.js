@@ -522,12 +522,33 @@
       '<a href="/" style="color:var(--green-600);font-weight:700">← 回地圖</a></div>';
   }
 
+  var INTRO_QUOTES = [
+    '樹根入土，樹梢入天——\n每一棵老樹，都是你與宇宙之間最古老的信使。',
+    '百年樹木，見過千萬個願望。\n它記得，就算你忘了。',
+    '城市裡最安靜的，是樹。\n它不說話，卻什麼都聽得見。',
+    '台北的樹，長在柏油路的縫隙裡，\n卻一直伸手向天。就像你的願望。',
+    '把心事掛上樹梢，讓風替你說，\n讓雨替你洗，讓時間替你成全。',
+    '樹木不言，願望自達。',
+    '城市喧囂，樹木靜候——\n它是台北最老的守願人。',
+    '在最安靜的生命面前，\n說出你最深的願望。',
+    '跟樹說說話吧，\n它不會評判你，只會默默替你記著。',
+    '你的願望，值得被一棵活了幾十年的生命好好接住。',
+    '不知道跟誰說？跟樹說。\n它在這裡比任何人都久。',
+    '在這座一千萬人的城市裡，\n總有一棵樹，在等你說話。',
+    '城市裡最不孤獨的，\n是那些被人掛上心願的樹。',
+    '每個台北人心裡都有一件說不出口的事。\n樹，聽得見。'
+  ];
+
   /* ── Intro splash ── 3s golden tree animation (Design v2) ── */
   function showIntro(onDone, opts) {
     var root = document.createElement('div');
     root.id = 'ttintro'; root.className = 'ttintro';
     var stage = document.createElement('div');
     stage.className = 'ttintro__stage';
+    var quoteEl = document.createElement('p');
+    quoteEl.className = 'ttintro__quote';
+    quoteEl.textContent = INTRO_QUOTES[Math.floor(Math.random() * INTRO_QUOTES.length)];
+    root.appendChild(quoteEl);
     root.appendChild(stage);
     document.body.appendChild(root);
 
@@ -567,7 +588,7 @@
       '<span class="ttintro__spark ttintro__spark--12"></span>' +
       '<span class="ttintro__spark ttintro__spark--13"></span>' +
       '<p class="ttintro__sub">在城市的樹梢，掛一張屬於你的祈福卡</p>' +
-      (opts && opts.cta ? '<a class="ttintro__cta">去找一棵屬於你的樹 🌳</a>' : '');
+      (opts && opts.cta ? '<a class="ttintro__cta">帶我去找一棵樹 🌿</a>' : '');
 
     function chime() {
       try {
