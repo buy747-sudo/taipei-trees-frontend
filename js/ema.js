@@ -611,7 +611,7 @@
     }
     setTimeout(chime, 780);
     setTimeout(chime, 1700);
-    setTimeout(leave, 4500);
+    if (!(opts && opts.cta)) setTimeout(leave, 4500);
   }
 
   /* ── Router ─────────────────────────────────────────────── */

@@ -303,7 +303,7 @@ textarea.cmp__input { min-height: 76px; resize: vertical; font-family: var(--fon
   font-family:"Noto Sans TC",sans-serif;font-weight:700;font-size:.95rem;
   white-space:nowrap;letter-spacing:.04em;
   box-shadow:0 4px 24px rgba(255,215,0,.5),0 1px 4px rgba(0,0,0,.2);
-  opacity:0;animation:ttintroTextIn .6s ease 3.5s forwards;
+  opacity:0;animation:ttintroTextIn .6s ease 2.0s forwards;
   cursor:pointer;-webkit-tap-highlight-color:transparent;
 }
 .ttintro__cta:hover,.ttintro__cta:active{background:#FFE44D}
